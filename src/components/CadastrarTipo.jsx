@@ -11,7 +11,7 @@ export default function CadastrarTipoModal({ schema }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await api.get('/cadastrar-tipo-pessoa', {
+            const response = await api.post('/cadastrar-tipo-pessoa', {
                 schema,
                 descricao,
                 classificacao,
