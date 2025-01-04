@@ -1,0 +1,10 @@
+
+.bg{
+    /* background-image:url("https://wallpapers.com/images/featured/technology-w65hwkhmusntb0j9.jpg"); */
+    /* background-image:url("https://img.freepik.com/free-vector/gradient-tech-futuristic-background_52683-74591.jpg"); */
+    background-image:url("https://wallpapercat.com/w/full/a/4/8/2139786-1920x1080-desktop-full-hd-high-tech-wallpaper.jpg");
+    /* background-image:url("https://i.pinimg.com/originals/00/08/06/0008069a050ade9ecf214d6ddd18021d.jpg"); */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
