@@ -14,8 +14,9 @@ export default function CadastrarPessoa() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [isOpen, setIsOpen] = useState(false);
+
     const [tipoPessoaT, setTipoPessoaT] = useState([]);
-    const [selectedTipo, setSelectedTipo] = useState("");
+    const [selectedTipo, setSelectedTipo] = useState('');
 
     useEffect(() => {
         const fetchTipoPessoaT = async () => {
@@ -39,23 +40,10 @@ export default function CadastrarPessoa() {
         setSelectedTipo(e.target.value);
     };
 
-    const validateDate = (date) => {
-        const today = new Date();
-        const selectedDate = new Date(date);
-        return selectedDate <= today;
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setMessage("");
-
-        // Validações de data
-        if (tipoPessoa === "cpf" && !validateDate(dataNascimento)) {
-            setMessage("A data de nascimento deve ser uma data válida.");
-            setLoading(false);
-            return;
-        }
 
         const dados = {
             tipoPessoa,
@@ -113,6 +101,7 @@ export default function CadastrarPessoa() {
         }
     };
 
+
     const resetForm = () => {
         setTipoPessoa("");
         setNome("");
@@ -124,6 +113,7 @@ export default function CadastrarPessoa() {
         setNomeFantasia("");
         setSelectedTipo("");
     };
+
 
     return (
         <div className="relative">
@@ -150,6 +140,7 @@ export default function CadastrarPessoa() {
                             Cadastro de Pessoa
                         </h1>
                         {message && <p className="text-center text-sm mb-4 text-red-600">{message}</p>}
+
 
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {/* Tipo Pessoa select */}
@@ -314,33 +305,14 @@ export default function CadastrarPessoa() {
                                             className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
-
-                                    {/* Selecione o tipo de pessoa */}
-                                    <div>
-                                        <label htmlFor="tipoPessoa">Selecione o Tipo de Pessoa:</label>
-                                        <select
-                                            id="tipoPessoa"
-                                            value={selectedTipo}
-                                            onChange={handleSelection}
-                                            className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
-                                        >
-                                            <option value="">-- Selecione --</option>
-                                            {tipoPessoaT.map((tipo) => (
-                                                <option key={tipo.tpp_id} value={tipo.tpp_id}>
-                                                    {tipo.tpp_descricao}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
                                 </>
                             )}
 
-                            {/* Submit button */}
-                            <div className="flex justify-center mt-6">
+                            <div className="text-center">
                                 <button
                                     type="submit"
-                                    className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-300"
                                     disabled={loading}
+                                    className={`w-full py-2 px-4 rounded bg-blue-500 text-white font-semibold ${loading ? 'opacity-50' : 'hover:bg-blue-700'}`}
                                 >
                                     {loading ? "Cadastrando..." : "Cadastrar"}
                                 </button>
