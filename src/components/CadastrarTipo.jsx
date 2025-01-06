@@ -17,12 +17,12 @@ export default function CadastrarTipoModal({ schema }) {
                 classificacao,
             });
 
-            if (response.status === 200) {
+            if (response.status === 201) {
                 setMessage('Tipo cadastrado com sucesso!');
                 setDescricao('');
                 setClassificacao('');
             } else {
-                throw new Error('Erro ao cadastrar tipo.');
+                throw new Error(`Erro ao cadastrar tipo. Status inesperado.`);
             }
         } catch (error) {
             setMessage(`Erro: ${error.response?.data?.message || error.message}`);

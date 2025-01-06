@@ -20,13 +20,13 @@ const EmpresaComponent = ({ schema }) => {
 
     const fetchPessoas = async () => {
         try {
-            const response = await api.get("/pessoas"); // Certifique-se de que a URL está correta
-            const data = response.data; // Extrai os dados do response
-            setPessoas(data); // Atualiza o estado com os dados recebidos
+            const response = await api.get("/pessoas"); 
+            const data = response.data; 
+            setPessoas(data); 
         } catch (error) {
-            setError(error.message); // Define a mensagem de erro caso ocorra
+            setError(error.message); 
         } finally {
-            setLoading(false); // Finaliza o carregamento
+            setLoading(false); 
         }
     };
 

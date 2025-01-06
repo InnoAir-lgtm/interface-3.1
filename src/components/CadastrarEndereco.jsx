@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState } from 'react'
+import { useEndereco } from '../auth/ProviderEndereco'
 import api from '../apiUrl';
 
-import { useEndereco } from '../auth/ProviderEndereco';
-
 export default function CadastrarEndereco() {
-    const { addEndereco } = useEndereco(); // Certifique-se de usar a desestruturação correta
+    const [enderecos, addEndereco] = useEndereco();
     const [endereco, setEndereco] = useState({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
     const [showSidebar, setShowSidebar] = useState(false);
 
@@ -28,7 +27,8 @@ export default function CadastrarEndereco() {
             console.log(response);
             alert('Endereço cadastrado com sucesso!');
 
-            addEndereco(endereco); // Chamada correta da função
+            addEndereco(endereco);
+
             setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
             setShowSidebar(false);
         } catch (error) {
@@ -74,7 +74,7 @@ export default function CadastrarEndereco() {
                     return acc;
                 }, {});
 
-                addEndereco(endereco); // Chamada correta da função
+                addEndereco(endereco);
                 setEndereco({ ...endereco, cep });
             } else {
                 console.error('Erro ao buscar endereço:', data.status);
@@ -82,6 +82,11 @@ export default function CadastrarEndereco() {
         } catch (error) {
             console.error('Erro ao chamar a API:', error.message);
         }
+    };
+
+    const handleCloseSidebar = () => {
+        setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
+        setShowSidebar(false);
     };
 
     return (
@@ -95,7 +100,6 @@ export default function CadastrarEndereco() {
 
             {showSidebar && (
                 <div className="fixed inset-0 flex z-50">
-                    {/* Sidebar */}
                     <div className="w-96 bg-white shadow-lg h-full overflow-y-auto transition-transform transform translate-x-0">
                         <div className="p-6">
                             <h2 className="text-xl font-bold text-gray-800 mb-4">Cadastro de Endereço</h2>
@@ -161,7 +165,7 @@ export default function CadastrarEndereco() {
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => setShowSidebar(false)}
+                                        onClick={handleCloseSidebar}
                                         className="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
                                     >
                                         Fechar
@@ -169,18 +173,11 @@ export default function CadastrarEndereco() {
                                 </div>
                             </form>
                         </div>
-
-                        <div>
-                            <form action="">
-                                {/* Dados da tabela endereco */}
-                            </form>
-                        </div>
                     </div>
 
-                    {/* Background Overlay */}
                     <div
                         className="flex-1 bg-black bg-opacity-50"
-                        onClick={() => setShowSidebar(false)}
+                        onClick={handleCloseSidebar}
                     />
                 </div>
             )}

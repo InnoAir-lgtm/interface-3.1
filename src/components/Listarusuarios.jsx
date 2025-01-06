@@ -16,18 +16,20 @@ export default function ListarUsuarios() {
         async function fetchUsuarios() {
             try {
                 const response = await api.get('/listar-usuarios');
-                const data = await response.json();
-                setUsuarios(data);
+                const usuariosFiltrados = response.data.filter((usuario) =>
+                    usuario.usr_perfil !== 'Master' && usuario.usr_perfil !== 'Administrador'
+                );
+                setUsuarios(usuariosFiltrados);
             } catch (error) {
                 console.error(error);
             }
         }
 
+
         async function fetchPapeis() {
             try {
                 const response = await api.get('/listar-papeis');
-                const data = await response.json();
-                setPapeis(data);
+                setPapeis(response.data);
             } catch (error) {
                 console.error(error);
             }
@@ -35,14 +37,13 @@ export default function ListarUsuarios() {
 
         async function fetchEmpresas() {
             try {
-                const response = await fetch('http://localhost:3000/lista-empresas');
-                if (!response.ok) throw new Error('Erro ao buscar empresas');
-                const data = await response.json();
-                setEmpresas(data);
+                const response = await api.get('/lista-empresas');
+                setEmpresas(response.data);
             } catch (error) {
                 console.error(error);
             }
         }
+
 
         fetchUsuarios();
         fetchPapeis();
@@ -51,14 +52,12 @@ export default function ListarUsuarios() {
 
     const abrirModal = async (usuario) => {
         setUsuarioSelecionado(usuario);
-
         try {
-            const response = await fetch(`http://localhost:3000/listar-associacoes/${usuario.usr_id}`);
-            if (!response.ok) throw new Error('Erro ao buscar associações');
+            const response = await api.get(`/listar-associacoes/${usuario.usr_id}`);
 
-            const data = await response.json();
-            const papeis = data.map((assoc) => assoc.pap_id);
-            const empresas = data.map((assoc) => assoc.emp_cnpj);
+            if (!response.data) throw new Error('Erro ao buscar associações');
+            const papeis = response.data.map((assoc) => assoc.pap_id);
+            const empresas = response.data.map((assoc) => assoc.emp_cnpj);
 
             setSelectedPapeis(papeis);
             setSelectedEmpresas(empresas);
@@ -68,6 +67,7 @@ export default function ListarUsuarios() {
 
         setIsModalOpen(true);
     };
+
 
     const abrirUserListModal = () => {
         setIsUserListModalOpen(true);
@@ -98,20 +98,14 @@ export default function ListarUsuarios() {
 
     const associarPapeisEmpresas = async () => {
         try {
-            const response = await fetch('http://localhost:3000/atualizar-associacoes', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    usr_id: usuarioSelecionado.usr_id,
-                    papeis: selectedPapeis,
-                    empresas: selectedEmpresas,
-                }),
+            const response = await api.post('/atualizar-associacoes', {
+                usr_id: usuarioSelecionado.usr_id,
+                papeis: selectedPapeis,
+                empresas: selectedEmpresas,
             });
 
-            if (!response.ok) throw new Error('Erro ao atualizar associações');
-            alert('Papeis e empresas atualizados com sucesso');
+            if (!response.data.success) throw new Error('Erro ao atualizar associações');
+            alert('Papéis e empresas atualizados com sucesso');
             fecharModal();
         } catch (error) {
             console.error(error);
@@ -119,21 +113,21 @@ export default function ListarUsuarios() {
         }
     };
 
+
     return (
         <div>
 
-            <div className="bg-white shadow-md rounded-lg p-6">
-                <div>
-                    <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                <div className="flex flex-col justify-between h-full">
+                    <h2 className="text-2xl font-semibold text-white mb-4 tracking-wider hover:text-gray-300 transition-all duration-300">
                         Usuários registrados
                     </h2>
-                    <p className="text-gray-600">Total de usuários cadastrados: {usuarios.length}</p>
+                    <p className="text-lg text-gray-400 mb-6">Total de usuários cadastrados: {usuarios.length}</p>
                     <button
                         onClick={abrirUserListModal}
-                        className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
+                        className="mt-auto bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white py-2 px-6 rounded-lg shadow-md transform transition-all duration-300 hover:scale-105">
                         Ver usuários
                     </button>
-
                 </div>
             </div>
 
@@ -178,67 +172,67 @@ export default function ListarUsuarios() {
                 </div>
             )}
 
-{isModalOpen && usuarioSelecionado && (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50 transition-all duration-300 ease-in-out">
-        <div className="bg-white p-6 rounded-md shadow-lg w-96 max-w-lg transform transition-all duration-200 ease-in-out">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Detalhes do Usuário</h2>
-            
-            <div className="mb-4">
-                <p className="text-gray-700"><strong className="font-medium text-gray-800">Nome:</strong> {usuarioSelecionado.usr_nome}</p>
-                <p className="text-gray-700"><strong className="font-medium text-gray-800">Email:</strong> {usuarioSelecionado.usr_email}</p>
-            </div>
+            {isModalOpen && usuarioSelecionado && (
+                <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50 transition-all duration-300 ease-in-out">
+                    <div className="bg-white p-6 rounded-md shadow-lg w-96 max-w-lg transform transition-all duration-200 ease-in-out">
+                        <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Detalhes do Usuário</h2>
 
-            <div className="mb-4">
-                <label className="block text-gray-800 font-medium">Papéis</label>
-                <div className="space-y-2">
-                    {papeis.map((papel) => (
-                        <label key={papel.pap_id} className="flex items-center space-x-3">
-                            <input
-                                type="checkbox"
-                                checked={selectedPapeis.includes(papel.pap_id)}
-                                onChange={() => togglePapelSelection(papel.pap_id)}
-                                className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 focus:ring-2 focus:ring-blue-400"
-                            />
-                            <span className="text-gray-700">{papel.pap_papel}</span>
-                        </label>
-                    ))}
+                        <div className="mb-4">
+                            <p className="text-gray-700"><strong className="font-medium text-gray-800">Nome:</strong> {usuarioSelecionado.usr_nome}</p>
+                            <p className="text-gray-700"><strong className="font-medium text-gray-800">Email:</strong> {usuarioSelecionado.usr_email}</p>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-gray-800 font-medium">Papéis</label>
+                            <div className="space-y-2">
+                                {papeis.map((papel) => (
+                                    <label key={papel.pap_id} className="flex items-center space-x-3">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedPapeis.includes(papel.pap_id)}
+                                            onChange={() => togglePapelSelection(papel.pap_id)}
+                                            className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 focus:ring-2 focus:ring-blue-400"
+                                        />
+                                        <span className="text-gray-700">{papel.pap_papel}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-gray-800 font-medium">Empresas</label>
+                            <div className="space-y-2">
+                                {empresas.map((empresa) => (
+                                    <label key={empresa.emp_cnpj} className="flex items-center space-x-3">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedEmpresas.includes(empresa.emp_cnpj)}
+                                            onChange={() => toggleEmpresaSelection(empresa.emp_cnpj)}
+                                            className="form-checkbox h-4 w-4 text-green-600 border-gray-300 focus:ring-2 focus:ring-green-400"
+                                        />
+                                        <span className="text-gray-700">{empresa.emp_nome}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end space-x-4 mt-6">
+                            <button
+                                className="bg-blue-600 text-white px-6 py-2 rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                onClick={associarPapeisEmpresas}
+                            >
+                                Associar Papéis e Empresas
+                            </button>
+                            <button
+                                className="bg-gray-400 text-white px-6 py-2 rounded-md shadow-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                                onClick={fecharModal}
+                            >
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div className="mb-4">
-                <label className="block text-gray-800 font-medium">Empresas</label>
-                <div className="space-y-2">
-                    {empresas.map((empresa) => (
-                        <label key={empresa.emp_cnpj} className="flex items-center space-x-3">
-                            <input
-                                type="checkbox"
-                                checked={selectedEmpresas.includes(empresa.emp_cnpj)}
-                                onChange={() => toggleEmpresaSelection(empresa.emp_cnpj)}
-                                className="form-checkbox h-4 w-4 text-green-600 border-gray-300 focus:ring-2 focus:ring-green-400"
-                            />
-                            <span className="text-gray-700">{empresa.emp_nome}</span>
-                        </label>
-                    ))}
-                </div>
-            </div>
-
-            <div className="flex justify-end space-x-4 mt-6">
-                <button
-                    className="bg-blue-600 text-white px-6 py-2 rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    onClick={associarPapeisEmpresas}
-                >
-                    Associar Papéis e Empresas
-                </button>
-                <button
-                    className="bg-gray-400 text-white px-6 py-2 rounded-md shadow-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400"
-                    onClick={fecharModal}
-                >
-                    Fechar
-                </button>
-            </div>
-        </div>
-    </div>
-)}
+            )}
 
 
         </div>

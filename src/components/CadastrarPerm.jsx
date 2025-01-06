@@ -9,9 +9,9 @@ export default function CadastrarPerm() {
     const handlePermissionSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await api.post('/cadastrar-permissoes', {
-                permissao: permis.permiss,
-                descricao: permis.descricao,
+            // Agora enviando `descricao` no campo correto
+            const response = await api.post('http://localhost:3000/cadastrar-permissoes', {
+                descricao: permis.descricao,  // Envie apenas a descricao
             });
             console.log('Resposta do servidor:', response.data);
             alert('Permissão cadastrada com sucesso!');
@@ -21,10 +21,11 @@ export default function CadastrarPerm() {
             });
             setIsPopRole(false);
         } catch (error) {
-            console.error('Erro ao cadastrar permissão:', error.message);
+            console.error('Erro ao cadastrar permissão:', error.response ? error.response.data : error.message);
             alert('Falha ao cadastrar permissão.');
         }
     };
+    
 
     const handleChangeInput = (e) => {
         const { name, value } = e.target;

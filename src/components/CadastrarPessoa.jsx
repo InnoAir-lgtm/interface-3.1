@@ -22,17 +22,24 @@ export default function CadastrarPessoa() {
         const fetchTipoPessoaT = async () => {
             try {
                 const response = await api.get("/listar-tipos-pessoa");
+                if (response.status === 200) {
+                    const resultData = Array.isArray(response.data.data) ? response.data.data : [];
+                    setTipoPessoaT(resultData);
+                } else {
+                    console.error("Erro ao buscar tipos de pessoa:", response.statusText);
+                }
             } catch (error) {
                 console.error("Erro na conexão com a API:", error);
             }
         };
-
+    
         fetchTipoPessoaT();
     }, []);
 
-    const handleSelection = (event) => {
-        setSelectedTipo(event.target.value);
+    const handleSelection = (e) => {
+        setSelectedTipo(e.target.value);
     };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -50,41 +57,39 @@ export default function CadastrarPessoa() {
         };
     
         try {
-            const response = await api.get("/cadastrar-pessoa", {
-                method: "POST",
+            const response = await api.post("/cadastrar-pessoa", dados, {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(dados),
             });
     
-            if (response.ok) {
-                const result = await response.json();
-                const pes_id = result.data[0].pes_id; // Pega o ID da pessoa retornado
+            console.log("Resposta da API ao cadastrar pessoa:", response);
+    
+            if (response.status === 200 && response.data) { 
+                const result = response.data;
+                const pes_id = result.data[0].pes_id; 
     
                 setMessage("Cadastro realizado com sucesso!");
                 console.log("Pessoa cadastrada com sucesso:", result);
     
                 if (selectedTipo && pes_id) {
-                    const tipoPessoaResponse = await api.get("/cadastrar-tipo-pessoa", {
-                        method: "POST",
+                    const tipoPessoaResponse = await api.post("/cadastrar-tipo-pessoa", {
+                        pes_id: pes_id, 
+                        tpp_id: selectedTipo,
+                    }, {
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({
-                            pes_id: pes_id, // Passando o ID da pessoa
-                            tpp_id: selectedTipo,
-                        }),
                     });
     
-                    if (tipoPessoaResponse.ok) {
+                    if (tipoPessoaResponse.status === 200) {
                         console.log("Cadastro na tabela pessoas_tipo realizado com sucesso!");
                     } else {
                         console.error("Erro ao cadastrar na tabela pessoas_tipo:", tipoPessoaResponse.statusText);
+                        setMessage(`Erro ao cadastrar tipo de pessoa: ${tipoPessoaResponse.statusText}`);
                     }
                 }
     
-                // Limpar form
                 setTipoPessoa("");
                 setNome("");
                 setCpf("");
@@ -94,8 +99,8 @@ export default function CadastrarPessoa() {
                 setInscricaoEstadual("");
                 setNomeFantasia("");
             } else {
-                setMessage("Erro ao realizar o cadastro.");
-                console.error("Erro na API:", response.statusText);
+                setMessage(`Erro ao realizar o cadastro. Status: ${response.status} - ${response.statusText}`);
+                console.error("Erro na resposta da API:", response);
             }
         } catch (error) {
             setMessage("Erro na conexão com a API.");
@@ -104,7 +109,6 @@ export default function CadastrarPessoa() {
             setLoading(false);
         }
     };
-    
 
     return (
         <div className="relative">
@@ -134,6 +138,7 @@ export default function CadastrarPessoa() {
 
 
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Tipo Pessoa select */}
                             <div>
                                 <label htmlFor="tipoPessoa" className="block text-sm font-semibold text-gray-700 mb-1">
                                     Tipo de Pessoa:
@@ -151,10 +156,7 @@ export default function CadastrarPessoa() {
                                 </select>
                             </div>
 
-
-
-
-
+                            {/* Condicional para CPF */}
                             {tipoPessoa === "cpf" && (
                                 <>
                                     <div>
@@ -215,6 +217,7 @@ export default function CadastrarPessoa() {
                                         />
                                     </div>
 
+                                    {/* Selecione o tipo de pessoa */}
                                     <div>
                                         <label htmlFor="tipoPessoa">Selecione o Tipo de Pessoa:</label>
                                         <select
@@ -231,10 +234,10 @@ export default function CadastrarPessoa() {
                                             ))}
                                         </select>
                                     </div>
-
                                 </>
                             )}
 
+                            {/* Condicional para CNPJ */}
                             {tipoPessoa === "cnpj" && (
                                 <>
                                     <div>
@@ -283,51 +286,20 @@ export default function CadastrarPessoa() {
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="nomeFantasia" className="block text-sm font-semibold text-gray-700 mb-1">
+                                        <label htmlFor="fantasia" className="block text-sm font-semibold text-gray-700 mb-1">
                                             Nome Fantasia:
                                         </label>
                                         <input
-                                            id="nomeFantasia"
+                                            id="fantasia"
                                             type="text"
                                             value={fantasia}
                                             onChange={(e) => setNomeFantasia(e.target.value)}
-                                            maxLength={50}
+                                            maxLength={80}
                                             required
                                             placeholder="Digite o nome fantasia"
                                             className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
-                                    <div>
-                                        <label htmlFor="dataNascimento" className="block text-sm font-semibold text-gray-700 mb-1">
-                                            Data de Nascimento:
-                                        </label>
-                                        <input
-                                            id="dataNascimento"
-                                            type="date"
-                                            value={dataNascimento}
-                                            onChange={(e) => setDataNascimento(e.target.value)}
-                                            required
-                                            className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label htmlFor="tipoPessoa">Selecione o Tipo de Pessoa:</label>
-                                        <select
-                                            id="tipoPessoa"
-                                            value={selectedTipo}
-                                            onChange={handleSelection}
-                                            className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
-                                        >
-                                            <option value="">-- Selecione --</option>
-                                            {tipoPessoaT.map((tipo) => (
-                                                <option key={tipo.tpp_id} value={tipo.tpp_id}>
-                                                    {tipo.tpp_descricao}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
                                 </>
                             )}
 
@@ -335,9 +307,9 @@ export default function CadastrarPessoa() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className={`bg-blue-600 text-white font-medium px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    className={`w-full py-2 px-4 rounded bg-blue-500 text-white font-semibold ${loading ? 'opacity-50' : 'hover:bg-blue-700'}`}
                                 >
-                                    {loading ? "Salvando..." : "Salvar"}
+                                    {loading ? "Cadastrando..." : "Cadastrar"}
                                 </button>
                             </div>
                         </form>

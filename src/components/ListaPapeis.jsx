@@ -13,9 +13,7 @@ export default function ListaPapeis() {
         async function fetchPapeis() {
             try {
                 const response = await api.get('/listar-papeis');
-                if (!response.ok) throw new Error('Erro ao buscar papéis.');
-                const data = await response.json();
-                setPapeis(data);
+                setPapeis(response.data);
             } catch (error) {
                 console.error(error);
             } finally {
@@ -28,9 +26,7 @@ export default function ListaPapeis() {
         async function fetchPermissoes() {
             try {
                 const response = await api.get('/listar-permissoes');
-                if (!response.ok) throw new Error('Erro ao buscar permissões.');
-                const data = await response.json();
-                setPermissoes(data);
+                setPermissoes(response.data);
             } catch (error) {
                 console.error(error);
             }
@@ -47,9 +43,7 @@ export default function ListaPapeis() {
 
         try {
             const response = await api.get(`/permissoes-por-papel/${papel.pap_id}`);
-            if (!response.ok) throw new Error('Erro ao buscar permissões do papel.');
-            const data = await response.json();
-            setSelectedPermissoes(data);
+            setSelectedPermissoes(response.data);
         } catch (error) {
             console.error('Erro ao buscar permissões:', error);
         } finally {

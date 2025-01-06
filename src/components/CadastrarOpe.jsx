@@ -1,46 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
+import api from '../apiUrl';
 
 export default function CadastrarOpe() {
-    const { user } = useAuth(); // Obtendo o usuário logado
+    const { user } = useAuth();
     const [formData, setFormData] = useState({ email: '', name: '', password: '', perfil: '', grupo: '' });
     const [showPassword, setShowPassword] = useState(false);
-    const [ setPapeis] = useState([]);
-    const [ setEmpresas] = useState([]);
     const [isPopUp, setIsPopUp] = useState(false);
-
-    useEffect(() => {
-        const fetchPapeis = async () => {
-            try {
-                const response = await fetch('http://localhost:3000/listar-papeis');
-                if (!response.ok) throw new Error('Erro ao buscar papéis.');
-                const data = await response.json();
-                setPapeis(data);
-            } catch (error) {
-                console.error('Erro ao buscar papéis:', error);
-            }
-        };
-
-        const fetchEmpresas = async () => {
-            try {
-                const response = await fetch('http://localhost:3000/lista-empresas');
-                if (!response.ok) throw new Error('Erro ao buscar empresas.');
-                const data = await response.json();
-                setEmpresas(data);
-            } catch (error) {
-                console.error('Erro ao buscar empresas:', error);
-            }
-        };
-
-        fetchEmpresas();
-        fetchPapeis();
-    }, []);
 
     useEffect(() => {
         if (user) {
             setFormData((prevData) => ({
                 ...prevData,
-                grupo: user.grupo, // Definindo o grupo automaticamente baseado no usuário logado
+                grupo: user.grupo,
             }));
         }
     }, [user]);
@@ -53,19 +25,16 @@ export default function CadastrarOpe() {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/cadastrar-usuario', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: `${formData.email}@bela.com.br`,
-                    nome: formData.name,
-                    senha: formData.password,
-                    perfil: formData.perfil,
-                    grupo: formData.grupo,
-                }),
+            const response = await api.post('/cadastrar-usuario', {
+                email: `${formData.email}@bela.com.br`,
+                nome: formData.name,
+                senha: formData.password,
+                perfil: formData.perfil,
+                grupo: formData.grupo,
             });
 
-            if (!response.ok) throw new Error('Erro ao cadastrar usuário.');
+            if (!response.data) throw new Error('Erro ao cadastrar usuário.');
+
             alert('Usuário cadastrado com sucesso!');
             setFormData({ email: '', name: '', password: '', perfil: '', grupo: user.grupo });
             setIsPopUp(false);
@@ -74,6 +43,7 @@ export default function CadastrarOpe() {
             alert('Falha ao cadastrar usuário.');
         }
     };
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -95,20 +65,23 @@ export default function CadastrarOpe() {
 
     return (
         <div>
-            <div className="bg-white shadow-md rounded-lg p-6">
-                <h2 className="text-lg font-semibold text-gray-700 mb-4">
-                    Cadastrar novos usuários
-                </h2>
-                <p className="text-gray-600">Gerencie os usuários registrados no sistema.</p>
-                <button
-                    onClick={togglePopUp}
-                    className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
-                    Cadastrar
-                </button>
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                <div className="flex flex-col justify-between h-full">
+                    <h2 className="text-2xl font-semibold text-white mb-4 tracking-wider hover:text-gray-300 transition-all duration-300">
+                        Cadastrar novos usuários
+                    </h2>
+                    <p className="text-lg text-gray-400 mb-6">Gerencie os usuários registrados no sistema.</p>
+                    <button
+                        onClick={togglePopUp}
+                        className="mt-auto bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white py-2 px-6 rounded-lg shadow-md transform transition-all duration-300 hover:scale-105">
+                        Cadastrar
+                    </button>
+                </div>
             </div>
 
+
             {isPopUp && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md relative">
                         <button
                             onClick={togglePopUp}
@@ -202,6 +175,7 @@ export default function CadastrarOpe() {
                     </div>
                 </div>
             )}
+
         </div>
     );
 }

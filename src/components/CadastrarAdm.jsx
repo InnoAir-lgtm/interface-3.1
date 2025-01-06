@@ -32,7 +32,7 @@ export default function CadastrarAdm() {
         }
 
         try {
-            const response = await api.post('http://localhost:3000/cadastrar-usuario', {
+            const response = await api.post('/cadastrar-usuario', {
                 email: `${formData.email}@bela.com.br`,
                 nome: formData.name,
                 senha: formData.password,
@@ -70,7 +70,7 @@ export default function CadastrarAdm() {
                 onClick={togglePopup}
                 className="py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600"
             >
-                Cadastrar adm
+                Cadastrar função
             </button>
 
             {isPopupOpen && (
