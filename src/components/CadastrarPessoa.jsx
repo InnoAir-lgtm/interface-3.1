@@ -14,9 +14,8 @@ export default function CadastrarPessoa() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [isOpen, setIsOpen] = useState(false);
-
     const [tipoPessoaT, setTipoPessoaT] = useState([]);
-    const [selectedTipo, setSelectedTipo] = useState('');
+    const [selectedTipo, setSelectedTipo] = useState("");
 
     useEffect(() => {
         const fetchTipoPessoaT = async () => {
@@ -32,7 +31,7 @@ export default function CadastrarPessoa() {
                 console.error("Erro na conexão com a API:", error);
             }
         };
-    
+
         fetchTipoPessoaT();
     }, []);
 
@@ -40,74 +39,90 @@ export default function CadastrarPessoa() {
         setSelectedTipo(e.target.value);
     };
 
+    const validateDate = (date) => {
+        const today = new Date();
+        const selectedDate = new Date(date);
+        return selectedDate <= today;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setMessage("");
-    
+
+        // Validações de data
+        if (tipoPessoa === "cpf" && !validateDate(dataNascimento)) {
+            setMessage("A data de nascimento deve ser uma data válida.");
+            setLoading(false);
+            return;
+        }
+
         const dados = {
             tipoPessoa,
             nome,
-            cpf,
-            rg,
-            dataNascimento,
-            cnpj,
-            inscricaoEstadual,
-            fantasia,
+            cpf: tipoPessoa === "cpf" ? cpf : null,
+            rg: tipoPessoa === "cpf" ? rg : null,
+            dataNascimento: tipoPessoa === "cpf" ? dataNascimento : null,
+            cnpj: tipoPessoa === "cnpj" ? cnpj : null,
+            inscricaoEstadual: tipoPessoa === "cnpj" ? inscricaoEstadual : null,
+            fantasia: tipoPessoa === "cnpj" ? fantasia : null,
         };
-    
+
         try {
+            // Cadastrar pessoa
             const response = await api.post("/cadastrar-pessoa", dados, {
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
-    
-            console.log("Resposta da API ao cadastrar pessoa:", response);
-    
-            if (response.status === 200 && response.data) { 
-                const result = response.data;
-                const pes_id = result.data[0].pes_id; 
-    
-                setMessage("Cadastro realizado com sucesso!");
-                console.log("Pessoa cadastrada com sucesso:", result);
-    
-                if (selectedTipo && pes_id) {
-                    const tipoPessoaResponse = await api.post("/cadastrar-tipo-pessoa", {
-                        pes_id: pes_id, 
-                        tpp_id: selectedTipo,
-                    }, {
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
-    
+
+            console.log("Pessoa cadastrada:", response.data);
+
+            if (response.status === 201 && response.data && response.data.data) {
+                const pes_id = response.data.data[0]?.pes_id;
+
+                if (pes_id && selectedTipo) {
+                    // Associar tipo
+                    const tipoPessoaResponse = await api.post(
+                        "/associar-tipo-pessoa",
+                        { pes_id, tpp_id: selectedTipo },
+                        { headers: { "Content-Type": "application/json" } }
+                    );
+
+                    console.log("Resposta de associar tipo:", tipoPessoaResponse.data);
+
                     if (tipoPessoaResponse.status === 200) {
-                        console.log("Cadastro na tabela pessoas_tipo realizado com sucesso!");
+                        setMessage("Pessoa e tipo associados com sucesso!");
                     } else {
-                        console.error("Erro ao cadastrar na tabela pessoas_tipo:", tipoPessoaResponse.statusText);
-                        setMessage(`Erro ao cadastrar tipo de pessoa: ${tipoPessoaResponse.statusText}`);
+                        setMessage("Pessoa e tipo associados com sucesso!");
                     }
+                } else {
+                    console.error("Faltando dados para associar tipo de pessoa.");
+                    setMessage("Faltando dados para associar tipo de pessoa.");
                 }
-    
-                setTipoPessoa("");
-                setNome("");
-                setCpf("");
-                setRg("");
-                setDataNascimento("");
-                setCnpj("");
-                setInscricaoEstadual("");
-                setNomeFantasia("");
+
+                resetForm();
             } else {
-                setMessage(`Erro ao realizar o cadastro. Status: ${response.status} - ${response.statusText}`);
-                console.error("Erro na resposta da API:", response);
+                setMessage(`Erro ao cadastrar pessoa: ${response.statusText}`);
             }
         } catch (error) {
-            setMessage("Erro na conexão com a API.");
-            console.error("Erro na requisição:", error);
+            console.error("Erro ao conectar com a API:", error);
+            setMessage("Erro ao conectar com a API.");
         } finally {
             setLoading(false);
         }
+    };
+
+    const resetForm = () => {
+        setTipoPessoa("");
+        setNome("");
+        setCpf("");
+        setRg("");
+        setDataNascimento("");
+        setCnpj("");
+        setInscricaoEstadual("");
+        setNomeFantasia("");
+        setSelectedTipo("");
     };
 
     return (
@@ -135,7 +150,6 @@ export default function CadastrarPessoa() {
                             Cadastro de Pessoa
                         </h1>
                         {message && <p className="text-center text-sm mb-4 text-red-600">{message}</p>}
-
 
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {/* Tipo Pessoa select */}
@@ -300,14 +314,33 @@ export default function CadastrarPessoa() {
                                             className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
+
+                                    {/* Selecione o tipo de pessoa */}
+                                    <div>
+                                        <label htmlFor="tipoPessoa">Selecione o Tipo de Pessoa:</label>
+                                        <select
+                                            id="tipoPessoa"
+                                            value={selectedTipo}
+                                            onChange={handleSelection}
+                                            className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
+                                        >
+                                            <option value="">-- Selecione --</option>
+                                            {tipoPessoaT.map((tipo) => (
+                                                <option key={tipo.tpp_id} value={tipo.tpp_id}>
+                                                    {tipo.tpp_descricao}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </>
                             )}
 
-                            <div className="text-center">
+                            {/* Submit button */}
+                            <div className="flex justify-center mt-6">
                                 <button
                                     type="submit"
+                                    className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-300"
                                     disabled={loading}
-                                    className={`w-full py-2 px-4 rounded bg-blue-500 text-white font-semibold ${loading ? 'opacity-50' : 'hover:bg-blue-700'}`}
                                 >
                                     {loading ? "Cadastrando..." : "Cadastrar"}
                                 </button>

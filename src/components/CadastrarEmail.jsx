@@ -42,9 +42,6 @@ export default function CadastrarEmail({ selectedPessoa }) {
 
         try {
             const response = await api.post('/associar-contato-pessoa', contatoData);
-
-
-        
             alert(response.data.message);
         } catch (error) {
             console.error('Erro ao salvar contato:', error.message);
