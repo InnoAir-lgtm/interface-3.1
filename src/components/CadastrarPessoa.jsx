@@ -120,6 +120,7 @@ export default function CadastrarPessoa() {
             <button
                 onClick={() => setIsOpen(true)}
                 className="items-center justify-center gap-2 flex bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+
             >
                 <div className="flex items-center justify-center w-[30px] h-[30px] rounded bg-green-500">
                     <GoPlus className="text-white" />
@@ -143,7 +144,6 @@ export default function CadastrarPessoa() {
 
 
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            {/* Tipo Pessoa select */}
                             <div>
                                 <label htmlFor="tipoPessoa" className="block text-sm font-semibold text-gray-700 mb-1">
                                     Tipo de Pessoa:
@@ -161,7 +161,6 @@ export default function CadastrarPessoa() {
                                 </select>
                             </div>
 
-                            {/* Condicional para CPF */}
                             {tipoPessoa === "cpf" && (
                                 <>
                                     <div>

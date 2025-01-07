@@ -47,8 +47,6 @@ const EmpresaComponent = ({ schema }) => {
     return (
         <div>
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Gestão da Empresa</h2>
-            <p className="text-gray-600">Aqui você pode adicionar os componentes relacionados ao schema: <strong>{schema}</strong>.</p>
-
             <div className='flex items-center space-x-4'>
 
                 <CadastrarTipo />

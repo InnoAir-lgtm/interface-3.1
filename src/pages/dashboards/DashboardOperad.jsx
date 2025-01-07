@@ -30,10 +30,8 @@ export default function DashboardOperad() {
         }
     };
 
-
     useEffect(() => {
         if (user?.id) {
-            console.log('Buscando associações para o usuário:', user.id);
             fetchAssociacoes();
         }
     }, [user]);
@@ -89,9 +87,13 @@ export default function DashboardOperad() {
                                 <p><strong>Email:</strong> {user.email}</p>
                                 <p><strong>Grupo:</strong> {user.grupo}</p>
                                 <p><strong>Perfil:</strong> {user.perfil}</p>
+                                <p><strong>Papel:</strong> {user.papel}</p>
                             </div>
+
+
                         </div>
                     )}
+
 
                     {showPopup && (
                         <div
@@ -107,7 +109,7 @@ export default function DashboardOperad() {
                                 <option value="">Selecione uma empresa</option>
                                 {empresas.map((empresa) => (
                                     <option key={empresa.emp_cnpj} value={empresa.emp_cnpj}>
-                                        {empresa.empresas.emp_nome}
+                                        {empresa.empresas.emp_nome} - {empresa.papeis.pap_papel} (ID: {empresa.pap_id})
                                     </option>
                                 ))}
                             </select>

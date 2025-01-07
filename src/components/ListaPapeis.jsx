@@ -20,9 +20,6 @@ export default function ListaPapeis() {
                 setLoading(false);
             }
         }
-
-
-
         async function fetchPermissoes() {
             try {
                 const response = await api.get('/listar-permissoes');
@@ -64,30 +61,31 @@ export default function ListaPapeis() {
 
     const handleAssociarPermissoes = async () => {
         try {
-
             const response = await api.get(`/permissoes-por-papel/${selectedPapel.pap_id}`);
-            const permissoesAtuais = await response.json();
-
+            const permissoesAtuais = response.data;
+    
+            // Adicionar permissões que não estão associadas
             for (const permissaoId of selectedPermissoes) {
                 if (!permissoesAtuais.includes(permissaoId)) {
-                    await api.get('/associar-permissao', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ papel_id: selectedPapel.pap_id, permissao_id: permissaoId }),
+                    await api.post('/associar-permissao', {
+                        papel_id: selectedPapel.pap_id,
+                        permissao_id: permissaoId,
                     });
                 }
             }
-
+    
+            // Remover permissões que não estão mais selecionadas
             for (const permissaoId of permissoesAtuais) {
                 if (!selectedPermissoes.includes(permissaoId)) {
-                    await api.get('/remover-permissao', {
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ papel_id: selectedPapel.pap_id, permissao_id: permissaoId }),
+                    await api.delete('/remover-permissao', {
+                        data: {
+                            papel_id: selectedPapel.pap_id,
+                            permissao_id: permissaoId,
+                        },
                     });
                 }
             }
-
+    
             alert('Permissões atualizadas com sucesso!');
             setSelectedPapel(null);
             setSelectedPermissoes([]);
@@ -96,6 +94,7 @@ export default function ListaPapeis() {
             alert('Erro ao atualizar permissões.');
         }
     };
+    
 
 
     if (loading) {

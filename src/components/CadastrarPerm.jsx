@@ -9,9 +9,8 @@ export default function CadastrarPerm() {
     const handlePermissionSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Agora enviando `descricao` no campo correto
-            const response = await api.post('http://localhost:3000/cadastrar-permissoes', {
-                descricao: permis.descricao,  // Envie apenas a descricao
+            const response = await api.post('/cadastrar-permissoes', {
+                descricao: permis.descricao, 
             });
             console.log('Resposta do servidor:', response.data);
             alert('Permissão cadastrada com sucesso!');
@@ -25,7 +24,7 @@ export default function CadastrarPerm() {
             alert('Falha ao cadastrar permissão.');
         }
     };
-    
+
 
     const handleChangeInput = (e) => {
         const { name, value } = e.target;

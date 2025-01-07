@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { usePermissions } from '../middleware/middleware';
 import { GoPlus } from "react-icons/go";
 import api from '../apiUrl';
 
@@ -7,9 +8,18 @@ export default function CadastrarTipoModal({ schema }) {
     const [classificacao, setClassificacao] = useState('');
     const [message, setMessage] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const { verifyAndCreatePermission, checkPermission } = usePermissions();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Verifique a permissão antes de prosseguir
+        const hasPermission = await checkPermission('cadastrar_tipo');
+        if (!hasPermission) {
+            setMessage('Você não tem permissão para cadastrar tipo.');
+            return;
+        }
+
         try {
             const response = await api.post('/cadastrar-tipo-pessoa', {
                 schema,
@@ -25,11 +35,22 @@ export default function CadastrarTipoModal({ schema }) {
                 throw new Error(`Erro ao cadastrar tipo. Status inesperado.`);
             }
         } catch (error) {
+            console.error("Erro ao cadastrar tipo:", error);
             setMessage(`Erro: ${error.response?.data?.message || error.message}`);
         }
     };
 
-    const openModal = () => setIsModalOpen(true);
+    const openModal = async (permissionName) => {
+        console.log("Verificando permissão para:", permissionName);  
+        const hasPermission = await verifyAndCreatePermission(permissionName);
+        if (hasPermission) {
+            setIsModalOpen(true);
+        } else {
+            setMessage('Você não tem permissão para acessar esta funcionalidade.');
+        }
+    };
+    
+
     const closeModal = () => {
         setIsModalOpen(false);
         setMessage('');
@@ -38,7 +59,8 @@ export default function CadastrarTipoModal({ schema }) {
     return (
         <div>
             <button
-                onClick={openModal}
+                value="cadastrar_tipo"
+                onClick={(e) => openModal(e.target.value)}  
                 className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                 <div className="flex items-center justify-center w-[30px] h-[30px] rounded bg-green-500">
                     <GoPlus className="text-white" />
