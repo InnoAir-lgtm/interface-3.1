@@ -2,22 +2,23 @@ import { useState } from 'react';
 import api from '../apiUrl';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import "./style.css"
+import './style.css';
 
 export default function LoginMaster() {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [mensagem, setMensagem] = useState('');
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, loading } = useAuth();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
             const response = await api.post('/login-master', { email, senha });
             const { user } = response.data;
-            login(user);
+            await login(user);  // Faz o login e a busca do papel do usuário
 
+            // Redirecionamento após o login.
             if (user.perfil === 'Master') {
                 navigate('/master');
             } else if (user.perfil === 'Administrador') {
@@ -32,6 +33,9 @@ export default function LoginMaster() {
         }
     };
 
+    if (loading) {
+        return <div>Carregando...</div>;  // Mostra "Carregando..." enquanto busca as permissões.
+    }
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100 bg">

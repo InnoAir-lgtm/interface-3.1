@@ -10,45 +10,40 @@ export default function ListaPapeis() {
     const [selectedPermissoes, setSelectedPermissoes] = useState([]);
 
     useEffect(() => {
-        async function fetchPapeis() {
+        const fetchData = async () => {
             try {
-                const response = await api.get('/listar-papeis');
-                setPapeis(response.data);
+                const [papeisRes, permissoesRes] = await Promise.all([
+                    api.get('/listar-papeis'),
+                    api.get('/listar-permissoes'),
+                ]);
+
+                setPapeis(papeisRes.data);
+                setPermissoes(permissoesRes.data);
             } catch (error) {
-                console.error(error);
+                console.error("Erro ao carregar dados iniciais:", error);
             } finally {
                 setLoading(false);
             }
-        }
-        async function fetchPermissoes() {
-            try {
-                const response = await api.get('/listar-permissoes');
-                setPermissoes(response.data);
-            } catch (error) {
-                console.error(error);
-            }
-        }
+        };
 
-        fetchPapeis();
-        fetchPermissoes();
+        fetchData();
     }, []);
+
 
     const handlePapelClick = async (papel) => {
         setSelectedPapel(papel);
         setSelectedPermissoes([]);
-        setLoadingPermissoes(true); // Inicia o spinner
+        setLoadingPermissoes(true);
 
         try {
             const response = await api.get(`/permissoes-por-papel/${papel.pap_id}`);
-            setSelectedPermissoes(response.data);
+            setSelectedPermissoes(response.data.map((perm) => perm.per_id));
         } catch (error) {
-            console.error('Erro ao buscar permissões:', error);
+            console.error("Erro ao buscar permissões do papel:", error);
         } finally {
-            setLoadingPermissoes(false); // Para o spinner
+            setLoadingPermissoes(false);
         }
     };
-
-
 
     const handlePermissaoToggle = (permissaoId) => {
         setSelectedPermissoes((prev) =>
@@ -58,44 +53,42 @@ export default function ListaPapeis() {
         );
     };
 
-
     const handleAssociarPermissoes = async () => {
         try {
             const response = await api.get(`/permissoes-por-papel/${selectedPapel.pap_id}`);
-            const permissoesAtuais = response.data;
-    
-            // Adicionar permissões que não estão associadas
-            for (const permissaoId of selectedPermissoes) {
-                if (!permissoesAtuais.includes(permissaoId)) {
-                    await api.post('/associar-permissao', {
+            const permissoesAtuais = response.data.map((perm) => perm.per_id);
+
+            const permissoesAdicionar = selectedPermissoes.filter(
+                (id) => !permissoesAtuais.includes(id)
+            );
+            const permissoesRemover = permissoesAtuais.filter(
+                (id) => !selectedPermissoes.includes(id)
+            );
+
+            for (const permissaoId of permissoesAdicionar) {
+                await api.post('/associar-permissao', {
+                    papel_id: selectedPapel.pap_id,
+                    permissao_id: permissaoId,
+                });
+            }
+
+            for (const permissaoId of permissoesRemover) {
+                await api.delete('/remover-permissao', {
+                    data: {
                         papel_id: selectedPapel.pap_id,
                         permissao_id: permissaoId,
-                    });
-                }
+                    },
+                });
             }
-    
-            // Remover permissões que não estão mais selecionadas
-            for (const permissaoId of permissoesAtuais) {
-                if (!selectedPermissoes.includes(permissaoId)) {
-                    await api.delete('/remover-permissao', {
-                        data: {
-                            papel_id: selectedPapel.pap_id,
-                            permissao_id: permissaoId,
-                        },
-                    });
-                }
-            }
-    
+
             alert('Permissões atualizadas com sucesso!');
             setSelectedPapel(null);
             setSelectedPermissoes([]);
         } catch (error) {
-            console.error('Erro ao atualizar permissões:', error);
-            alert('Erro ao atualizar permissões.');
+            console.error("Erro ao atualizar permissões:", error);
+            alert("Erro ao atualizar permissões.");
         }
     };
-    
-
 
     if (loading) {
         return <div className="flex items-center justify-center h-screen text-lg">Carregando...</div>;
@@ -133,7 +126,7 @@ export default function ListaPapeis() {
                         ) : (
                             <ul className="mb-4">
                                 {permissoes.map((permissao) => (
-                                    <li key={permissao.perm_id}>
+                                    <li key={permissao.per_id}>
                                         <label className="flex items-center">
                                             <input
                                                 type="checkbox"
@@ -141,10 +134,12 @@ export default function ListaPapeis() {
                                                 checked={selectedPermissoes.includes(permissao.per_id)}
                                                 onChange={() => handlePermissaoToggle(permissao.per_id)}
                                             />
-                                            {permissao.per_descricao}
+                                            {permissao.per_descricao} {/* Alterado para a chave correta */}
                                         </label>
                                     </li>
                                 ))}
+
+
                             </ul>
                         )}
                         <button

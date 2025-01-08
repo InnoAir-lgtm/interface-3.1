@@ -8,17 +8,10 @@ export default function CadastrarTipoModal({ schema }) {
     const [classificacao, setClassificacao] = useState('');
     const [message, setMessage] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const { verifyAndCreatePermission, checkPermission } = usePermissions();
+    const { verifyAndCreatePermission } = usePermissions();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // Verifique a permissão antes de prosseguir
-        const hasPermission = await checkPermission('cadastrar_tipo');
-        if (!hasPermission) {
-            setMessage('Você não tem permissão para cadastrar tipo.');
-            return;
-        }
 
         try {
             const response = await api.post('/cadastrar-tipo-pessoa', {
@@ -49,7 +42,6 @@ export default function CadastrarTipoModal({ schema }) {
             setMessage('Você não tem permissão para acessar esta funcionalidade.');
         }
     };
-    
 
     const closeModal = () => {
         setIsModalOpen(false);
@@ -59,7 +51,7 @@ export default function CadastrarTipoModal({ schema }) {
     return (
         <div>
             <button
-                value="cadastrar_tipo"
+                value="cadastrarTipo"
                 onClick={(e) => openModal(e.target.value)}  
                 className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                 <div className="flex items-center justify-center w-[30px] h-[30px] rounded bg-green-500">

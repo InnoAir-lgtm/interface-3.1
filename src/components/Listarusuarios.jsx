@@ -104,7 +104,9 @@ export default function ListarUsuarios() {
                 empresas: selectedEmpresas,
             });
 
-            if (!response.data.success) throw new Error('Erro ao atualizar associações');
+            if (response.data.message !== 'Associações atualizadas com sucesso!') {
+                throw new Error('Erro ao atualizar associações');
+            }
             alert('Papéis e empresas atualizados com sucesso');
             fecharModal();
         } catch (error) {
@@ -112,6 +114,8 @@ export default function ListarUsuarios() {
             alert('Erro ao atualizar papéis e empresas');
         }
     };
+
+
 
 
     return (

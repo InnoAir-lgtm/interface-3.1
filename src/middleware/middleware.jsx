@@ -11,11 +11,10 @@ export const PermissionProvider = ({ children }) => {
         fetchPermissions();
     }, []);
 
-    // Função para buscar permissões
     const fetchPermissions = async () => {
         try {
             const response = await api.get('/listar-permissoes');
-            setPermissions(response.data);
+            setPermissions(response.data || []);
         } catch (error) {
             console.error("Erro ao carregar permissões:", error);
         } finally {
@@ -23,32 +22,32 @@ export const PermissionProvider = ({ children }) => {
         }
     };
 
-    // Função para verificar e criar permissão
     const verifyAndCreatePermission = async (permissionName) => {
         if (!permissionName) {
             console.error("Erro: Nome da permissão não fornecido.");
             return false;
         }
-
-        const descricaoAmigavel = formatPermissionName(permissionName);
-
+    
+        const normalizedPermissionName = normalizePermissionName(permissionName); 
+        const descricaoAmigavel = formatPermissionName(normalizedPermissionName);
+    
         try {
             let permissionExists = checkPermissionExists(descricaoAmigavel);
-
+    
             if (!permissionExists) {
-                permissionExists = await createPermission(descricaoAmigavel, permissionName);
+                permissionExists = await createPermission(descricaoAmigavel, normalizedPermissionName);
             }
-
+    
             if (!permissionExists) return false;
-
-            return await checkUserPermission(permissionName);
+    
+            return await checkUserPermission(normalizedPermissionName);
         } catch (error) {
             console.error("Erro ao verificar ou criar permissão:", error);
             return false;
         }
     };
+    
 
-    // Função para formatar o nome da permissão
     const formatPermissionName = (permissionName) => {
         return permissionName
             .replace(/([A-Z])/g, ' $1')
@@ -56,67 +55,77 @@ export const PermissionProvider = ({ children }) => {
             .trim();
     };
 
-
     const checkPermissionExists = (descricaoAmigavel) => {
-        return permissions.some((perm) => perm.per_descricao === descricaoAmigavel);
+        return permissions.some(
+            (perm) => perm.per_descricao && perm.per_descricao === descricaoAmigavel
+        );
     };
 
-
+    const normalizePermissionName = (permissionName) => {
+        return permissionName.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
+    };
+    
     const createPermission = async (descricaoAmigavel, permissionName) => {
-        const response = await api.post('/cadastrar-permissoes', {
-            descricao: descricaoAmigavel,
-            permissao: permissionName,
-        });
-
-        if (response.status === 201 || response.status === 200) {
-            setPermissions((prevPermissions) => [
-                ...prevPermissions,
-                response.data,
-            ]);
-            return true;
-        } else {
-            console.error("Erro ao criar permissão:", response.data);
-            return false;
-        }
-    };
-
-
-    const checkUserPermission = async (permissionName) => {
-        const user = JSON.parse(localStorage.getItem('user'));
-        const papelId = user?.pap_id;
-
-        if (!papelId) {
-            console.log("Erro: Papel do usuário não encontrado.");
-            alert("Erro: Papel do usuário não encontrado.");
-            return false;
-        }
-
         try {
-            const response = await api.get(`/permissoes-por-papel/${papelId}`);
-            const permissoesPorPapel = response.data;
+            const response = await api.post('/cadastrar-permissoes', {
+                descricao: descricaoAmigavel,
+                permissao: permissionName,
+            });
 
-            console.log("Permissões do papel:", permissoesPorPapel);
-
-            const hasPermission = permissoesPorPapel.some(permission =>
-                permission.per_permissao.toLowerCase() === permissionName.toLowerCase()
-            );
-
-            if (hasPermission) {
-                console.log("Usuário tem permissão para:", permissionName);
+            if (response.status === 201 || response.status === 200) {
+                setPermissions((prevPermissions) => [
+                    ...prevPermissions,
+                    response.data,
+                ]);
                 return true;
             } else {
-                console.log("Usuário não tem permissão para:", permissionName);
-                alert(`Você não tem permissão para acessar a função: ${permissionName}`);
+                console.error("Erro ao criar permissão:", response.data);
                 return false;
             }
         } catch (error) {
-            console.error("Erro ao verificar permissões:", error.message);
-            alert("Erro ao verificar permissões.");
+            console.error("Erro ao criar permissão:", error);
             return false;
         }
     };
 
+  const checkUserPermission = async (permissionName) => {
+    const normalizedPermissionName = normalizePermissionName(permissionName); // Normalize o nome aqui
+    const user = JSON.parse(localStorage.getItem('user'));
+    const papelId = user?.pap_id;
 
+    if (!papelId) {
+        console.error("Erro: Papel do usuário não encontrado.");
+        alert("Erro: Papel do usuário não encontrado.");
+        return false;
+    }
+
+    try {
+        const response = await api.get(`/permissoes-por-papel/${papelId}`);
+        const permissoesPorPapel = response.data || [];
+
+        console.log("Permissões do papel:", permissoesPorPapel);
+
+        const hasPermission = permissoesPorPapel.some((permission) => {
+            return (
+                permission.per_permissao &&
+                permission.per_permissao.toLowerCase() === normalizedPermissionName
+            );
+        });
+
+        if (hasPermission) {
+            console.log("Usuário tem permissão para:", normalizedPermissionName);
+            return true;
+        } else {
+            console.log("Usuário não tem permissão para:", normalizedPermissionName);
+            alert(`Você não tem permissão para acessar a função: ${normalizedPermissionName}`);
+            return false;
+        }
+    } catch (error) {
+        console.error("Erro ao verificar permissões:", error.message);
+        alert("Erro ao verificar permissões.");
+        return false;
+    }
+};
 
 
     const checkPermission = (permissionName) => {
@@ -131,15 +140,12 @@ export const PermissionProvider = ({ children }) => {
         console.log("Papel do usuário:", papelId);
         console.log("Permissões carregadas:", permissions);
 
-        // Filtrando permissões pelo papel
-        const permissoesPorPapel = permissions.filter(perm => perm.pap_id === papelId);
+        const permissoesPorPapel = permissions.filter((perm) => perm.pap_id === papelId);
         console.log("Permissões do papel:", permissoesPorPapel);
 
-        // Verificando se a permissão está presente
         const hasPermission = permissoesPorPapel.some(
             (permission) => permission.permissao === permissionName
         );
-
 
         if (!hasPermission) {
             alert("Você não tem permissão para executar esta ação.");
@@ -147,7 +153,6 @@ export const PermissionProvider = ({ children }) => {
 
         return hasPermission;
     };
-
 
     return (
         <PermissionContext.Provider value={{ verifyAndCreatePermission, checkPermission, loading }}>
