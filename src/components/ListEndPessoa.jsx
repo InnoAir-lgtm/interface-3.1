@@ -4,27 +4,35 @@ import api from '../apiUrl';
 export default function ListEndPessoa({ selectedPessoa }) {
     const [showSidebar, setShowSidebar] = useState(false);
     const [enderecos, setEnderecos] = useState([]);
-
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [selectedSchema, setSelectedSchema] = useState('belaarte');
 
     useEffect(() => {
         if (showSidebar && selectedPessoa) {
-            listarEnderecos(selectedPessoa.pes_id);
+            listarEnderecos(selectedPessoa.pes_id, selectedSchema);
         }
-    }, [showSidebar, selectedPessoa]);
+    }, [showSidebar, selectedPessoa, selectedSchema]);
 
-    const listarEnderecos = async (pes_id) => {
+    const listarEnderecos = async (pes_id, schema) => {
+        setLoading(true);
+        setError(null);
         try {
-            const response = await api.get(`/listar-endereco?pes_id=${pes_id}`, {
+            const response = await api.get(`/listar-endereco?pes_id=${pes_id}&schema=${schema}`, {
                 method: 'GET',
             });
-
-            // Corrigindo para acessar os dados da resposta
             setEnderecos(response.data.data || []);
         } catch (error) {
+            setError('Erro ao listar endereços. Tente novamente mais tarde.');
             console.error('Erro ao listar endereços:', error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
+    const handleSidebarClose = () => {
+        setShowSidebar(false);
+    };
 
     return (
         <div>
@@ -41,16 +49,36 @@ export default function ListEndPessoa({ selectedPessoa }) {
             >
                 <div className="p-4 border-b border-gray-300 flex justify-between items-center">
                     <h2 className="text-lg font-semibold">Lista de endereços</h2>
-
                     <button
-                        onClick={() => setShowSidebar(false)}
+                        onClick={handleSidebarClose}
                         className="bg-red-600 text-white p-2 rounded-full focus:outline-none hover:bg-red-700"
                     >
                         ✕
                     </button>
                 </div>
                 <div className="p-4">
-                    {enderecos.length > 0 ? (
+                    {/* Seletor de Schema */}
+                    <div className="mb-4">
+                        <label htmlFor="schema" className="block text-gray-700">Escolha o Schema</label>
+                        <select
+                            id="schema"
+                            value={selectedSchema}
+                            onChange={(e) => setSelectedSchema(e.target.value)}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded"
+                        >
+                            <option value="belaarte">belaarte</option>
+                            <option value="public">public</option>
+                            <option value="graphql_public">graphql_public</option>
+                            <option value="belaarte_">belaarte_</option>
+                        </select>
+
+                    </div>
+
+                    {loading ? (
+                        <p>Carregando...</p>
+                    ) : error ? (
+                        <p className="text-red-600">{error}</p>
+                    ) : enderecos.length > 0 ? (
                         <div className="grid gap-4">
                             {enderecos.map((endereco, index) => (
                                 <div key={index} className="p-4 border rounded-lg shadow-md bg-white">
@@ -70,7 +98,7 @@ export default function ListEndPessoa({ selectedPessoa }) {
             {/* Fundo escuro (overlay) */}
             {showSidebar && (
                 <div
-                    onClick={() => setShowSidebar(false)}
+                    onClick={handleSidebarClose}
                     className="fixed inset-0 bg-black bg-opacity-50 z-40"
                 ></div>
             )}

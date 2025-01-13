@@ -20,21 +20,30 @@ const EmpresaComponent = ({ schema }) => {
 
     const fetchPessoas = async () => {
         try {
-            const response = await api.get("/pessoas"); 
-            const data = response.data; 
-            setPessoas(data); 
+            const response = await api.get(`/pessoas?schema=${schema}`);
+            const data = response.data;
+            console.log("Dados de pessoas:", data);
+            if (!data || data.length === 0) {
+                setError("Nenhuma pessoa encontrada para o schema especificado.");
+            } else {
+                setPessoas(data.data);
+            }
         } catch (error) {
-            setError(error.message); 
+            console.error("Erro ao buscar pessoas:", error);
+            setError("Erro ao carregar os dados das pessoas.");
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
 
-
     useEffect(() => {
         fetchPessoas();
-    }, []);
+    }, [schema]);
+
+    useEffect(() => {
+        console.log("Pessoas carregadas:", pessoas);
+    }, [pessoas]);
 
     if (loading) {
         return <p>Carregando...</p>;
@@ -46,14 +55,12 @@ const EmpresaComponent = ({ schema }) => {
 
     return (
         <div>
+
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Gestão da Empresa</h2>
+
             <div className='flex items-center space-x-4'>
-
                 <CadastrarTipo />
-
-                <CadastrarPessoa />
-
-
+                <CadastrarPessoa schema={schema} />
             </div>
 
             <div className="p-4">
@@ -62,7 +69,7 @@ const EmpresaComponent = ({ schema }) => {
                     <ul className="space-y-2">
                         {pessoas.map((pessoa) => (
                             <li
-                                key={pessoa.id}
+                                key={pessoa.pes_id} 
                                 className="p-4 border rounded shadow cursor-pointer"
                                 onClick={() => setSelectedPessoa(pessoa)}
                             >
@@ -87,7 +94,7 @@ const EmpresaComponent = ({ schema }) => {
                         <div className="bg-gray-100 p-6 sm:p-8 md:p-10 rounded-lg shadow-lg w-full max-w-lg md:max-w-2xl lg:max-w-3xl h-auto max-h-screen overflow-y-auto flex">
 
                             <div className="absolute top-1/4 left-9 flex flex-col space-y-4">
-                                <CadastrarEndereco />
+                                <CadastrarEndereco schema={schema} />
                                 <ListEndPessoa selectedPessoa={selectedPessoa} />
                                 <ListarContatos selectedPessoa={selectedPessoa} />
                             </div>
@@ -183,8 +190,8 @@ const EmpresaComponent = ({ schema }) => {
                                         />
                                     </div>
                                 </form>
-                                <CadastrarEmail selectedPessoa={selectedPessoa} />
-                                <CadastrarComplementar selectedPessoa={selectedPessoa} />
+                                <CadastrarEmail selectedPessoa={selectedPessoa} schema={schema} />
+                                <CadastrarComplementar selectedPessoa={selectedPessoa} schema={schema} />
                             </div>
                         </div>
                     </div>

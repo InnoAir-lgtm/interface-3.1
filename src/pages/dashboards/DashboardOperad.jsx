@@ -2,20 +2,23 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import { CgProfile } from "react-icons/cg";
 import EmpresaComponent from '../../components/Pessoa';
-
 import api from '../../apiUrl';
+
 export default function DashboardOperad() {
     const { logout, user } = useAuth();
     const [showPopup, setShowPopUp] = useState(false);
     const [empresas, setEmpresas] = useState([]);
-    const [selectedSchema, setSelectedSchema] = useState("");
+    const [selectedSchema, setSelectedSchema] = useState(null);  
     const [loading, setLoading] = useState(true);
-    const [error] = useState("");
+    const [error, setError] = useState(null);
+    const [empresaData, setEmpresaData] = useState(null); 
 
     const fetchAssociacoes = async () => {
         try {
             const response = await api.get(`/listar-associacoes/${user.id}`);
             const data = response.data;
+
+            console.log('Dados das empresas:', data); 
 
             const empresasUnicas = data.filter(
                 (empresa, index, self) =>
@@ -30,6 +33,7 @@ export default function DashboardOperad() {
         }
     };
 
+
     useEffect(() => {
         if (user?.id) {
             fetchAssociacoes();
@@ -40,12 +44,32 @@ export default function DashboardOperad() {
         setShowPopUp(!showPopup);
     };
 
-    const handleEmpresaChange = (e) => {
+    const handleEmpresaChange = async (e) => {
         const cnpj = e.target.value;
-        setSelectedSchema(cnpj);
+        setSelectedSchema(null); 
+        if (cnpj) {
+            try {
+                const response = await api.get(`/buscar-schema?cnpj=${cnpj}`);
+                const schema = response.data.schema;
+                console.log('Schema encontrado:', schema);
+                setSelectedSchema(schema);
+                setEmpresaData(null);
 
-        console.log('CNPJ selecionado:', cnpj);
+                const empresaDataResponse = await api.get(`/dados-empresa?cnpj=${cnpj}`);
+                setEmpresaData(empresaDataResponse.data);
+            } catch (error) {
+                console.error("Erro ao buscar o schema:", error);
+                setError("Erro ao carregar o schema da empresa.");
+            }
+        }
     };
+
+
+    useEffect(() => {
+        if (selectedSchema) {
+            console.log('Novo schema selecionado:', selectedSchema);
+        }
+    }, [selectedSchema]);
 
     if (loading) {
         return <p>Carregando...</p>;
@@ -89,11 +113,8 @@ export default function DashboardOperad() {
                                 <p><strong>Perfil:</strong> {user.perfil}</p>
                                 <p><strong>Papel:</strong> {user.papel}</p>
                             </div>
-
-
                         </div>
                     )}
-
 
                     {showPopup && (
                         <div
@@ -105,22 +126,35 @@ export default function DashboardOperad() {
                         {empresas.length > 0 ? (
                             <select
                                 className="w-72 p-3 border rounded-lg text-gray-800 shadow-md focus:ring-2 focus:ring-blue-500 transition duration-200"
-                                onChange={handleEmpresaChange}>
+                                onChange={handleEmpresaChange}
+                            >
                                 <option value="">Selecione uma empresa</option>
-                                {empresas.map((empresa) => (
-                                    <option key={empresa.emp_cnpj} value={empresa.emp_cnpj}>
-                                        {empresa.empresas.emp_nome} - {empresa.papeis.pap_papel} (ID: {empresa.pap_id})
-                                    </option>
-                                ))}
+                                {empresas.map((empresa) => {
+                                    const empresaNome = empresa.empresas?.emp_nome?.trim() || ''; 
+                                    const papel = empresa.papeis?.pap_papel?.trim() || ''; 
+
+                                    return (
+                                        <option key={empresa.emp_cnpj} value={empresa.emp_cnpj}>
+                                            {empresaNome} - {papel} (ID: {empresa.pap_id})
+                                        </option>
+                                    );
+                                })}
                             </select>
                         ) : (
                             <p className="text-gray-500 mt-4">Nenhuma empresa associada encontrada.</p>
                         )}
+
                     </div>
 
                     {selectedSchema && (
+                        <div className="mt-4 text-gray-700">
+                            <strong>Schema Selecionado:</strong> {selectedSchema}
+                        </div>
+                    )}
+
+                    {selectedSchema && empresaData && (
                         <div className="mt-6">
-                            <EmpresaComponent schema={selectedSchema} />
+                            <EmpresaComponent schema={selectedSchema} empresaData={empresaData} />
                         </div>
                     )}
                 </div>

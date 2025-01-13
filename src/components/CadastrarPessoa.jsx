@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { GoPlus } from "react-icons/go";
 import api from "../apiUrl";
 
-export default function CadastrarPessoa() {
+export default function CadastrarPessoa({ schema }) {
     const [tipoPessoa, setTipoPessoa] = useState("");
     const [nome, setNome] = useState("");
     const [cpf, setCpf] = useState("");
@@ -45,7 +45,15 @@ export default function CadastrarPessoa() {
         setLoading(true);
         setMessage("");
 
+        if (!schema) {
+            setMessage("Selecione um schema antes de cadastrar.");
+            setLoading(false);
+            return;
+        }
+    
+
         const dados = {
+            schema,
             tipoPessoa,
             nome,
             cpf: tipoPessoa === "cpf" ? cpf : null,
@@ -64,13 +72,11 @@ export default function CadastrarPessoa() {
                 },
             });
 
-            console.log("Pessoa cadastrada:", response.data);
-
             if (response.status === 201 && response.data && response.data.data) {
                 const pes_id = response.data.data[0]?.pes_id;
 
                 if (pes_id && selectedTipo) {
-                    // Associar tipo
+    
                     const tipoPessoaResponse = await api.post(
                         "/associar-tipo-pessoa",
                         { pes_id, tpp_id: selectedTipo },

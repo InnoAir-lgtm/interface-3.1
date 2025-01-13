@@ -1,7 +1,7 @@
 import  { useState } from 'react';
 import api from '../apiUrl';
 
-export default function CadastrarEmail({ selectedPessoa }) {
+export default function CadastrarEmail({ selectedPessoa, schema }) {
     const [contato, setContato] = useState({ email: '', numero: '', email_tipo: '', pes_id: '' });
     const [inputPlaceholder, setInputPlaceholder] = useState('');
 
@@ -28,12 +28,18 @@ export default function CadastrarEmail({ selectedPessoa }) {
     };
 
     const salvarContato = async () => {
+        if (!schema) {
+            setMessage('Selecione um schema antes de salvar o contato.');
+            return;
+        }
+        
         if (!contato.email || !contato.numero || !contato.email_tipo) {
             alert('Preencha todos os campos obrigatórios antes de salvar o contato.');
             return;
         }
 
         const contatoData = {
+            schema,
             ctt_contato: contato.numero,
             ctt_tipo: contato.email_tipo,
             pes_id: selectedPessoa.pes_id,

@@ -1,7 +1,8 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useEndereco } from '../auth/ProviderEndereco';
+import api from '../apiUrl';
 
-export default function CadastrarComplementar({ selectedPessoa }) {
+export default function CadastrarComplementar({ selectedPessoa, schema }) {
     const [enderecos] = useEndereco();
     const [complementar, setComplementar] = useState({
         cep: '',
@@ -9,8 +10,9 @@ export default function CadastrarComplementar({ selectedPessoa }) {
         latitude: '',
         longitude: '',
         numero: '',
-        epe_tipo: '' 
+        epe_tipo: ''
     });
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
         if (enderecos.length > 0) {
@@ -20,52 +22,49 @@ export default function CadastrarComplementar({ selectedPessoa }) {
                 latitude: ultimoEndereco.latitude || '',
                 longitude: ultimoEndereco.longitude || '',
                 complemento: ultimoEndereco.complemento || '',
-                numero: ultimoEndereco.epe_numero || '' 
+                numero: ultimoEndereco.epe_numero || ''
             });
         }
     }, [enderecos]);
 
     const salvarEndereco = async () => {
+        setMessage('');
+        if (!schema) {
+            setMessage('Selecione um schema antes de cadastrar.');
+            return;
+        }
+
         if (!selectedPessoa) {
-            alert('Nenhuma pessoa selecionada.');
+            setMessage('Nenhuma pessoa selecionada.');
             return;
         }
 
         const enderecoData = {
+            schema,
             pes_id: selectedPessoa.pes_id,
-            epe_numero: complementar.numero || '',  
-            epe_complemento: complementar.complemento || '',  
+            epe_numero: complementar.numero || '',
+            epe_complemento: complementar.complemento || '',
             epe_tipo: complementar.epe_tipo,
-            end_cep: complementar.cep.replace('-', ''),  
+            end_cep: complementar.cep.replace('-', ''),
             epe_latitude: complementar.latitude || '',
             epe_longitude: complementar.longitude || ''
         };
 
-        console.log(enderecoData)
+        console.log(enderecoData);
+
         try {
-            const response = await fetch('http://localhost:3000/associar-endereco', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(enderecoData)
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro ao associar endereço');
-            }
-
-            const data = await response.json();
-            alert(data.message);
+            const response = await api.post('/associar-endereco', enderecoData);
+            setMessage(response.data.message);
         } catch (error) {
             console.error('Erro ao salvar o endereço:', error.message);
-            alert('Erro ao salvar o endereço.');
+            setMessage('Erro ao salvar o endereço.');
         }
     };
 
     return (
         <div>
             <form className="grid gap-2">
+                {message && <p className="text-red-600">{message}</p>}
                 <div className="flex w-full gap-4">
                     <input
                         type="text"
@@ -105,7 +104,7 @@ export default function CadastrarComplementar({ selectedPessoa }) {
                     />
                     <select
                         className="border p-2 rounded w-full"
-                        value={complementar.epe_tipo} 
+                        value={complementar.epe_tipo}
                         onChange={(e) => setComplementar({ ...complementar, epe_tipo: e.target.value })}
                     >
                         <option>Selecione tipo de endereço</option>

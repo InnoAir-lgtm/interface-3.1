@@ -2,20 +2,29 @@ import { useState } from 'react'
 import { useEndereco } from '../auth/ProviderEndereco'
 import api from '../apiUrl';
 
-export default function CadastrarEndereco() {
+export default function CadastrarEndereco({ schema }) {
     const [enderecos, addEndereco] = useEndereco();
     const [endereco, setEndereco] = useState({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
     const [showSidebar, setShowSidebar] = useState(false);
 
     const handleChange = async (e) => {
         e.preventDefault();
+
+        if (!schema) {
+            setMessage('Selecione um schema antes de cadastrar.');
+            return;
+        }
+
         if (!endereco.cep) {
             alert('Por favor, insira um CEP.');
             return;
         }
         try {
             const formattedCep = endereco.cep.replace('-', '');
+
+
             const response = await api.post('/cadastrar-endereco', {
+                schema,
                 cep: formattedCep,
                 logradouro: endereco.logradouro,
                 bairro: endereco.bairro,
@@ -24,6 +33,7 @@ export default function CadastrarEndereco() {
                 latitude: endereco.latitude || '',
                 longitude: endereco.longitude || '',
             });
+            
             console.log(response);
             alert('Endereço cadastrado com sucesso!');
 
