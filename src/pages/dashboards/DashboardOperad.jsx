@@ -8,10 +8,10 @@ export default function DashboardOperad() {
     const { logout, user } = useAuth();
     const [showPopup, setShowPopUp] = useState(false);
     const [empresas, setEmpresas] = useState([]);
-    const [selectedSchema, setSelectedSchema] = useState(null);  
+    const [selectedSchema, setSelectedSchema] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [empresaData, setEmpresaData] = useState(null); 
+    const [empresaData, setEmpresaData] = useState(null);
 
     const fetchAssociacoes = async () => {
         try {
@@ -43,7 +43,7 @@ export default function DashboardOperad() {
 
     const handleEmpresaChange = async (e) => {
         const cnpj = e.target.value;
-        setSelectedSchema(null); 
+        setSelectedSchema(null);
         if (cnpj) {
             try {
                 const response = await api.get(`/buscar-schema?cnpj=${cnpj}`);
@@ -81,17 +81,19 @@ export default function DashboardOperad() {
                     <header className="flex justify-between items-center mb-8">
                         <h1 className="text-3xl font-semibold text-gray-800">Bem-vindo ao Dashboard</h1>
                         <div className="flex space-x-4">
-                            <button
-                                onClick={logout}
-                                className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition duration-200">
-                                Sair
-                            </button>
 
-                            <button
-                                className="flex justify-center items-center w-12 h-12 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition duration-200"
-                                onClick={togglePop}>
-                                <CgProfile fontSize={28} />
-                            </button>
+
+                            <div className='flex justify-center items-center gap-2'>
+                                <button
+                                    className="flex justify-center items-center w-12 h-12 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition duration-200"
+                                    onClick={togglePop}>
+                                    <CgProfile fontSize={28} />
+                                </button>
+                                <div>
+                                    <p className='text-[13px]'>{user.email}</p>
+                                    <p className='text-[13px]'>{user.papel}</p>
+                                </div>
+                            </div>
                         </div>
                     </header>
 
@@ -108,6 +110,12 @@ export default function DashboardOperad() {
                                 <p><strong>Perfil:</strong> {user.perfil}</p>
                                 <p><strong>Papel:</strong> {user.papel}</p>
                             </div>
+
+                            <button
+                                onClick={logout}
+                                className="bg-red-500 text-white px-1 py-1 rounded-lg hover:bg-red-600 transition duration-200">
+                                Sair
+                            </button>
                         </div>
                     )}
 
@@ -125,8 +133,8 @@ export default function DashboardOperad() {
                             >
                                 <option value="">Selecione uma empresa</option>
                                 {empresas.map((empresa) => {
-                                    const empresaNome = empresa.empresas?.emp_nome?.trim() || ''; 
-                                    const papel = empresa.papeis?.pap_papel?.trim() || ''; 
+                                    const empresaNome = empresa.empresas?.emp_nome?.trim() || '';
+                                    const papel = empresa.papeis?.pap_papel?.trim() || '';
 
                                     return (
                                         <option key={empresa.emp_cnpj} value={empresa.emp_cnpj}>

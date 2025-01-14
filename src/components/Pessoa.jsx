@@ -84,14 +84,14 @@ const EmpresaComponent = ({ schema }) => {
             <div className="mt-10">
                 <button
                     onClick={openModal}
-                    className="w-32 h-48 bg-white rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-100 transition duration-200 text-gray-800 font-semibold flex justify-center items-center text-center relative"
+                    className="w-48 h-64 bg-white rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-100 transition duration-200 text-gray-800 font-semibold flex justify-center items-center text-center relative"
                 >
-                    <div className="relative flex flex-col items-center justify-center space-y-2 w-full h-full">
-                        <GiExpand className="absolute top-2 right-2 text-gray-600 hover:text-gray-800 text-xl transition transform hover:scale-110" />
-                        <span className="font-medium transition transform hover:scale-105 hover:text-gray-600">
+                    <div className="relative flex flex-col items-center justify-center space-y-3 w-full h-full">
+                        <GiExpand className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl transition transform hover:scale-110" />
+                        <span className="font-medium transition transform hover:scale-105 hover:text-gray-600 text-lg">
                             Ver Pessoas
                         </span>
-                        <div className="absolute bottom-2 right-2 flex items-center justify-center bg-red-500 text-white rounded-full w-7 h-7 text-lg font-semibold transition-transform duration-300 ease-in-out hover:scale-110 hover:rotate-12">
+                        <div className="absolute bottom-4 right-4 flex items-center justify-center bg-red-500 text-white rounded-full w-9 h-9 text-xl font-semibold transition-transform duration-300 ease-in-out hover:scale-110 hover:rotate-12">
                             {pessoas.length}
                         </div>
                     </div>

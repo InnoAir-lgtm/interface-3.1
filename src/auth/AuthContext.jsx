@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
                 email: userData.email,
                 grupo: userData.grupo,
                 perfil: userData.perfil,
-                papel: null, // Inicializa sem o papel.
+                papel: null,
                 pap_id: null,
             };
 
