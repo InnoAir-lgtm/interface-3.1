@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { usePermissions } from "../middleware/middleware";
 import { GoPlus } from "react-icons/go";
 import api from "../apiUrl";
 
@@ -15,13 +16,15 @@ export default function CadastrarPessoa({ schema }) {
     const [message, setMessage] = useState("");
     const [isOpen, setIsOpen] = useState(false);
 
+    const { verifyAndCreatePermission } = usePermissions()
+
     const [tipoPessoaT, setTipoPessoaT] = useState([]);
     const [selectedTipo, setSelectedTipo] = useState('');
 
     useEffect(() => {
         const fetchTipoPessoaT = async () => {
             try {
-                const response = await api.get("/listar-tipos-pessoa");
+                const response = await api.get(`/listar-tipos-pessoa?schema=${schema}`);
                 if (response.status === 200) {
                     const resultData = Array.isArray(response.data.data) ? response.data.data : [];
                     setTipoPessoaT(resultData);
@@ -39,7 +42,6 @@ export default function CadastrarPessoa({ schema }) {
     const handleSelection = (e) => {
         setSelectedTipo(e.target.value);
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -50,7 +52,6 @@ export default function CadastrarPessoa({ schema }) {
             setLoading(false);
             return;
         }
-    
 
         const dados = {
             schema,
@@ -65,34 +66,34 @@ export default function CadastrarPessoa({ schema }) {
         };
 
         try {
-            // Cadastrar pessoa
             const response = await api.post("/cadastrar-pessoa", dados, {
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
 
-            if (response.status === 201 && response.data && response.data.data) {
+            if (response.status === 201 && response.data?.data) {
                 const pes_id = response.data.data[0]?.pes_id;
+                console.log("Pessoa cadastrada com ID:", pes_id);
 
                 if (pes_id && selectedTipo) {
-    
-                    const tipoPessoaResponse = await api.post(
-                        "/associar-tipo-pessoa",
+                    const tipoPessoaResponse = await api.post(`/associar-tipo-pessoa?schema=${schema}`,
                         { pes_id, tpp_id: selectedTipo },
                         { headers: { "Content-Type": "application/json" } }
                     );
+
+                    console.log(selectedTipo)
 
                     console.log("Resposta de associar tipo:", tipoPessoaResponse.data);
 
                     if (tipoPessoaResponse.status === 200) {
                         setMessage("Pessoa e tipo associados com sucesso!");
                     } else {
-                        setMessage("Pessoa e tipo associados com sucesso!");
+                        setMessage("Erro ao associar tipo à pessoa.");
                     }
                 } else {
-                    console.error("Faltando dados para associar tipo de pessoa.");
                     setMessage("Faltando dados para associar tipo de pessoa.");
+                    console.error("pes_id ou selectedTipo ausentes.");
                 }
 
                 resetForm();
@@ -108,6 +109,7 @@ export default function CadastrarPessoa({ schema }) {
     };
 
 
+
     const resetForm = () => {
         setTipoPessoa("");
         setNome("");
@@ -120,11 +122,25 @@ export default function CadastrarPessoa({ schema }) {
         setSelectedTipo("");
     };
 
+    const abrirModal = async (permissionName) => {
+        const hasPermission = await verifyAndCreatePermission(permissionName)
+        if (hasPermission) {
+            setIsOpen(true)
+        } else {
+            setMessage('Você não tem permissão para acessar esta funcionalidade.')
+        }
+    }
+    const closeModal = () => {
+        setIsOpen(false)
+        setMessage('')
+    }
+
 
     return (
         <div className="relative">
             <button
-                onClick={() => setIsOpen(true)}
+                value="cadastrarPessoa"
+                onClick={(e) => abrirModal(e.target.value)}
                 className="items-center justify-center gap-2 flex bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
 
             >
@@ -243,7 +259,13 @@ export default function CadastrarPessoa({ schema }) {
                                                 </option>
                                             ))}
                                         </select>
+                                        {selectedTipo && (
+                                            <p className="mt-2 text-sm text-gray-700">
+                                                ID do tipo selecionado: <span className="font-bold">{selectedTipo}</span>
+                                            </p>
+                                        )}
                                     </div>
+
                                 </>
                             )}
 

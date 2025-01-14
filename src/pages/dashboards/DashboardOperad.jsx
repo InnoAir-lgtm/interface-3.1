@@ -17,9 +17,6 @@ export default function DashboardOperad() {
         try {
             const response = await api.get(`/listar-associacoes/${user.id}`);
             const data = response.data;
-
-            console.log('Dados das empresas:', data); 
-
             const empresasUnicas = data.filter(
                 (empresa, index, self) =>
                     index === self.findIndex((e) => e.emp_cnpj === empresa.emp_cnpj)
@@ -51,7 +48,6 @@ export default function DashboardOperad() {
             try {
                 const response = await api.get(`/buscar-schema?cnpj=${cnpj}`);
                 const schema = response.data.schema;
-                console.log('Schema encontrado:', schema);
                 setSelectedSchema(schema);
                 setEmpresaData(null);
 
@@ -67,7 +63,6 @@ export default function DashboardOperad() {
 
     useEffect(() => {
         if (selectedSchema) {
-            console.log('Novo schema selecionado:', selectedSchema);
         }
     }, [selectedSchema]);
 

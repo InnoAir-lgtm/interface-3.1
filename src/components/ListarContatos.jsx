@@ -2,19 +2,19 @@ import React, { useEffect, useState } from 'react'
 import { RiContactsBook3Fill } from "react-icons/ri";
 import api from '../apiUrl';
 
-export default function ListarContatos({ selectedPessoa }) {
+export default function ListarContatos({ selectedPessoa, schema }) {
     const [contatos, setContatos] = useState([])
     const [shopPopUp, setShoPopUp] = useState(false)
 
     useEffect(() => {
         if (shopPopUp && selectedPessoa) {
-            listarContato(selectedPessoa.pes_id)
+            listarContato(selectedPessoa.pes_id, schema)
         }
-    }, [shopPopUp, selectedPessoa])
+    }, [shopPopUp, selectedPessoa, schema])
 
-    const listarContato = async (pes_id) => {
+    const listarContato = async (pes_id, schema) => {
         try {
-            const response = await api.get(`/listar-contatos-pessoa?pes_id=${pes_id}`, {
+            const response = await api.get(`/listar-contatos-pessoa?pes_id=${pes_id}&schema=${schema}`, {
             })
             setContatos(response.data.data || []);
         } catch (error) {
@@ -26,7 +26,7 @@ export default function ListarContatos({ selectedPessoa }) {
         <div>
             <button
                 onClick={() => setShoPopUp(true)}
-                className="px-5 py-3 flex items-center  text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="px-5 py-3 flex items-center w-full  text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
                 <RiContactsBook3Fill /> Lista de contatos
             </button>

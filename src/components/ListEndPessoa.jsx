@@ -1,26 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import api from '../apiUrl';
 
-export default function ListEndPessoa({ selectedPessoa }) {
+export default function ListEndPessoa({ schema, selectedPessoa }) {
     const [showSidebar, setShowSidebar] = useState(false);
     const [enderecos, setEnderecos] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [selectedSchema, setSelectedSchema] = useState('belaarte');
 
     useEffect(() => {
         if (showSidebar && selectedPessoa) {
-            listarEnderecos(selectedPessoa.pes_id, selectedSchema);
+            listarEnderecos(selectedPessoa.pes_id, schema);
         }
-    }, [showSidebar, selectedPessoa, selectedSchema]);
+    }, [showSidebar, selectedPessoa, schema]);
 
     const listarEnderecos = async (pes_id, schema) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await api.get(`/listar-endereco?pes_id=${pes_id}&schema=${schema}`, {
-                method: 'GET',
-            });
+            const response = await api.get(`/listar-endereco?pes_id=${pes_id}&schema=${schema}`);
             setEnderecos(response.data.data || []);
         } catch (error) {
             setError('Erro ao listar endereços. Tente novamente mais tarde.');
@@ -44,8 +41,9 @@ export default function ListEndPessoa({ selectedPessoa }) {
             </button>
 
             <div
-                className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform ${showSidebar ? 'translate-x-0' : 'translate-x-full'
-                    } transition-transform duration-300 ease-in-out z-50`}
+                className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform ${
+                    showSidebar ? 'translate-x-0' : 'translate-x-full'
+                } transition-transform duration-300 ease-in-out z-50`}
             >
                 <div className="p-4 border-b border-gray-300 flex justify-between items-center">
                     <h2 className="text-lg font-semibold">Lista de endereços</h2>
@@ -57,23 +55,6 @@ export default function ListEndPessoa({ selectedPessoa }) {
                     </button>
                 </div>
                 <div className="p-4">
-                    {/* Seletor de Schema */}
-                    <div className="mb-4">
-                        <label htmlFor="schema" className="block text-gray-700">Escolha o Schema</label>
-                        <select
-                            id="schema"
-                            value={selectedSchema}
-                            onChange={(e) => setSelectedSchema(e.target.value)}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                        >
-                            <option value="belaarte">belaarte</option>
-                            <option value="public">public</option>
-                            <option value="graphql_public">graphql_public</option>
-                            <option value="belaarte_">belaarte_</option>
-                        </select>
-
-                    </div>
-
                     {loading ? (
                         <p>Carregando...</p>
                     ) : error ? (
@@ -95,7 +76,6 @@ export default function ListEndPessoa({ selectedPessoa }) {
                 </div>
             </div>
 
-            {/* Fundo escuro (overlay) */}
             {showSidebar && (
                 <div
                     onClick={handleSidebarClose}

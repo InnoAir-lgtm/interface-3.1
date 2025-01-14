@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import CadastrarPessoa from "./CadastrarPessoa";
 import CadastrarTipo from "./CadastrarTipo";
 import CadastrarEndereco from "./CadastrarEndereco";
@@ -7,13 +6,12 @@ import CadastrarEmail from "./CadastrarEmail";
 import CadastrarComplementar from "./CadastrarComplementar";
 import ListEndPessoa from "./ListEndPessoa";
 import ListarContatos from "./ListarContatos";
-import { GiExpand } from "react-icons/gi";
-import api from "../apiUrl";
 
+import api from "../apiUrl";
 
 const EmpresaComponent = ({ schema }) => {
     const [selectedPessoa, setSelectedPessoa] = useState(null);
-    const [isOpen, setIsOpen] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
     const [pessoas, setPessoas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -37,34 +35,27 @@ const EmpresaComponent = ({ schema }) => {
         }
     };
 
-    const openModal = () => {
-        setIsOpen(true)
-    }
-
-    const closeModal = () => {
-        setIsOpen(false)
-    }
 
     useEffect(() => {
         fetchPessoas();
     }, [schema]);
 
+
+    const openModal = (pessoa) => {
+        setSelectedPessoa(pessoa);
+        setModalVisible(true);
+    };
+
+    const closeModal = () => {
+        setModalVisible(false);
+        setSelectedPessoa(null);
+    };
+
     useEffect(() => {
     }, [pessoas]);
+
     if (loading) {
-        return (
-            <div className="flex justify-center items-center min-h-screen">
-                <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{
-                        repeat: Infinity,
-                        duration: 1,
-                        ease: "linear"
-                    }}
-                    className="w-16 h-16 border-4 border-blue-500 border-t-transparent border-solid rounded-full"
-                />
-            </div>
-        );
+        return <p>Carregando...</p>;
     }
 
     if (error) {
@@ -81,71 +72,68 @@ const EmpresaComponent = ({ schema }) => {
                 <CadastrarPessoa schema={schema} />
             </div>
 
-            <div className="mt-10">
+            <div>
                 <button
                     onClick={openModal}
-                    className="w-32 h-48 bg-white rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-100 transition duration-200 text-gray-800 font-semibold flex justify-center items-center text-center relative"
+                    className="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600"
                 >
-                    <div className="relative flex flex-col items-center justify-center space-y-2 w-full h-full">
-                        <GiExpand className="absolute top-2 right-2 text-gray-600 hover:text-gray-800 text-xl transition transform hover:scale-110" />
-                        <span className="font-medium transition transform hover:scale-105 hover:text-gray-600">
-                            Ver Pessoas
-                        </span>
-                        <div className="absolute bottom-2 right-2 flex items-center justify-center bg-red-500 text-white rounded-full w-7 h-7 text-lg font-semibold transition-transform duration-300 ease-in-out hover:scale-110 hover:rotate-12">
-                            {pessoas.length}
-                        </div>
-                    </div>
+                    Ver Pessoas
                 </button>
             </div>
 
+            <div className="p-4">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Lista de Pessoas</h2>
+
+            </div>
 
 
-            <AnimatePresence initial={false}>
-                {isOpen && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            transition={{ duration: 0.3 }}
+            {modalVisible && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full relative">
+                        {/* Botão de fechar */}
+                        <button
+                            className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+                            onClick={closeModal}
                         >
-                            <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full sm:w-[700px] relative">
-                                <button
-                                    className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl"
-                                    onClick={closeModal}
-                                >
-                                    ✖
-                                </button>
+                            ✖
+                        </button>
 
-                                <h3 className="text-2xl font-semibold mb-6 text-gray-800">Lista de Usuários</h3>
+                        {/* Título */}
+                        <h3 className="text-lg font-semibold mb-4">Lista de Usuários</h3>
 
-                                {pessoas.length > 0 ? (
-                                    <ul className="space-y-4">
-                                        {pessoas.map((pessoa) => (
-                                            <li
-                                                key={pessoa.pes_id}
-                                                className="p-6 bg-gray-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-xl transition-all cursor-pointer"
-                                                onClick={() => setSelectedPessoa(pessoa)}
-                                            >
-                                                <p className="text-lg font-medium text-gray-800">
-                                                    <strong>{pessoa.pes_fis_jur === "cnpj" ? "Nome Fantasia" : "Nome"}:</strong> {pessoa.pes_fantasia || pessoa.pes_nome}
-                                                </p>
-                                                {pessoa.pes_fis_jur === "cnpj" ? (
-                                                    <p className="text-sm text-gray-600"><strong>CNPJ:</strong> {pessoa.pes_cpf_cnpj}</p>
-                                                ) : (
-                                                    <p className="text-sm text-gray-600"><strong>CPF:</strong> {pessoa.pes_cpf_cnpj}</p>
-                                                )}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p className="text-gray-600">Nenhuma pessoa cadastrada.</p>
-                                )}
-                            </div>
-                        </motion.div>
+                        {/* Lista de usuários */}
+                        {pessoas.length > 0 ? (
+                            <ul className="space-y-2">
+                                {pessoas.map((pessoa) => (
+                                    <li
+                                        key={pessoa.pes_id}
+                                        className="p-4 border rounded shadow cursor-pointer"
+                                    >
+                                        <p>
+                                            <strong>
+                                                {pessoa.pes_fis_jur === "cnpj" ? "Nome Fantasia" : "Nome"}:
+                                            </strong>{" "}
+                                            {pessoa.pes_fantasia || pessoa.pes_nome}
+                                        </p>
+                                        {pessoa.pes_fis_jur === "cnpj" && (
+                                            <p>
+                                                <strong>CNPJ:</strong> {pessoa.pes_cpf_cnpj}
+                                            </p>
+                                        )}
+                                        {pessoa.pes_fis_jur === "cpf" && (
+                                            <p>
+                                                <strong>CPF:</strong> {pessoa.pes_cpf_cnpj}
+                                            </p>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p>Nenhuma pessoa cadastrada.</p>
+                        )}
                     </div>
-                )}
-            </AnimatePresence>
+                </div>
+            )}
 
             <div className="relative">
                 {selectedPessoa && (

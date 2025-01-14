@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useEndereco } from '../auth/ProviderEndereco'
+import { usePermissions } from '../middleware/middleware';
 import api from '../apiUrl';
 
 export default function CadastrarEndereco({ schema }) {
     const [enderecos, addEndereco] = useEndereco();
+    const { verifyAndCreatePermission } = usePermissions()
     const [endereco, setEndereco] = useState({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
-    const [showSidebar, setShowSidebar] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     const handleChange = async (e) => {
         e.preventDefault();
@@ -33,7 +35,7 @@ export default function CadastrarEndereco({ schema }) {
                 latitude: endereco.latitude || '',
                 longitude: endereco.longitude || '',
             });
-            
+
             console.log(response);
             alert('Endereço cadastrado com sucesso!');
 
@@ -93,6 +95,17 @@ export default function CadastrarEndereco({ schema }) {
             console.error('Erro ao chamar a API:', error.message);
         }
     };
+    const abrirModal = async (permissionName) => {
+        const hasPermission = await verifyAndCreatePermission(permissionName)
+        if (hasPermission) {
+            setIsOpen(true)
+        } else {
+        }
+    }
+    const closeModal = () => {
+        setIsOpen(false)
+        setMessage('')
+    }
 
     const handleCloseSidebar = () => {
         setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
@@ -102,13 +115,14 @@ export default function CadastrarEndereco({ schema }) {
     return (
         <div>
             <button
-                onClick={() => setShowSidebar(true)}
+            value='adicionarEndereco'
+                onClick={(e) => abrirModal(e.target.value)}
                 className="px-5 py-3  text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
                 + Adicionar endereço
             </button>
 
-            {showSidebar && (
+            {isOpen && (
                 <div className="fixed inset-0 flex z-50">
                     <div className="w-96 bg-white shadow-lg h-full overflow-y-auto transition-transform transform translate-x-0">
                         <div className="p-6">

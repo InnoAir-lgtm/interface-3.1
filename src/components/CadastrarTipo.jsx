@@ -33,8 +33,7 @@ export default function CadastrarTipoModal({ schema }) {
         }
     };
 
-    const openModal = async (permissionName) => {
-        console.log("Verificando permissão para:", permissionName);  
+    const openModal = async (permissionName) => { 
         const hasPermission = await verifyAndCreatePermission(permissionName);
         if (hasPermission) {
             setIsModalOpen(true);
