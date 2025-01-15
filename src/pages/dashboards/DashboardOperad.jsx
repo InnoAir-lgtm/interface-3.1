@@ -104,18 +104,20 @@ export default function DashboardOperad() {
                                 <button onClick={togglePop} className="text-gray-600 hover:text-red-500">X</button>
                             </div>
                             <div className="space-y-2 text-gray-700">
-                                <p><strong>Identificação:</strong> {user.id}</p>
+                                <p><strong>Nº de indentifação:</strong> {user.id}</p>
                                 <p><strong>Email:</strong> {user.email}</p>
                                 <p><strong>Grupo:</strong> {user.grupo}</p>
                                 <p><strong>Perfil:</strong> {user.perfil}</p>
                                 <p><strong>Papel:</strong> {user.papel}</p>
                             </div>
 
-                            <button
-                                onClick={logout}
-                                className="bg-red-500 text-white px-1 py-1 rounded-lg hover:bg-red-600 transition duration-200">
-                                Sair
-                            </button>
+                            <div className='mt-2 flex justify-end'>
+                                <button
+                                    onClick={logout}
+                                    className="bg-red-500 text-white px-1 py-1 rounded-lg hover:bg-red-600 transition duration-200">
+                                    Sair
+                                </button>
+                            </div>
                         </div>
                     )}
 

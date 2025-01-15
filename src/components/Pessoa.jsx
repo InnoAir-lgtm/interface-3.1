@@ -9,7 +9,8 @@ import ListEndPessoa from "./ListEndPessoa";
 import ListarContatos from "./ListarContatos";
 import { GiExpand } from "react-icons/gi";
 import api from "../apiUrl";
-
+import { FiTrash } from "react-icons/fi";
+import { BiPlus } from "react-icons/bi";
 
 const EmpresaComponent = ({ schema }) => {
     const [selectedPessoa, setSelectedPessoa] = useState(null);
@@ -79,9 +80,10 @@ const EmpresaComponent = ({ schema }) => {
             <div className='flex items-center space-x-4'>
                 <CadastrarTipo />
                 <CadastrarPessoa schema={schema} />
-            </div>
 
-            <div className="mt-10">
+
+
+
                 <button
                     onClick={openModal}
                     className="w-48 h-64 bg-white rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-100 transition duration-200 text-gray-800 font-semibold flex justify-center items-center text-center relative"
@@ -114,7 +116,7 @@ const EmpresaComponent = ({ schema }) => {
                                     className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl"
                                     onClick={closeModal}
                                 >
-                                    ✖
+                                    <BiPlus />
                                 </button>
 
                                 <h3 className="text-2xl font-semibold mb-6 text-gray-800">Lista de Usuários</h3>
@@ -124,9 +126,19 @@ const EmpresaComponent = ({ schema }) => {
                                         {pessoas.map((pessoa) => (
                                             <li
                                                 key={pessoa.pes_id}
-                                                className="p-6 bg-gray-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-xl transition-all cursor-pointer"
+                                                className="relative p-6 bg-gray-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-xl transition-all cursor-pointer"
                                                 onClick={() => setSelectedPessoa(pessoa)}
                                             >
+                                                <button
+                                                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 transition-transform transform hover:scale-110"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeletePessoa(pessoa.pes_id);
+                                                    }}
+                                                >
+                                                    <FiTrash className="w-5 h-5" />
+                                                </button>
+                                                {/* Informações da pessoa */}
                                                 <p className="text-lg font-medium text-gray-800">
                                                     <strong>{pessoa.pes_fis_jur === "cnpj" ? "Nome Fantasia" : "Nome"}:</strong> {pessoa.pes_fantasia || pessoa.pes_nome}
                                                 </p>
@@ -141,6 +153,8 @@ const EmpresaComponent = ({ schema }) => {
                                 ) : (
                                     <p className="text-gray-600">Nenhuma pessoa cadastrada.</p>
                                 )}
+
+
                             </div>
                         </motion.div>
                     </div>

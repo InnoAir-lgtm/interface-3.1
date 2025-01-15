@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../apiUrl';
+import { CiCircleList } from "react-icons/ci";
+import { PiPersonArmsSpreadThin } from "react-icons/pi";
 
 export default function ListarUsuarios() {
     const [usuarios, setUsuarios] = useState([]);
@@ -7,10 +9,10 @@ export default function ListarUsuarios() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [papeis, setPapeis] = useState([]);
     const [empresas, setEmpresas] = useState([]);
-    const [selectedPapeis, setSelectedPapeis] = useState([]);
+    const [selectedPapeis, setSelectedPapeis] = useState({});
     const [selectedEmpresas, setSelectedEmpresas] = useState([]);
     const [isUserListModalOpen, setIsUserListModalOpen] = useState(false);
-
+    const [expandedEmpresas, setExpandedEmpresas] = useState({});
 
     useEffect(() => {
         async function fetchUsuarios() {
@@ -24,7 +26,6 @@ export default function ListarUsuarios() {
                 console.error(error);
             }
         }
-
 
         async function fetchPapeis() {
             try {
@@ -43,7 +44,6 @@ export default function ListarUsuarios() {
                 console.error(error);
             }
         }
-
 
         fetchUsuarios();
         fetchPapeis();
@@ -68,7 +68,6 @@ export default function ListarUsuarios() {
         setIsModalOpen(true);
     };
 
-
     const abrirUserListModal = () => {
         setIsUserListModalOpen(true);
     };
@@ -80,28 +79,40 @@ export default function ListarUsuarios() {
     const fecharModal = () => {
         setIsModalOpen(false);
         setUsuarioSelecionado(null);
-        setSelectedPapeis([]);
+        setSelectedPapeis({});
         setSelectedEmpresas([]);
     };
 
-    const togglePapelSelection = (papelId) => {
-        setSelectedPapeis((prev) =>
-            prev.includes(papelId) ? prev.filter((id) => id !== papelId) : [...prev, papelId]
-        );
+    const togglePapelSelection = (papelId, empresaCnpj) => {
+        setSelectedPapeis((prev) => {
+            const empresaPapeis = prev[empresaCnpj] || [];
+            const updatedEmpresasPapeis = empresaPapeis.includes(papelId)
+                ? empresaPapeis.filter((id) => id !== papelId)
+                : [...empresaPapeis, papelId];
+            return { ...prev, [empresaCnpj]: updatedEmpresasPapeis };
+        });
     };
+
 
     const toggleEmpresaSelection = (cnpj) => {
         setSelectedEmpresas((prev) =>
             prev.includes(cnpj) ? prev.filter((id) => id !== cnpj) : [...prev, cnpj]
         );
+        setExpandedEmpresas((prev) => ({
+            ...prev,
+            [cnpj]: !prev[cnpj],
+        }));
     };
-
     const associarPapeisEmpresas = async () => {
         try {
+            const associacoes = Object.entries(selectedPapeis).map(([emp_cnpj, papeis]) => ({
+                emp_cnpj,
+                papeis,
+            }));
+
             const response = await api.post('/atualizar-associacoes', {
                 usr_id: usuarioSelecionado.usr_id,
-                papeis: selectedPapeis,
-                empresas: selectedEmpresas,
+                associacoes,
             });
 
             if (response.data.message !== 'Associações atualizadas com sucesso!') {
@@ -111,7 +122,8 @@ export default function ListarUsuarios() {
             fecharModal();
         } catch (error) {
             console.error(error);
-            alert('Erro ao atualizar papéis e empresas');
+            const errorMessage = error.response?.data?.error || 'Erro ao atualizar papéis e empresas';
+            alert(errorMessage);
         }
     };
 
@@ -121,18 +133,33 @@ export default function ListarUsuarios() {
     return (
         <div>
 
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                <div className="flex flex-col justify-between h-full">
-                    <h2 className="text-2xl font-semibold text-white mb-4 tracking-wider hover:text-gray-300 transition-all duration-300">
-                        Usuários registrados
-                    </h2>
-                    <p className="text-lg text-gray-400 mb-6">Total de usuários cadastrados: {usuarios.length}</p>
+            <div className="bg-[#D9D9D9] backdrop-blur-lg h-64 rounded-[40px] p-7 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                <div className="flex flex-col justify-between h-full gap-4 sm:gap-3">
+                    <div className="flex gap-5 sm:gap-3 flex-wrap items-center">
+                        <div className="flex justify-center items-center bg-black w-16 h-16 rounded-full sm:w-12 sm:h-12">
+                            <CiCircleList className="text-white text-[40px] sm:text-[30px]" />
+                        </div>
+
+                        <h2 className="text-2xl font-semibold text-black tracking-wider hover:text-white transition-all duration-300 sm:text-xl">
+                            Usuários registrados
+                            <p className="text-lg font-extralight mb-6 sm:mb-2 sm:text-sm">
+                                Total de usuários cadastrados:
+                            </p>
+                        </h2>
+                    </div>
+
+                    <div className="flex justify-center items-center gap-5 flex-wrap sm:gap-3">
+                        <PiPersonArmsSpreadThin className="text-[50px] sm:text-[40px]" />
+                        <div className="text-[50px] sm:text-[40px]">{usuarios.length}</div>
+                    </div>
+
                     <button
                         onClick={abrirUserListModal}
-                        className="mt-auto bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white py-2 px-6 rounded-lg shadow-md transform transition-all duration-300 hover:scale-105">
+                        className="mt-auto text-[20px] bg-green-500 text-white py-2 px-6 rounded-[20px] shadow-md transform transition-all duration-300 hover:scale-105 sm:text-[16px] sm:py-2 sm:px-4">
                         Ver usuários
                     </button>
                 </div>
+
             </div>
 
 
@@ -140,7 +167,6 @@ export default function ListarUsuarios() {
             {isUserListModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
                     <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md relative">
-
                         <button
                             onClick={fecharUserListModal}
                             className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
@@ -149,12 +175,12 @@ export default function ListarUsuarios() {
                         </button>
 
                         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Lista de Usuários</h2>
-                        <ul className="max-h-96 overflow-y-auto">
+                        <ul className="max-h-96 ">
                             {usuarios.length > 0 ? (
                                 usuarios.map((usuario) => (
                                     <li
                                         key={usuario.usr_id}
-                                        className="flex justify-between items-center bg-gray-100 hover:bg-gray-200 rounded-lg p-4 mb-2"
+                                        className="flex justify-between items-center bg-gray-100 hover:bg-gray-200 hover:shadow-lg hover:scale-[1.02] transition-transform cursor-pointer rounded-lg p-4 mb-2"
                                     >
                                         <div>
                                             <p className="font-semibold">{usuario.usr_nome}</p>
@@ -167,6 +193,7 @@ export default function ListarUsuarios() {
                                             Editar
                                         </button>
                                     </li>
+
                                 ))
                             ) : (
                                 <p className="text-gray-600">Nenhum usuário encontrado</p>
@@ -187,35 +214,36 @@ export default function ListarUsuarios() {
                         </div>
 
                         <div className="mb-4">
-                            <label className="block text-gray-800 font-medium">Papéis</label>
-                            <div className="space-y-2">
-                                {papeis.map((papel) => (
-                                    <label key={papel.pap_id} className="flex items-center space-x-3">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedPapeis.includes(papel.pap_id)}
-                                            onChange={() => togglePapelSelection(papel.pap_id)}
-                                            className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 focus:ring-2 focus:ring-blue-400"
-                                        />
-                                        <span className="text-gray-700">{papel.pap_papel}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="mb-4">
                             <label className="block text-gray-800 font-medium">Empresas</label>
                             <div className="space-y-2">
                                 {empresas.map((empresa) => (
-                                    <label key={empresa.emp_cnpj} className="flex items-center space-x-3">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedEmpresas.includes(empresa.emp_cnpj)}
-                                            onChange={() => toggleEmpresaSelection(empresa.emp_cnpj)}
-                                            className="form-checkbox h-4 w-4 text-green-600 border-gray-300 focus:ring-2 focus:ring-green-400"
-                                        />
-                                        <span className="text-gray-700">{empresa.emp_nome}</span>
-                                    </label>
+                                    <div key={empresa.emp_cnpj}>
+                                        <label className="flex items-center space-x-3">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedEmpresas.includes(empresa.emp_cnpj)}
+                                                onChange={() => toggleEmpresaSelection(empresa.emp_cnpj)}
+                                                className="form-checkbox h-4 w-4 text-green-600 border-gray-300 focus:ring-2 focus:ring-green-400"
+                                            />
+                                            <span className="text-gray-700">{empresa.emp_nome}</span>
+                                        </label>
+
+                                        {expandedEmpresas[empresa.emp_cnpj] && (
+                                            <div className="ml-6 mt-2 space-y-2">
+                                                {papeis.map((papel) => (
+                                                    <label key={papel.pap_id} className="flex items-center space-x-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedPapeis[empresa.emp_cnpj]?.includes(papel.pap_id)}
+                                                            onChange={() => togglePapelSelection(papel.pap_id, empresa.emp_cnpj)}
+                                                            className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 focus:ring-2 focus:ring-blue-400"
+                                                        />
+                                                        <span className="text-gray-700">{papel.pap_papel}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 ))}
                             </div>
                         </div>
@@ -237,8 +265,6 @@ export default function ListarUsuarios() {
                     </div>
                 </div>
             )}
-
-
         </div>
     );
 }

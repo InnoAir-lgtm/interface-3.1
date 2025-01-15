@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import api from '../apiUrl';
+import { IoMdPersonAdd } from "react-icons/io";
 
 export default function CadastrarOpe() {
     const { user } = useAuth();
@@ -65,19 +66,30 @@ export default function CadastrarOpe() {
 
     return (
         <div>
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                <div className="flex flex-col justify-between h-full">
-                    <h2 className="text-2xl font-semibold text-white mb-4 tracking-wider hover:text-gray-300 transition-all duration-300">
-                        Cadastrar novos usuários
-                    </h2>
-                    <p className="text-lg text-gray-400 mb-6">Gerencie os usuários registrados no sistema.</p>
+
+            <div className="bg-[#D9D9D9] backdrop-blur-lg h-64 rounded-[40px] p-7 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                <div className="flex flex-col justify-between h-full gap-4 sm:gap-3">
+                    <div className="flex gap-5 sm:gap-3 flex-wrap items-center">
+                        <div className="flex justify-center items-center bg-black w-16 h-16 rounded-full sm:w-12 sm:h-12">
+                            <IoMdPersonAdd className="text-white text-[40px] sm:text-[30px]" />
+                        </div>
+                        <h2 className="text-2xl font-semibold text-black tracking-wider hover:text-white transition-all duration-300 sm:text-xl">
+                            Cadastrar novos usuários
+                            <p className="text-lg font-extralight mb-6 sm:mb-2 sm:text-sm">
+                                Gerencie os usuários registrados no sistema.
+                            </p>
+                        </h2>
+                    </div>
+
                     <button
                         onClick={togglePopUp}
-                        className="mt-auto bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white py-2 px-6 rounded-lg shadow-md transform transition-all duration-300 hover:scale-105">
+                        className="mt-auto text-[20px] bg-green-500 text-white py-2 px-6 rounded-[20px] shadow-md transform transition-all duration-300 hover:scale-105 sm:text-[16px] sm:py-2 sm:px-4">
                         Cadastrar
                     </button>
                 </div>
+
             </div>
+
 
 
             {isPopUp && (
