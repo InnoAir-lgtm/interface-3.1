@@ -3,6 +3,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { CgProfile } from "react-icons/cg";
 import EmpresaComponent from '../../components/Pessoa';
 import api from '../../apiUrl';
+import Agenda from '../../components/Agenda';
 
 export default function DashboardOperad() {
     const { logout, user } = useAuth();
@@ -12,6 +13,9 @@ export default function DashboardOperad() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [empresaData, setEmpresaData] = useState(null);
+
+    const [selectedEmpresaName, setSelectedEmpresaName] = useState(null);
+
 
     const fetchAssociacoes = async () => {
         try {
@@ -44,6 +48,7 @@ export default function DashboardOperad() {
     const handleEmpresaChange = async (e) => {
         const cnpj = e.target.value;
         setSelectedSchema(null);
+        setSelectedEmpresaName(null);
         if (cnpj) {
             try {
                 const response = await api.get(`/buscar-schema?cnpj=${cnpj}`);
@@ -53,6 +58,9 @@ export default function DashboardOperad() {
 
                 const empresaDataResponse = await api.get(`/dados-empresa?cnpj=${cnpj}`);
                 setEmpresaData(empresaDataResponse.data);
+
+                const empresa = empresas.find((emp) => emp.emp_cnpj === cnpj);
+                setSelectedEmpresaName(empresa?.empresas?.emp_nome || "Empresa Desconhecida");
             } catch (error) {
                 console.error("Erro ao buscar o schema:", error);
                 setError("Erro ao carregar o schema da empresa.");
@@ -75,27 +83,29 @@ export default function DashboardOperad() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="flex">
-                <div className="flex-1 p-8">
-                    <header className="flex justify-between items-center mb-8">
-                        <h1 className="text-3xl font-semibold text-gray-800">Bem-vindo ao Dashboard</h1>
-                        <div className="flex space-x-4">
-
-
-                            <div className='flex justify-center items-center gap-2'>
+        <div className='border'>
+            <div>
+                <div className="p-8">
+                    <header className="flex flex-wrap justify-between items-center mb-8 gap-4">
+                        <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 flex-shrink-0">
+                            Bem-vindo ao Dashboard
+                        </h1>
+                        <div className="flex items-center gap-4 flex-wrap">
+                            <Agenda />
+                            <div className="flex items-center justify-center gap-2">
                                 <button
                                     className="flex justify-center items-center w-12 h-12 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition duration-200"
                                     onClick={togglePop}>
                                     <CgProfile fontSize={28} />
                                 </button>
-                                <div>
-                                    <p className='text-[13px]'>{user.email}</p>
-                                    <p className='text-[13px]'>{user.papel}</p>
+                                <div className="text-center md:text-left">
+                                    <p className="text-xs md:text-sm">{user.email}</p>
+                                    <p className="text-xs md:text-sm">{user.papel}</p>
                                 </div>
                             </div>
                         </div>
                     </header>
+
 
                     {showPopup && (
                         <div className="absolute top-20 right-4 bg-white p-6 rounded-lg shadow-xl w-80 z-50 transition-all duration-300">
@@ -127,7 +137,7 @@ export default function DashboardOperad() {
                             onClick={togglePop}></div>
                     )}
 
-                    <div className="mb-5">
+                    <div>
                         {empresas.length > 0 ? (
                             <select
                                 className="w-72 p-3 border rounded-lg text-gray-800 shadow-md focus:ring-2 focus:ring-blue-500 transition duration-200"
@@ -140,7 +150,7 @@ export default function DashboardOperad() {
 
                                     return (
                                         <option key={empresa.emp_cnpj} value={empresa.emp_cnpj}>
-                                            {empresaNome} - {papel} (ID: {empresa.pap_id})
+                                            {empresaNome} - {papel}
                                         </option>
                                     );
                                 })}
@@ -151,15 +161,10 @@ export default function DashboardOperad() {
 
                     </div>
 
-                    {selectedSchema && (
-                        <div className="mt-4 text-gray-700">
-                            <strong>Schema Selecionado:</strong> {selectedSchema}
-                        </div>
-                    )}
 
                     {selectedSchema && empresaData && (
                         <div className="mt-6">
-                            <EmpresaComponent schema={selectedSchema} empresaData={empresaData} />
+                            <EmpresaComponent schema={selectedSchema} empresaData={empresaData} empresaName={selectedEmpresaName} />
                         </div>
                     )}
                 </div>

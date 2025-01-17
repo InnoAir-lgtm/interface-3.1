@@ -12,7 +12,7 @@ import api from "../apiUrl";
 import { FiTrash } from "react-icons/fi";
 import { BiPlus } from "react-icons/bi";
 
-const EmpresaComponent = ({ schema }) => {
+const EmpresaComponent = ({ schema, empresaName }) => {
     const [selectedPessoa, setSelectedPessoa] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
     const [pessoas, setPessoas] = useState([]);
@@ -75,30 +75,32 @@ const EmpresaComponent = ({ schema }) => {
     return (
         <div>
 
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Gestão da Empresa</h2>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Gestão da {empresaName || "NOME DA EMPRESA"}</h2>
 
-            <div className='flex items-center space-x-4'>
-                <CadastrarTipo />
-                <CadastrarPessoa schema={schema} />
+            <div className="flex flex-wrap gap-4">
+                
+                    <CadastrarTipo />
+                    <CadastrarPessoa schema={schema} />
 
+                    <button
+                        onClick={openModal}
+                        className="flex-1 min-w-[150px] max-w-[300px] h-64 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg hover:shadow-2xl hover:bg-gradient-to-br hover:from-green-100 hover:to-white transition-all duration-300 text-gray-800 font-semibold flex justify-center items-center text-center relative overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-green-500 opacity-10 hover:opacity-20 transition-opacity duration-300 rounded-lg"></div>
+                        <div className="relative flex flex-col items-center justify-center space-y-4 w-full h-full">
+                            <GiExpand className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl transition transform hover:scale-110" />
 
+                            <span className="font-medium text-lg transition transform hover:scale-105 hover:text-gray-600">
+                                Ver Pessoas
+                            </span>
 
-
-                <button
-                    onClick={openModal}
-                    className="w-48 h-64 bg-white rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-100 transition duration-200 text-gray-800 font-semibold flex justify-center items-center text-center relative"
-                >
-                    <div className="relative flex flex-col items-center justify-center space-y-3 w-full h-full">
-                        <GiExpand className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl transition transform hover:scale-110" />
-                        <span className="font-medium transition transform hover:scale-105 hover:text-gray-600 text-lg">
-                            Ver Pessoas
-                        </span>
-                        <div className="absolute bottom-4 right-4 flex items-center justify-center bg-red-500 text-white rounded-full w-9 h-9 text-xl font-semibold transition-transform duration-300 ease-in-out hover:scale-110 hover:rotate-12">
-                            {pessoas.length}
+                            <div className="absolute bottom-4 right-4 flex items-center justify-center bg-red-500 text-white rounded-full w-9 h-9 text-xl font-semibold shadow-md transition-transform duration-300 ease-in-out hover:scale-110 hover:rotate-12">
+                                {pessoas.length}
+                            </div>
                         </div>
-                    </div>
-                </button>
+                    </button>
             </div>
+
 
 
 
