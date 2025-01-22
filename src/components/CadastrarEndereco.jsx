@@ -1,11 +1,11 @@
-import { useState } from 'react'
-import { useEndereco } from '../auth/ProviderEndereco'
+import { useState } from 'react';
+import { useEndereco } from '../auth/ProviderEndereco';
 import { usePermissions } from '../middleware/middleware';
 import api from '../apiUrl';
 
 export default function CadastrarEndereco({ schema }) {
     const [enderecos, addEndereco] = useEndereco();
-    const { verifyAndCreatePermission } = usePermissions()
+    const { verifyAndCreatePermission } = usePermissions();
     const [endereco, setEndereco] = useState({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
     const [isOpen, setIsOpen] = useState(false);
 
@@ -13,7 +13,7 @@ export default function CadastrarEndereco({ schema }) {
         e.preventDefault();
 
         if (!schema) {
-            setMessage('Selecione um schema antes de cadastrar.');
+            alert('Selecione um schema antes de cadastrar.');
             return;
         }
 
@@ -23,7 +23,6 @@ export default function CadastrarEndereco({ schema }) {
         }
         try {
             const formattedCep = endereco.cep.replace('-', '');
-
 
             const response = await api.post('/cadastrar-endereco', {
                 schema,
@@ -42,7 +41,7 @@ export default function CadastrarEndereco({ schema }) {
             addEndereco(endereco);
 
             setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
-            setShowSidebar(false);
+            setIsOpen(false); // Fecha o modal
         } catch (error) {
             console.error('Erro ao cadastrar endereço:', error.message);
             alert('Falha ao cadastrar endereço.');
@@ -55,7 +54,7 @@ export default function CadastrarEndereco({ schema }) {
 
         try {
             const response = await fetch(
-                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cleanCep)}&key=AIzaSyDtW8rulgb5mXwwiU7LvfgXOhFHZBV0xWQ`
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cleanCep)}&key=SUA_API_KEY`
             );
             const data = await response.json();
 
@@ -95,27 +94,27 @@ export default function CadastrarEndereco({ schema }) {
             console.error('Erro ao chamar a API:', error.message);
         }
     };
+
     const abrirModal = async (permissionName) => {
-        const hasPermission = await verifyAndCreatePermission(permissionName)
+        const hasPermission = await verifyAndCreatePermission(permissionName);
         if (hasPermission) {
-            setIsOpen(true)
-        } else {
+            setIsOpen(true);
         }
-    }
+    };
+
     const closeModal = () => {
-        setIsOpen(false)
-        setMessage('')
-    }
+        setIsOpen(false);
+    };
 
     const handleCloseSidebar = () => {
         setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
-        setShowSidebar(false);
+        setIsOpen(false); // Fecha o modal
     };
 
     return (
         <div>
             <button
-            value='adicionarEndereco'
+                value="adicionarEndereco"
                 onClick={(e) => abrirModal(e.target.value)}
                 className="px-5 py-3  text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
