@@ -54,7 +54,7 @@ export default function CadastrarEndereco({ schema }) {
 
         try {
             const response = await fetch(
-                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cleanCep)}&key=SUA_API_KEY`
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cleanCep)}&key=AIzaSyDtW8rulgb5mXwwiU7LvfgXOhFHZBV0xWQ`
             );
             const data = await response.json();
 
