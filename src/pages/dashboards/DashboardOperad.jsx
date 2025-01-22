@@ -3,7 +3,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { CgProfile } from "react-icons/cg";
 import EmpresaComponent from '../../components/Pessoa';
 import api from '../../apiUrl';
-import Agenda from '../../components/Agenda';
+import Task from '../../components/Task';
 
 export default function DashboardOperad() {
     const { logout, user } = useAuth();
@@ -13,9 +13,24 @@ export default function DashboardOperad() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [empresaData, setEmpresaData] = useState(null);
-
     const [selectedEmpresaName, setSelectedEmpresaName] = useState(null);
 
+    // Estado para a frase motivacional
+    const [motivationalPhrase, setMotivationalPhrase] = useState('');
+
+    // Lista de frases motivacionais
+    const motivationalPhrases = [
+        "Acredite no seu potencial e conquiste seus objetivos!",
+        "Cada dia é uma nova oportunidade de fazer diferente.",
+        "O sucesso é o resultado da sua dedicação diária.",
+        "Você é mais forte do que imagina. Continue em frente!",
+        "Grandes realizações começam com pequenos passos.",
+        "Nunca desista, o caminho para o sucesso é construído com esforço.",
+        "Confie no processo e celebre cada conquista!",
+        "O impossível é apenas uma questão de perspectiva.",
+        "Seu trabalho duro de hoje será a recompensa de amanhã.",
+        "Persista, insista e alcance seus sonhos!"
+    ];
 
     const fetchAssociacoes = async () => {
         try {
@@ -34,11 +49,14 @@ export default function DashboardOperad() {
         }
     };
 
-
     useEffect(() => {
         if (user?.id) {
             fetchAssociacoes();
         }
+
+        // Seleciona uma frase aleatória ao carregar o componente
+        const randomIndex = Math.floor(Math.random() * motivationalPhrases.length);
+        setMotivationalPhrase(motivationalPhrases[randomIndex]);
     }, [user]);
 
     const togglePop = () => {
@@ -68,11 +86,11 @@ export default function DashboardOperad() {
         }
     };
 
-
-    useEffect(() => {
-        if (selectedSchema) {
-        }
-    }, [selectedSchema]);
+    const formatarNome = (nomeCompleto) => {
+        if (!nomeCompleto) return '';
+        const nomes = nomeCompleto.split(' ');
+        return nomes.length > 1 ? `${nomes[0]} ${nomes[1]}` : nomes[0];
+    };
 
     if (loading) {
         return <p>Carregando...</p>;
@@ -83,15 +101,21 @@ export default function DashboardOperad() {
     }
 
     return (
-        <div className='border'>
-            <div>
-                <div className="p-8">
+        <div className='flex'>
+            <div className='w-full p-10'>
+                <div>
                     <header className="flex flex-wrap justify-between items-center mb-8 gap-4">
-                        <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 flex-shrink-0">
-                            Bem-vindo ao Dashboard
-                        </h1>
+
+                        <div>
+                            <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 flex-shrink-0 mb-2">
+                                Bem-vindo <span className='bg-green-500 p-1'> {formatarNome(user.nome)}</span>
+                            </h1>
+                            <p className="text-lg font-light text-gray-600">{motivationalPhrase}</p>
+                        </div>
+
                         <div className="flex items-center gap-4 flex-wrap">
-                            <Agenda />
+                            {/* AONDE ELE VAI VER AS TAREFAS */}
+                            <Task />
                             <div className="flex items-center justify-center gap-2">
                                 <button
                                     className="flex justify-center items-center w-12 h-12 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition duration-200"
@@ -100,12 +124,11 @@ export default function DashboardOperad() {
                                 </button>
                                 <div className="text-center md:text-left">
                                     <p className="text-xs md:text-sm">{user.email}</p>
-                                    <p className="text-xs md:text-sm">{user.papel}</p>
+                                    <p className='className="text-xs md:text-sm'>{user.perfil}</p>
                                 </div>
                             </div>
                         </div>
                     </header>
-
 
                     {showPopup && (
                         <div className="absolute top-20 right-4 bg-white p-6 rounded-lg shadow-xl w-80 z-50 transition-all duration-300">
@@ -118,13 +141,13 @@ export default function DashboardOperad() {
                                 <p><strong>Email:</strong> {user.email}</p>
                                 <p><strong>Grupo:</strong> {user.grupo}</p>
                                 <p><strong>Perfil:</strong> {user.perfil}</p>
-                                <p><strong>Papel:</strong> {user.papel}</p>
+                                <p><strong>Nome:</strong> {user.nome}</p>
                             </div>
 
-                            <div className='mt-2 flex justify-end'>
+                            <div className='mt-2 flex justify-end border-t-2 p-1 '>
                                 <button
                                     onClick={logout}
-                                    className="bg-red-500 text-white px-1 py-1 rounded-lg hover:bg-red-600 transition duration-200">
+                                    className="bg-red-500 w-10 text-white px-1 py-1 rounded-lg hover:bg-red-600 transition duration-200">
                                     Sair
                                 </button>
                             </div>
@@ -160,7 +183,6 @@ export default function DashboardOperad() {
                         )}
 
                     </div>
-
 
                     {selectedSchema && empresaData && (
                         <div className="mt-6">

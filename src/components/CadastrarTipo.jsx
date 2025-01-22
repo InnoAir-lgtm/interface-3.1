@@ -49,10 +49,13 @@ export default function CadastrarTipoModal({ schema }) {
 
     return (
         <div>
+
             <button
                 value="cadastrarTipo"
                 onClick={(e) => openModal(e.target.value)}
-                className="w-72 h-64 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg hover:shadow-2xl hover:bg-gradient-to-br hover:from-green-100 hover:to-white transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center relative overflow-hidden">
+                className="w-72 h-64 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg hover:shadow-2xl hover:bg-gradient-to-br hover:from-green-100 hover:to-white transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center relative overflow-hidden"
+                >
+
                 <div className="absolute inset-0 bg-green-500 opacity-10 hover:opacity-20 transition-opacity duration-300 rounded-lg pointer-events-none"></div>
                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500 shadow-md transform hover:scale-105 transition-transform duration-200">
                     <GoPlus className="text-white text-xl" />

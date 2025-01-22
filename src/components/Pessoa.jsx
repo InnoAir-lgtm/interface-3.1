@@ -10,7 +10,9 @@ import ListarContatos from "./ListarContatos";
 import { GiExpand } from "react-icons/gi";
 import api from "../apiUrl";
 import { FiTrash } from "react-icons/fi";
-import { BiPlus } from "react-icons/bi";
+import { IoMdClose } from "react-icons/io";
+import Agenda from "./Agenda";
+
 
 const EmpresaComponent = ({ schema, empresaName }) => {
     const [selectedPessoa, setSelectedPessoa] = useState(null);
@@ -18,8 +20,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     const [pessoas, setPessoas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-
-
 
     const fetchPessoas = async () => {
         try {
@@ -77,28 +77,26 @@ const EmpresaComponent = ({ schema, empresaName }) => {
 
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Gestão da {empresaName || "NOME DA EMPRESA"}</h2>
 
-            <div className="flex flex-wrap gap-4">
-                
-                    <CadastrarTipo />
-                    <CadastrarPessoa schema={schema} />
 
-                    <button
-                        onClick={openModal}
-                        className="flex-1 min-w-[150px] max-w-[300px] h-64 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg hover:shadow-2xl hover:bg-gradient-to-br hover:from-green-100 hover:to-white transition-all duration-300 text-gray-800 font-semibold flex justify-center items-center text-center relative overflow-hidden"
-                    >
-                        <div className="absolute inset-0 bg-green-500 opacity-10 hover:opacity-20 transition-opacity duration-300 rounded-lg"></div>
-                        <div className="relative flex flex-col items-center justify-center space-y-4 w-full h-full">
-                            <GiExpand className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl transition transform hover:scale-110" />
+            <div className="flex sm:justify-center xl:justify-normal items-center flex-wrap gap-4 w-full h-full">
+                <CadastrarTipo />
+                <Agenda />
 
-                            <span className="font-medium text-lg transition transform hover:scale-105 hover:text-gray-600">
-                                Ver Pessoas
-                            </span>
-
-                            <div className="absolute bottom-4 right-4 flex items-center justify-center bg-red-500 text-white rounded-full w-9 h-9 text-xl font-semibold shadow-md transition-transform duration-300 ease-in-out hover:scale-110 hover:rotate-12">
-                                {pessoas.length}
-                            </div>
+                <button
+                    onClick={openModal}
+                    className="w-72 h-64 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg hover:shadow-2xl hover:bg-gradient-to-br hover:from-green-100 hover:to-white transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center relative overflow-hidden"
+                >
+                    <div className="absolute inset-0 bg-green-500 opacity-10 hover:opacity-20 transition-opacity duration-300 rounded-lg"></div>
+                    <div className="h-full w-full relative flex flex-col items-center justify-center space-y-4">
+                        <GiExpand className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl transition transform hover:scale-110" />
+                        <span className="font-medium text-lg transition transform hover:scale-105 hover:text-gray-600">
+                            Ver Pessoas
+                        </span>
+                        <div className="absolute bottom-4 right-4 flex items-center justify-center bg-red-500 text-white rounded-full w-9 h-9 text-xl font-semibold shadow-md transition-transform duration-300 ease-in-out hover:scale-110 hover:rotate-12">
+                            {pessoas.length}
                         </div>
-                    </button>
+                    </div>
+                </button>
             </div>
 
 
@@ -114,12 +112,20 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                             transition={{ duration: 0.3 }}
                         >
                             <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full sm:w-[700px] relative">
-                                <button
-                                    className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl"
-                                    onClick={closeModal}
-                                >
-                                    <BiPlus />
-                                </button>
+
+                                <div className="flex justify-between">
+                                    <button
+                                        className="text-gray-600 hover:text-gray-800 text-2xl"
+                                        onClick={closeModal}
+                                    >
+                                        <IoMdClose />
+                                    </button>
+
+                                    <CadastrarPessoa schema={schema} />
+
+                                </div>
+
+
 
                                 <h3 className="text-2xl font-semibold mb-6 text-gray-800">Lista de Usuários</h3>
 
@@ -140,7 +146,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 >
                                                     <FiTrash className="w-5 h-5" />
                                                 </button>
-                                                {/* Informações da pessoa */}
                                                 <p className="text-lg font-medium text-gray-800">
                                                     <strong>{pessoa.pes_fis_jur === "cnpj" ? "Nome Fantasia" : "Nome"}:</strong> {pessoa.pes_fantasia || pessoa.pes_nome}
                                                 </p>
@@ -174,18 +179,19 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                 <ListarContatos selectedPessoa={selectedPessoa} schema={schema} />
                             </div>
 
-                            <div className="flex-1 pl-4">
-                                <div className="flex justify-between">
-                                    <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">Detalhes da Pessoa</h2>
+                            <div className="flex-1 p-4 rounded-lg max-w-full">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-xl md:text-2xl font-semibold text-gray-800 border-b pb-2">Detalhes da Pessoa</h2>
                                     <button
                                         onClick={() => setSelectedPessoa(null)}
-                                        className="bg-red-500 text-white px-1 rounded-lg hover:bg-red-600 transition duration-200">
+                                        className="bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 transition duration-200"
+                                    >
                                         X
                                     </button>
                                 </div>
                                 <form>
-                                    <div className='flex gap-4 mb-6'>
-                                        <div className="w-1/2">
+                                    <div className="flex flex-col md:flex-row gap-4 mb-6">
+                                        <div className="w-full md:w-1/2">
                                             <label htmlFor="nome" className="block text-sm font-medium text-gray-700">Nome</label>
                                             <input
                                                 type="text"
@@ -195,7 +201,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 readOnly
                                             />
                                         </div>
-                                        <div className="w-1/2">
+                                        <div className="w-full md:w-1/2">
                                             <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo</label>
                                             <input
                                                 type="text"
@@ -208,8 +214,8 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                     </div>
 
                                     {selectedPessoa.pes_fis_jur === "cpf" ? (
-                                        <div className='flex gap-4 mb-6'>
-                                            <div className="w-1/2">
+                                        <div className="flex flex-col md:flex-row gap-4 mb-6">
+                                            <div className="w-full md:w-1/2">
                                                 <label htmlFor="cpf" className="block text-sm font-medium text-gray-700">CPF</label>
                                                 <input
                                                     type="text"
@@ -219,7 +225,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                     readOnly
                                                 />
                                             </div>
-                                            <div className="w-1/2">
+                                            <div className="w-full md:w-1/2">
                                                 <label htmlFor="rg" className="block text-sm font-medium text-gray-700">RG</label>
                                                 <input
                                                     type="text"
@@ -231,8 +237,8 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className='flex gap-4 mb-6'>
-                                            <div className="w-1/2">
+                                        <div className="flex flex-col md:flex-row gap-4 mb-6">
+                                            <div className="w-full md:w-1/2">
                                                 <label htmlFor="cnpj" className="block text-sm font-medium text-gray-700">CNPJ</label>
                                                 <input
                                                     type="text"
@@ -242,7 +248,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                     readOnly
                                                 />
                                             </div>
-                                            <div className="w-1/2">
+                                            <div className="w-full md:w-1/2">
                                                 <label htmlFor="ie" className="block text-sm font-medium text-gray-700">Inscrição Estadual</label>
                                                 <input
                                                     type="text"
@@ -254,6 +260,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                             </div>
                                         </div>
                                     )}
+
                                     <div className="mb-4">
                                         <label htmlFor="fundacao" className="block text-sm font-medium text-gray-700">Data de Fundação</label>
                                         <input
@@ -265,9 +272,11 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                         />
                                     </div>
                                 </form>
+
                                 <CadastrarEmail selectedPessoa={selectedPessoa} schema={schema} />
                                 <CadastrarComplementar selectedPessoa={selectedPessoa} schema={schema} />
                             </div>
+
                         </div>
                     </div>
                 )}

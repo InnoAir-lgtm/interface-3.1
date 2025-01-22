@@ -15,10 +15,7 @@ export default function DashboardAdm() {
                 <div className="container mx-auto flex justify-between items-center px-8">
                     <h1 className="text-4xl font-semibold tracking-tight">Dashboard do Administrador</h1>
                     <div className="flex items-center space-x-6">
-                        {/* Botão Sair */}
-                       
-
-                        {/* Botão de Perfil */}
+ 
                         <div className="relative">
                            
                                 <Perfil />

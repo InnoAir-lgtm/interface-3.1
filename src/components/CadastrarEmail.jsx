@@ -56,68 +56,75 @@ export default function CadastrarEmail({ selectedPessoa, schema }) {
     };
 
     return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-            <div className="flex gap-4 mb-4">
-                <div className="w-1/2">
-                    <label htmlFor="tipo_email" className="block text-sm font-medium text-gray-600">Tipo de contato</label>
-                    <select
-                        id="tipo_email"
-                        className="mt-1 p-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                        onChange={handleTipoContatoChange}
-                    >
-                        <option value="">Selecione o tipo de contato</option>
-                        <option value="Email NFE">Email NFE</option>
-                        <option value="Email NFSE">Email NFSE</option>
-                        <option value="Telefone comercial">Telefone comercial</option>
-                        <option value="Telefone pessoal">Telefone pessoal</option>
-                        <option value="Whatsapp">Whatsapp</option>
-                        <option value="Home Page">Home Page</option>
-                        <option value="Instagram">Instagram</option>
-                        <option value="Facebook">Facebook</option>
-                        <option value="Linkedin">Linkedin</option>
-                    </select>
-                </div>
-
-                <div className="w-1/2">
-                    <label htmlFor="nome_contato" className="block text-sm font-medium text-gray-600">Nome contato</label>
-                    <input
-                        id="nome_contato"
-                        className="mt-1 p-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                        type="text"
-                        placeholder="Contato"
-                        onChange={(e) => setContato(prevState => ({
-                            ...prevState,
-                            numero: e.target.value
-                        }))}
-                    />
-                </div>
-            </div>
-
-            <div className="flex gap-4 mb-6">
-                <div className="w-1/2">
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-600">Contato</label>
-                    <input
-                        type="text"
-                        id="contato"
-                        className="mt-1 p-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                        value={contato.email}
-                        placeholder={inputPlaceholder}
-                        onChange={(e) => setContato(prevState => ({
-                            ...prevState,
-                            email: e.target.value
-                        }))}
-                    />
-                </div>
-
-                <div className="w-1/2 flex items-end">
-                    <button
-                        className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                        onClick={salvarContato}
-                    >
-                        Adicionar contato
-                    </button>
-                </div>
-            </div>
+            <label htmlFor="tipo_email" className="block text-sm font-medium text-gray-600">
+                Tipo de contato
+            </label>
+            <select
+                id="tipo_email"
+                className="mt-1 p-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                onChange={handleTipoContatoChange}
+            >
+                <option value="">Selecione o tipo de contato</option>
+                <option value="Email NFE">Email NFE</option>
+                <option value="Email NFSE">Email NFSE</option>
+                <option value="Telefone comercial">Telefone comercial</option>
+                <option value="Telefone pessoal">Telefone pessoal</option>
+                <option value="Whatsapp">Whatsapp</option>
+                <option value="Home Page">Home Page</option>
+                <option value="Instagram">Instagram</option>
+                <option value="Facebook">Facebook</option>
+                <option value="Linkedin">Linkedin</option>
+            </select>
         </div>
+    
+        <div>
+            <label htmlFor="nome_contato" className="block text-sm font-medium text-gray-600">
+                Nome contato
+            </label>
+            <input
+                id="nome_contato"
+                className="mt-1 p-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                type="text"
+                placeholder="Contato"
+                onChange={(e) =>
+                    setContato((prevState) => ({
+                        ...prevState,
+                        numero: e.target.value,
+                    }))
+                }
+            />
+        </div>
+    
+        <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-600">
+                Contato
+            </label>
+            <input
+                type="text"
+                id="contato"
+                className="mt-1 p-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                value={contato.email}
+                placeholder={inputPlaceholder}
+                onChange={(e) =>
+                    setContato((prevState) => ({
+                        ...prevState,
+                        email: e.target.value,
+                    }))
+                }
+            />
+        </div>
+    
+        <div className="flex items-end">
+            <button
+                className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                onClick={salvarContato}
+            >
+                Adicionar contato
+            </button>
+        </div>
+    </div>
+    
     );
 }

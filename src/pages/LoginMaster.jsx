@@ -16,9 +16,7 @@ export default function LoginMaster() {
         try {
             const response = await api.post('/login-master', { email, senha });
             const { user } = response.data;
-            await login(user);  // Faz o login e a busca do papel do usuário
-
-            // Redirecionamento após o login.
+            await login(user); 
             if (user.perfil === 'Master') {
                 navigate('/master');
             } else if (user.perfil === 'Administrador') {

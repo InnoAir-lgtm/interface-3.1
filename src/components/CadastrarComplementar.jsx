@@ -62,45 +62,46 @@ export default function CadastrarComplementar({ selectedPessoa, schema }) {
     };
 
     return (
-        <div>
-            <form className="grid gap-2">
+        <div className='mt-4'>
+            <form className="grid gap-4">
                 {message && <p className="text-red-600">{message}</p>}
-                <div className="flex w-full gap-4">
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <input
                         type="text"
                         value={complementar.cep}
                         readOnly
                         placeholder="CEP"
-                        className="border p-2 rounded flex-1"
+                        className="border p-2 rounded w-full"
                     />
                     <input
                         type="text"
                         placeholder="Número"
-                        className="border p-2 rounded w-24"
+                        className="border p-2 rounded w-full"
                         onChange={(e) => setComplementar({ ...complementar, numero: e.target.value })}
                     />
                     <input
                         type="text"
                         placeholder="Complemento"
-                        className="border p-2 rounded flex-1"
+                        className="border p-2 rounded w-full"
                         onChange={(e) => setComplementar({ ...complementar, complemento: e.target.value })}
                     />
                 </div>
 
-                <div className="flex w-full gap-4 mb-10">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                     <input
                         type="text"
                         value={complementar.latitude}
                         readOnly
                         placeholder="Latitude"
-                        className="border p-2 rounded w-40"
+                        className="border p-2 rounded w-full"
                     />
                     <input
                         type="text"
                         value={complementar.longitude}
                         readOnly
                         placeholder="Longitude"
-                        className="border p-2 rounded w-40"
+                        className="border p-2 rounded w-full"
                     />
                     <select
                         className="border p-2 rounded w-full"
@@ -117,7 +118,7 @@ export default function CadastrarComplementar({ selectedPessoa, schema }) {
 
                 <button
                     type="button"
-                    className="bg-blue-600 text-white py-2 rounded"
+                    className="bg-blue-600 text-white py-2 rounded w-full sm:w-auto"
                     onClick={salvarEndereco}
                 >
                     Salvar
