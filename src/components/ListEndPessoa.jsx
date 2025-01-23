@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../apiUrl';
+import { IoMdArrowDropright } from "react-icons/io"
 
 export default function ListEndPessoa({ schema, selectedPessoa }) {
     const [showSidebar, setShowSidebar] = useState(false);
@@ -35,9 +36,9 @@ export default function ListEndPessoa({ schema, selectedPessoa }) {
         <div>
             <button
                 onClick={() => setShowSidebar(true)}
-                className="px-5 py-3 md:w-20 lg:w-48 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+               className="px-5 py-3 flex justify-center items-center w-48  transition-transform transform -translate-x-32 hover:translate-x-0 duration-300 ease-in-out  text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
-                Lista de endereços
+                Lista de endereços <IoMdArrowDropright />
             </button>
 
             <div

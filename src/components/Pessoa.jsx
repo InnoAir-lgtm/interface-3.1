@@ -12,6 +12,7 @@ import api from "../apiUrl";
 import { FiTrash } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
 import Agenda from "./Agenda";
+import { IoReloadSharp } from "react-icons/io5";
 
 
 const EmpresaComponent = ({ schema, empresaName }) => {
@@ -20,7 +21,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     const [pessoas, setPessoas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-
     const fetchPessoas = async () => {
         try {
             const response = await api.get(`/pessoas?schema=${schema}`);
@@ -37,6 +37,12 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             setLoading(false);
         }
     };
+
+    const handleRefresh = () => {
+        setLoading(true);  // Mostra o carregando enquanto as pessoas são recarregadas
+        fetchPessoas();
+    };
+
 
     const openModal = () => {
         setIsOpen(true)
@@ -67,21 +73,14 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             </div>
         );
     }
-
     if (error) {
         return <p>Erro: {error}</p>;
     }
-
     return (
         <div>
 
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Gestão da {empresaName || "NOME DA EMPRESA"}</h2>
-
-
             <div className="flex sm:justify-center xl:justify-normal items-center flex-wrap gap-4 w-full h-full">
-                <CadastrarTipo />
-                <Agenda />
-
                 <button
                     onClick={openModal}
                     className="w-72 h-64 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg hover:shadow-2xl hover:bg-gradient-to-br hover:from-green-100 hover:to-white transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center relative overflow-hidden"
@@ -90,18 +89,18 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                     <div className="h-full w-full relative flex flex-col items-center justify-center space-y-4">
                         <GiExpand className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl transition transform hover:scale-110" />
                         <span className="font-medium text-lg transition transform hover:scale-105 hover:text-gray-600">
-                            Ver Pessoas
+                            Pessoas
                         </span>
                         <div className="absolute bottom-4 right-4 flex items-center justify-center bg-red-500 text-white rounded-full w-9 h-9 text-xl font-semibold shadow-md transition-transform duration-300 ease-in-out hover:scale-110 hover:rotate-12">
                             {pessoas.length}
                         </div>
                     </div>
                 </button>
+                <CadastrarTipo schema={schema} />
+                <Agenda />
+
+
             </div>
-
-
-
-
             <AnimatePresence initial={false}>
                 {isOpen && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -121,14 +120,23 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                         <IoMdClose />
                                     </button>
 
-                                    <CadastrarPessoa schema={schema} />
+                                    <div className="flex gap-10">
+                                        <CadastrarPessoa schema={schema} />
+
+                                        <button
+                                            className=" bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-transform duration-300 ease-in-out"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleRefresh();
+                                            }}
+                                        >
+                                            <IoReloadSharp />
+                                        </button>
+                                    </div>
+
 
                                 </div>
-
-
-
                                 <h3 className="text-2xl font-semibold mb-6 text-gray-800">Lista de Usuários</h3>
-
                                 {pessoas.length > 0 ? (
                                     <ul className="space-y-4">
                                         {pessoas.map((pessoa) => (
@@ -154,26 +162,29 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 ) : (
                                                     <p className="text-sm text-gray-600"><strong>CPF:</strong> {pessoa.pes_cpf_cnpj}</p>
                                                 )}
+
+
                                             </li>
                                         ))}
+
+
                                     </ul>
                                 ) : (
                                     <p className="text-gray-600">Nenhuma pessoa cadastrada.</p>
                                 )}
-
-
                             </div>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
-
             <div className="relative">
                 {selectedPessoa && (
                     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
                         <div className="bg-gray-100 p-6 sm:p-8 md:p-10 rounded-lg shadow-lg w-full max-w-lg md:max-w-2xl lg:max-w-3xl h-auto max-h-screen overflow-y-auto flex">
 
-                            <div className="absolute top-1/4 left-9 flex flex-col space-y-4">
+
+                            {/* Buttons laterais */}
+                            <div className="absolute top-1/4 left-0 flex flex-col space-y-4 ">
                                 <CadastrarEndereco schema={schema} />
                                 <ListEndPessoa selectedPessoa={selectedPessoa} schema={schema} />
                                 <ListarContatos selectedPessoa={selectedPessoa} schema={schema} />
@@ -212,7 +223,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                             />
                                         </div>
                                     </div>
-
                                     {selectedPessoa.pes_fis_jur === "cpf" ? (
                                         <div className="flex flex-col md:flex-row gap-4 mb-6">
                                             <div className="w-full md:w-1/2">
@@ -260,7 +270,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                             </div>
                                         </div>
                                     )}
-
                                     <div className="mb-4">
                                         <label htmlFor="fundacao" className="block text-sm font-medium text-gray-700">Data de Fundação</label>
                                         <input
@@ -273,7 +282,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                     </div>
                                 </form>
 
-                                <CadastrarEmail selectedPessoa={selectedPessoa} schema={schema} />
+
                                 <CadastrarComplementar selectedPessoa={selectedPessoa} schema={schema} />
                             </div>
 

@@ -15,11 +15,10 @@ export default function CadastrarPessoa({ schema }) {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [isOpen, setIsOpen] = useState(false);
-
     const { verifyAndCreatePermission } = usePermissions()
-
     const [tipoPessoaT, setTipoPessoaT] = useState([]);
     const [selectedTipo, setSelectedTipo] = useState('');
+    
 
     useEffect(() => {
         const fetchTipoPessoaT = async () => {
@@ -40,8 +39,19 @@ export default function CadastrarPessoa({ schema }) {
     }, []);
 
     const handleSelection = (e) => {
-        setSelectedTipo(e.target.value);
+        const tipo = e.target.value;
+        setTipoPessoa(tipo);
+
+        // Resetando os campos automaticamente ao selecionar
+        setNome("");
+        setCpf("");
+        setRg("");
+        setDataNascimento("");
+        setCnpj("");
+        setInscricaoEstadual("");
+        setNomeFantasia("");
     };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -107,9 +117,6 @@ export default function CadastrarPessoa({ schema }) {
             setLoading(false);
         }
     };
-
-
-
     const resetForm = () => {
         setTipoPessoa("");
         setNome("");
@@ -130,11 +137,6 @@ export default function CadastrarPessoa({ schema }) {
             setMessage('Você não tem permissão para acessar esta funcionalidade.')
         }
     }
-    const closeModal = () => {
-        setIsOpen(false)
-        setMessage('')
-    }
-
 
     return (
         <div className="relative">
@@ -142,19 +144,14 @@ export default function CadastrarPessoa({ schema }) {
             <button
                 value="cadastrarPessoa"
                 onClick={(e) => abrirModal(e.target.value)}
-                className="items-center justify-center gap-2 flex bg-green-500 text-white p-1 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="items-center justify-center gap-2 flex bg-green-500 text-white p-1 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-
-
                 <div className="flex items-center justify-center w-[30px] h-[30px] rounded bg-gray-500">
                     <GoPlus className="text-white" />
                 </div>
                 Cadastrar pessoa
             </button>
-
-
-
-
+            
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex justify-center items-center bg-gray-800 bg-opacity-50">
                     <div className="bg-white border border-gray-300 shadow-lg rounded-lg p-6 w-full max-w-lg relative">
@@ -187,7 +184,6 @@ export default function CadastrarPessoa({ schema }) {
                                     <option value="cnpj">CNPJ</option>
                                 </select>
                             </div>
-
                             {tipoPessoa === "cpf" && (
                                 <>
                                     <div>
@@ -247,12 +243,11 @@ export default function CadastrarPessoa({ schema }) {
                                             className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
-
-                                    {/* Selecione o tipo de pessoa */}
                                     <div>
                                         <label htmlFor="tipoPessoa">Selecione o Tipo de Pessoa:</label>
                                         <select
                                             id="tipoPessoa"
+                                            
                                             value={selectedTipo}
                                             onChange={handleSelection}
                                             className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
@@ -273,8 +268,6 @@ export default function CadastrarPessoa({ schema }) {
 
                                 </>
                             )}
-
-                            {/* Condicional para CNPJ */}
                             {tipoPessoa === "cnpj" && (
                                 <>
                                     <div>
@@ -339,7 +332,6 @@ export default function CadastrarPessoa({ schema }) {
                                     </div>
                                 </>
                             )}
-
                             <div className="text-center">
                                 <button
                                     type="submit"

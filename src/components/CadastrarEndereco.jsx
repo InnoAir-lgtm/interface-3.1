@@ -116,7 +116,7 @@ export default function CadastrarEndereco({ schema }) {
             <button
                 value="adicionarEndereco"
                 onClick={(e) => abrirModal(e.target.value)}
-                className="px-5 py-3  text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="px-5 py-3 flex transition-transform transform -translate-x-32 hover:translate-x-0 duration-300 ease-in-out  text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
                 + Adicionar endereço
             </button>
