@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from "motion/react";
 import CadastrarPessoa from "./CadastrarPessoa";
 import CadastrarTipo from "./CadastrarTipo";
 import CadastrarEndereco from "./CadastrarEndereco";
-import CadastrarEmail from "./CadastrarEmail";
 import CadastrarComplementar from "./CadastrarComplementar";
 import ListEndPessoa from "./ListEndPessoa";
 import ListarContatos from "./ListarContatos";
@@ -21,6 +20,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     const [pessoas, setPessoas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
     const fetchPessoas = async () => {
         try {
             const response = await api.get(`/pessoas?schema=${schema}`);
@@ -28,7 +28,17 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             if (!data || data.length === 0) {
                 setError("Nenhuma pessoa encontrada para o schema especificado.");
             } else {
-                setPessoas(data.data);
+                const pessoasComTipo = await Promise.all(data.data.map(async (pessoa) => {
+                    // Buscar os tipos da pessoa selecionada
+                    const tiposResponse = await api.get(`/tipos-pessoa?pes_id=${pessoa.pes_id}&schema=${schema}`);
+                    const tiposPessoa = tiposResponse.data.data;
+
+                    return {
+                        ...pessoa,
+                        tipos: tiposPessoa // Aqui, mantém os tipos como objetos com 'tpp_id' e 'tpp_descricao'
+                    };
+                }));
+                setPessoas(pessoasComTipo);
             }
         } catch (error) {
             console.error("Erro ao buscar pessoas:", error);
@@ -38,10 +48,59 @@ const EmpresaComponent = ({ schema, empresaName }) => {
         }
     };
 
+
+
+    const handleDeletePessoa = async (id) => {
+        try {
+            const response = await api.delete(`/pessoas/${id}?schema=${schema}`);
+            if (response.status === 200) {
+                setPessoas((prevPessoas) => prevPessoas.filter((pessoa) => pessoa.pes_id !== id));
+                alert('Pessoa deletada com sucesso!');
+            }
+        } catch (error) {
+            console.error("Erro ao deletar pessoa:", error);
+            alert('Erro ao tentar deletar a pessoa.');
+        }
+    };
+
     const handleRefresh = () => {
-        setLoading(true);  // Mostra o carregando enquanto as pessoas são recarregadas
+        setLoading(true);
         fetchPessoas();
     };
+
+    const handleDeleteTipoPessoa = async (pes_id, tpp_id) => {
+        try {
+            const response = await api.delete(`/deletar-tipos-pessoa?pes_id=${pes_id}&tpp_id=${tpp_id}&schema=${schema}`);
+            if (response.status === 200) {
+                // Atualiza o estado removendo o tipo da pessoa
+                setPessoas((prevPessoas) => {
+                    return prevPessoas.map((pessoa) => {
+                        if (pessoa.pes_id === pes_id) {
+                            // Remove o tipo da pessoa usando o tpp_id
+                            const novosTipos = pessoa.tipos.filter((tipo) => tipo.tpp_id !== tpp_id);
+                            return { ...pessoa, tipos: novosTipos };
+                        }
+                        return pessoa;
+                    });
+                });
+    
+                // Limpar o campo de tipo na pessoa selecionada
+                setSelectedPessoa((prevSelectedPessoa) => ({
+                    ...prevSelectedPessoa,
+                    tipos: [],  // Limpa o campo de tipos
+                }));
+    
+                alert('Tipo de pessoa excluído com sucesso!');
+            }
+        } catch (error) {
+            console.error('Erro ao excluir tipo de pessoa:', error);
+            alert('Erro ao excluir tipo de pessoa.');
+        }
+    };
+    
+
+
+
 
 
     const openModal = () => {
@@ -136,7 +195,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
 
 
                                 </div>
-                                <h3 className="text-2xl font-semibold mb-6 text-gray-800">Lista de Usuários</h3>
+                                <h3 className="text-2xl font-semibold mb-6 text-gray-800">Lista de Pessoas</h3>
                                 {pessoas.length > 0 ? (
                                     <ul className="space-y-4">
                                         {pessoas.map((pessoa) => (
@@ -154,6 +213,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 >
                                                     <FiTrash className="w-5 h-5" />
                                                 </button>
+
                                                 <p className="text-lg font-medium text-gray-800">
                                                     <strong>{pessoa.pes_fis_jur === "cnpj" ? "Nome Fantasia" : "Nome"}:</strong> {pessoa.pes_fantasia || pessoa.pes_nome}
                                                 </p>
@@ -162,8 +222,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 ) : (
                                                     <p className="text-sm text-gray-600"><strong>CPF:</strong> {pessoa.pes_cpf_cnpj}</p>
                                                 )}
-
-
                                             </li>
                                         ))}
 
@@ -181,9 +239,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                 {selectedPessoa && (
                     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
                         <div className="bg-gray-100 p-6 sm:p-8 md:p-10 rounded-lg shadow-lg w-full max-w-lg md:max-w-2xl lg:max-w-3xl h-auto max-h-screen overflow-y-auto flex">
-
-
-                            {/* Buttons laterais */}
                             <div className="absolute top-1/4 left-0 flex flex-col space-y-4 ">
                                 <CadastrarEndereco schema={schema} />
                                 <ListEndPessoa selectedPessoa={selectedPessoa} schema={schema} />
@@ -212,6 +267,43 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 readOnly
                                             />
                                         </div>
+
+
+                                        <div className="w-full md:w-1/2 flex items-center justify-between">
+                                        
+                                            <div className="w-full">
+                                                <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo Pessoa</label>
+                                                <div className="mt-1 p-2 border border-gray-300 rounded-lg w-full bg-gray-50 flex items-center justify-between">
+                                                    <span className="text-sm text-gray-700">
+                                                        {selectedPessoa.tipos.map((tipo, index) => (
+                                                            <span key={index}>{tipo.tpp_descricao}</span>
+                                                        ))}
+                                                    </span>
+
+                                                    <button
+                                                        className="ml-2 text-red-500 hover:text-red-700"
+                                                        onClick={(e) => {
+                                                            e.preventDefault(); 
+                                                            e.stopPropagation();  // Impede a propagação do evento
+
+
+                                                            const tipoPessoa = selectedPessoa.tipos[0]; // Ou a lógica que você desejar para pegar o tipo correto
+                                                            handleDeleteTipoPessoa(selectedPessoa.pes_id, tipoPessoa.tpp_id);  // Excluir o tipo de pessoa
+                                                        }}
+                                                    >
+                                                        <FiTrash className="w-5 h-5" />
+                                                    </button>
+
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+
+
+
                                         <div className="w-full md:w-1/2">
                                             <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo</label>
                                             <input

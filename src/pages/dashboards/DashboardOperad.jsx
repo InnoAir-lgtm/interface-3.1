@@ -6,7 +6,7 @@ import api from '../../apiUrl';
 import Task from '../../components/Task';
 
 export default function DashboardOperad() {
-    const { logout, user } = useAuth();
+    const { logout, user, setUser } = useAuth();
     const [showPopup, setShowPopUp] = useState(false);
     const [empresas, setEmpresas] = useState([]);
     const [selectedSchema, setSelectedSchema] = useState(null);
@@ -14,9 +14,13 @@ export default function DashboardOperad() {
     const [error, setError] = useState(null);
     const [empresaData, setEmpresaData] = useState(null);
     const [selectedEmpresaName, setSelectedEmpresaName] = useState(null);
-
-    // Estado para a frase motivacional
     const [motivationalPhrase, setMotivationalPhrase] = useState('');
+    const [currentRole, setCurrentRole] = useState(user.papel);
+
+    useEffect(() => {
+        setCurrentRole(user.papel); // Atualiza o estado local quando o papel do usuário muda
+    }, [user.papel]);
+
 
     // Lista de frases motivacionais
     const motivationalPhrases = [
@@ -40,7 +44,6 @@ export default function DashboardOperad() {
                 (empresa, index, self) =>
                     index === self.findIndex((e) => e.emp_cnpj === empresa.emp_cnpj)
             );
-
             setEmpresas(empresasUnicas);
         } catch (error) {
             console.error('Erro ao buscar associações:', error.response?.data || error.message);
@@ -53,8 +56,6 @@ export default function DashboardOperad() {
         if (user?.id) {
             fetchAssociacoes();
         }
-
-        // Seleciona uma frase aleatória ao carregar o componente
         const randomIndex = Math.floor(Math.random() * motivationalPhrases.length);
         setMotivationalPhrase(motivationalPhrases[randomIndex]);
     }, [user]);
@@ -67,6 +68,7 @@ export default function DashboardOperad() {
         const cnpj = e.target.value;
         setSelectedSchema(null);
         setSelectedEmpresaName(null);
+
         if (cnpj) {
             try {
                 const response = await api.get(`/buscar-schema?cnpj=${cnpj}`);
@@ -79,12 +81,41 @@ export default function DashboardOperad() {
 
                 const empresa = empresas.find((emp) => emp.emp_cnpj === cnpj);
                 setSelectedEmpresaName(empresa?.empresas?.emp_nome || "Empresa Desconhecida");
+
+                const papel = empresa?.papeis?.pap_papel || "Usuário sem papel";
+                const pap_id = empresa?.pap_id || null;
+
+                setCurrentRole(papel);
+
+
+                // Atualiza o contexto do usuário e estado local
+                setUser((prevUser) => {
+                    const updatedUser = {
+                        ...prevUser,
+                        papel,
+                        pap_id,
+                    };
+                    localStorage.setItem('user', JSON.stringify(updatedUser)); // Atualize o localStorage
+                    return updatedUser; // Retorne o novo estado
+                });
+
+                // Atualiza o localStorage
+                localStorage.setItem(
+                    'user',
+                    JSON.stringify({
+                        ...user,
+                        papel,
+                        pap_id,
+                    })
+                );
             } catch (error) {
-                console.error("Erro ao buscar o schema:", error);
-                setError("Erro ao carregar o schema da empresa.");
+                console.error("Erro ao buscar o schema ou papel da empresa:", error);
+                setError("Erro ao carregar os dados da empresa.");
             }
         }
     };
+
+
 
     const formatarNome = (nomeCompleto) => {
         if (!nomeCompleto) return '';
@@ -103,32 +134,32 @@ export default function DashboardOperad() {
     return (
         <div className='flex'>
             <div className='w-full p-10'>
-                <div>
-                    <header className="flex flex-wrap justify-between items-center mb-8 gap-4">
+                <div className='p-2 flex flex-col'>
 
-                        <div>
-                            <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 flex-shrink-0 mb-2">
-                                Bem-vindo <span className='bg-green-500 p-1'> {formatarNome(user.nome)}</span>
+                    <header className="flex flex-wrap justify-between items-center mb-8 gap-6">
+                        <div className="flex-1">
+                            <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-2">
+                                Bem-vindo <span className='bg-green-500 text-white px-2 py-1'>{formatarNome(user.nome)}</span>
                             </h1>
                             <p className="text-lg font-light text-gray-600">{motivationalPhrase}</p>
                         </div>
 
-                        <div className="flex items-center gap-4 flex-wrap">
-                            {/* AONDE ELE VAI VER AS TAREFAS */}
-                            <Task />
-                            <div className="flex items-center justify-center gap-2">
-                                <button
-                                    className="flex justify-center items-center w-12 h-12 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition duration-200"
-                                    onClick={togglePop}>
-                                    <CgProfile fontSize={28} />
-                                </button>
-                                <div className="text-center md:text-left">
-                                    <p className="text-xs md:text-sm">{user.email}</p>
-                                    <p className='className="text-xs md:text-sm'>{user.perfil}</p>
-                                </div>
+                        <div className="flex items-center gap-4 flex-shrink-0">
+                            <button
+                                className="flex justify-center items-center w-12 h-12 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition duration-200"
+                                onClick={togglePop}
+                            >
+                                <CgProfile fontSize={28} />
+                            </button>
+
+                            <div className="text-center md:text-left hidden lg:block xl:block">
+                                <p className="text-xs md:text-sm">{user.email}</p>
+                                <p className="text-xs md:text-sm">{user.perfil}</p>
                             </div>
                         </div>
+
                     </header>
+
 
                     {showPopup && (
                         <div className="absolute top-20 right-4 bg-white p-6 rounded-lg shadow-xl w-80 z-50 transition-all duration-300">
@@ -142,6 +173,7 @@ export default function DashboardOperad() {
                                 <p><strong>Grupo:</strong> {user.grupo}</p>
                                 <p><strong>Perfil:</strong> {user.perfil}</p>
                                 <p><strong>Nome:</strong> {user.nome}</p>
+                                <p className='className="text-xs md:text-sm'>{currentRole}</p>
                             </div>
 
                             <div className='mt-2 flex justify-end border-t-2 p-1 '>
@@ -181,7 +213,6 @@ export default function DashboardOperad() {
                         ) : (
                             <p className="text-gray-500 mt-4">Nenhuma empresa associada encontrada.</p>
                         )}
-
                     </div>
 
                     {selectedSchema && empresaData && (

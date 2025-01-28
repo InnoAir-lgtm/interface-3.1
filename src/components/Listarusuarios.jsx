@@ -56,17 +56,35 @@ export default function ListarUsuarios() {
             const response = await api.get(`/listar-associacoes/${usuario.usr_id}`);
 
             if (!response.data) throw new Error('Erro ao buscar associações');
-            const papeis = response.data.map((assoc) => assoc.pap_id);
-            const empresas = response.data.map((assoc) => assoc.emp_cnpj);
 
-            setSelectedPapeis(papeis);
+            const papeisPorEmpresa = {};
+            const empresas = [];
+
+            response.data.forEach((assoc) => {
+                if (!papeisPorEmpresa[assoc.emp_cnpj]) {
+                    papeisPorEmpresa[assoc.emp_cnpj] = [];
+                    empresas.push(assoc.emp_cnpj);
+                }
+                papeisPorEmpresa[assoc.emp_cnpj].push(assoc.pap_id);
+            });
+
+            setSelectedPapeis(papeisPorEmpresa);
             setSelectedEmpresas(empresas);
+
+            // Abrir expand automaticamente para empresas selecionadas
+            const expandState = {};
+            empresas.forEach((empresaCnpj) => {
+                expandState[empresaCnpj] = true;
+            });
+            setExpandedEmpresas(expandState);
         } catch (error) {
             console.error(error);
         }
 
         setIsModalOpen(true);
     };
+
+
 
     const abrirUserListModal = () => {
         setIsUserListModalOpen(true);
@@ -86,12 +104,13 @@ export default function ListarUsuarios() {
     const togglePapelSelection = (papelId, empresaCnpj) => {
         setSelectedPapeis((prev) => {
             const empresaPapeis = prev[empresaCnpj] || [];
-            const updatedEmpresasPapeis = empresaPapeis.includes(papelId)
+            const updatedPapeis = empresaPapeis.includes(papelId)
                 ? empresaPapeis.filter((id) => id !== papelId)
                 : [...empresaPapeis, papelId];
-            return { ...prev, [empresaCnpj]: updatedEmpresasPapeis };
+            return { ...prev, [empresaCnpj]: updatedPapeis };
         });
     };
+    
 
 
     const toggleEmpresaSelection = (cnpj) => {
@@ -100,9 +119,10 @@ export default function ListarUsuarios() {
         );
         setExpandedEmpresas((prev) => ({
             ...prev,
-            [cnpj]: !prev[cnpj],
+            [cnpj]: !prev[cnpj], // Toggle apenas ao marcar/desmarcar
         }));
     };
+
     const associarPapeisEmpresas = async () => {
         try {
             const associacoes = Object.entries(selectedPapeis).map(([emp_cnpj, papeis]) => ({
@@ -227,14 +247,13 @@ export default function ListarUsuarios() {
                                             />
                                             <span className="text-gray-700">{empresa.emp_nome}</span>
                                         </label>
-
                                         {expandedEmpresas[empresa.emp_cnpj] && (
                                             <div className="ml-6 mt-2 space-y-2">
                                                 {papeis.map((papel) => (
                                                     <label key={papel.pap_id} className="flex items-center space-x-3">
                                                         <input
                                                             type="checkbox"
-                                                            checked={selectedPapeis[empresa.emp_cnpj]?.includes(papel.pap_id)}
+                                                            checked={selectedPapeis[empresa.emp_cnpj]?.includes(papel.pap_id) || false}
                                                             onChange={() => togglePapelSelection(papel.pap_id, empresa.emp_cnpj)}
                                                             className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 focus:ring-2 focus:ring-blue-400"
                                                         />
@@ -243,9 +262,12 @@ export default function ListarUsuarios() {
                                                 ))}
                                             </div>
                                         )}
+
                                     </div>
                                 ))}
+
                             </div>
+
                         </div>
 
                         <div className="flex justify-end space-x-4 mt-6">

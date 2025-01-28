@@ -25,6 +25,17 @@ export default function ListarContatos({ selectedPessoa, schema }) {
         }
     }
 
+
+    const deletarContato = async (ctt_id, schema) => {
+        try {
+            await api.delete(`/deletar-contato?ctt_id=${ctt_id}&schema=${schema}`);
+            listarContato(selectedPessoa.pes_id, schema);
+        } catch (error) {
+            console.error('Erro ao deletar contato:', error.message);
+        }
+    };
+
+
     return (
         <div>
             <button
@@ -56,20 +67,21 @@ export default function ListarContatos({ selectedPessoa, schema }) {
 
                     {contatos.length > 0 ? (
                         <div className="grid gap-4">
-                            {contatos.map((contatos, index) => (
+                            {contatos.map((contato, index) => (
                                 <div key={index} className="p-4 border rounded-lg shadow-md bg-white">
                                     <button
                                         className="text-red-500 hover:text-red-700 transition-transform transform hover:scale-110"
-                                     
+                                        onClick={() => deletarContato(contato.ctt_id, schema)} // Usar 'ctt_id'
                                     >
                                         <FiTrash className="w-5 h-5" />
                                     </button>
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-2"> {contatos.ctt_tipo}</h3>
-                                    <p>Responsavel: {contatos.ctt_contato}</p>
-                                    <p>Contato: {contatos.ctt_numero_email}</p>
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-2">{contato.ctt_tipo}</h3>
+                                    <p>Responsável: {contato.ctt_contato}</p>
+                                    <p>Contato: {contato.ctt_numero_email}</p>
                                 </div>
-
                             ))}
+
+
                         </div>
                     ) : (
                         <p className="text-gray-500">Nenhum endereço associado ao usuário.</p>

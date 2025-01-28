@@ -18,7 +18,6 @@ export default function CadastrarPessoa({ schema }) {
     const { verifyAndCreatePermission } = usePermissions()
     const [tipoPessoaT, setTipoPessoaT] = useState([]);
     const [selectedTipo, setSelectedTipo] = useState('');
-    
 
     useEffect(() => {
         const fetchTipoPessoaT = async () => {
@@ -39,19 +38,8 @@ export default function CadastrarPessoa({ schema }) {
     }, []);
 
     const handleSelection = (e) => {
-        const tipo = e.target.value;
-        setTipoPessoa(tipo);
-
-        // Resetando os campos automaticamente ao selecionar
-        setNome("");
-        setCpf("");
-        setRg("");
-        setDataNascimento("");
-        setCnpj("");
-        setInscricaoEstadual("");
-        setNomeFantasia("");
+        setSelectedTipo(e.target.value);
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -137,7 +125,7 @@ export default function CadastrarPessoa({ schema }) {
             setMessage('Você não tem permissão para acessar esta funcionalidade.')
         }
     }
-
+   
     return (
         <div className="relative">
 
@@ -151,7 +139,6 @@ export default function CadastrarPessoa({ schema }) {
                 </div>
                 Cadastrar pessoa
             </button>
-            
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex justify-center items-center bg-gray-800 bg-opacity-50">
                     <div className="bg-white border border-gray-300 shadow-lg rounded-lg p-6 w-full max-w-lg relative">
@@ -247,7 +234,6 @@ export default function CadastrarPessoa({ schema }) {
                                         <label htmlFor="tipoPessoa">Selecione o Tipo de Pessoa:</label>
                                         <select
                                             id="tipoPessoa"
-                                            
                                             value={selectedTipo}
                                             onChange={handleSelection}
                                             className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"

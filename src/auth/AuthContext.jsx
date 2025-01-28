@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
 
     const login = async (userData) => {
-        setLoading(true); 
+        setLoading(true);
         try {
             const formattedUser = {
                 id: userData.id,
@@ -43,9 +43,18 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             console.error("Erro ao buscar permissões do papel:", error.message);
         } finally {
-            setLoading(false);
+            setLoading(false); 
         }
     };
+
+    const updateUser = (updatedData) => {
+        setUser((prevUser) => {
+            const updatedUser = { ...prevUser, ...updatedData };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            return updatedUser;
+        });
+    };
+    
 
     const logout = () => {
         setUser(null);
@@ -55,7 +64,7 @@ export const AuthProvider = ({ children }) => {
     const isAuthenticated = !!user;
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, isAuthenticated,setUser: updateUser, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

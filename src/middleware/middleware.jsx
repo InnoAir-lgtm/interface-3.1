@@ -102,9 +102,7 @@ export const PermissionProvider = ({ children }) => {
     try {
         const response = await api.get(`/permissoes-por-papel/${papelId}`);
         const permissoesPorPapel = response.data || [];
-
         console.log("Permissões do papel:", permissoesPorPapel);
-
         const hasPermission = permissoesPorPapel.some((permission) => {
             return (
                 permission.per_permissao &&
