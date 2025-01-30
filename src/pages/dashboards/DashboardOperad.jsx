@@ -3,7 +3,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { CgProfile } from "react-icons/cg";
 import EmpresaComponent from '../../components/Pessoa';
 import api from '../../apiUrl';
-import Task from '../../components/Task';
+import { motion } from 'framer-motion';
 
 export default function DashboardOperad() {
     const { logout, user, setUser } = useAuth();
@@ -18,11 +18,10 @@ export default function DashboardOperad() {
     const [currentRole, setCurrentRole] = useState(user.papel);
 
     useEffect(() => {
-        setCurrentRole(user.papel); // Atualiza o estado local quando o papel do usuário muda
+        setCurrentRole(user.papel);
     }, [user.papel]);
 
 
-    // Lista de frases motivacionais
     const motivationalPhrases = [
         "Acredite no seu potencial e conquiste seus objetivos!",
         "Cada dia é uma nova oportunidade de fazer diferente.",
@@ -68,7 +67,6 @@ export default function DashboardOperad() {
         const cnpj = e.target.value;
         setSelectedSchema(null);
         setSelectedEmpresaName(null);
-
         if (cnpj) {
             try {
                 const response = await api.get(`/buscar-schema?cnpj=${cnpj}`);
@@ -78,28 +76,22 @@ export default function DashboardOperad() {
 
                 const empresaDataResponse = await api.get(`/dados-empresa?cnpj=${cnpj}`);
                 setEmpresaData(empresaDataResponse.data);
-
                 const empresa = empresas.find((emp) => emp.emp_cnpj === cnpj);
                 setSelectedEmpresaName(empresa?.empresas?.emp_nome || "Empresa Desconhecida");
-
                 const papel = empresa?.papeis?.pap_papel || "Usuário sem papel";
                 const pap_id = empresa?.pap_id || null;
 
                 setCurrentRole(papel);
-
-
-                // Atualiza o contexto do usuário e estado local
                 setUser((prevUser) => {
                     const updatedUser = {
                         ...prevUser,
                         papel,
                         pap_id,
                     };
-                    localStorage.setItem('user', JSON.stringify(updatedUser)); // Atualize o localStorage
-                    return updatedUser; // Retorne o novo estado
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                    return updatedUser;
                 });
 
-                // Atualiza o localStorage
                 localStorage.setItem(
                     'user',
                     JSON.stringify({
@@ -115,27 +107,60 @@ export default function DashboardOperad() {
         }
     };
 
-
-
     const formatarNome = (nomeCompleto) => {
         if (!nomeCompleto) return '';
         const nomes = nomeCompleto.split(' ');
         return nomes.length > 1 ? `${nomes[0]} ${nomes[1]}` : nomes[0];
     };
 
+
     if (loading) {
-        return <p>Carregando...</p>;
+        return (
+            <div className="fixed inset-0 flex justify-center items-center bg-gray-100 z-50">
+                <motion.div
+                    initial={{ x: 0 }}
+                    animate={{ x: "-100%" }}
+                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                    className="absolute left-0 top-0 w-1/2 h-full bg-black"
+                />
+                <motion.div
+                    initial={{ x: 0 }}
+                    animate={{ x: "100%" }}
+                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                    className="absolute right-0 top-0 w-1/2 h-full bg-black"
+                />
+                <motion.div
+                    initial={{ opacity: 1 }}
+                    animate={{ opacity: 0 }}
+                    transition={{ delay: 1, duration: 0.5 }}
+                    className="absolute flex justify-center items-center"
+                >
+                    <motion.div
+                        className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"
+                        initial={{ rotate: 0 }}
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 1 }}
+                    />
+                </motion.div>
+            </div>
+        );
     }
+
+
 
     if (error) {
         return <p>Erro: {error}</p>;
     }
 
     return (
-        <div className='flex'>
+        <div
+        >
+            <div className="flex justify-center items-center w-full bg-black border border-gray-300 shadow-md p-1 text-lg font-extralight text-white">
+                Bela Arte — O conforto do cliente vem em primeiro lugar.
+            </div>
+
             <div className='w-full p-10'>
                 <div className='p-2 flex flex-col'>
-
                     <header className="flex flex-wrap justify-between items-center mb-8 gap-6">
                         <div className="flex-1">
                             <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-2">
@@ -144,7 +169,7 @@ export default function DashboardOperad() {
                             <p className="text-lg font-light text-gray-600">{motivationalPhrase}</p>
                         </div>
 
-                        <div className="flex items-center gap-4 flex-shrink-0">
+                        <div className="flex items-center gap-4 flex-shrink-0 border rounded-full p-2 shadow-md">
                             <button
                                 className="flex justify-center items-center w-12 h-12 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition duration-200"
                                 onClick={togglePop}

@@ -29,13 +29,12 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                 setError("Nenhuma pessoa encontrada para o schema especificado.");
             } else {
                 const pessoasComTipo = await Promise.all(data.data.map(async (pessoa) => {
-                    // Buscar os tipos da pessoa selecionada
                     const tiposResponse = await api.get(`/tipos-pessoa?pes_id=${pessoa.pes_id}&schema=${schema}`);
                     const tiposPessoa = tiposResponse.data.data;
 
                     return {
                         ...pessoa,
-                        tipos: tiposPessoa // Aqui, mantém os tipos como objetos com 'tpp_id' e 'tpp_descricao'
+                        tipos: tiposPessoa
                     };
                 }));
                 setPessoas(pessoasComTipo);
@@ -47,8 +46,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             setLoading(false);
         }
     };
-
-
 
     const handleDeletePessoa = async (id) => {
         try {
@@ -72,22 +69,18 @@ const EmpresaComponent = ({ schema, empresaName }) => {
         try {
             const response = await api.delete(`/deletar-tipos-pessoa?pes_id=${pes_id}&tpp_id=${tpp_id}&schema=${schema}`);
             if (response.status === 200) {
-                // Atualiza o estado removendo o tipo da pessoa
                 setPessoas((prevPessoas) => {
                     return prevPessoas.map((pessoa) => {
                         if (pessoa.pes_id === pes_id) {
-                            // Remove o tipo da pessoa usando o tpp_id
                             const novosTipos = pessoa.tipos.filter((tipo) => tipo.tpp_id !== tpp_id);
                             return { ...pessoa, tipos: novosTipos };
                         }
                         return pessoa;
                     });
                 });
-    
-                // Limpar o campo de tipo na pessoa selecionada
                 setSelectedPessoa((prevSelectedPessoa) => ({
                     ...prevSelectedPessoa,
-                    tipos: [],  // Limpa o campo de tipos
+                    tipos: [],
                 }));
     
                 alert('Tipo de pessoa excluído com sucesso!');
@@ -98,11 +91,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
         }
     };
     
-
-
-
-
-
     const openModal = () => {
         setIsOpen(true)
     }
@@ -135,10 +123,12 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     if (error) {
         return <p>Erro: {error}</p>;
     }
+
+
     return (
         <div>
+            <h2 className="text-2xl font-normal text-gray-800 mb-4">Gestão da <span className="font-extralight">{empresaName || "NOME DA EMPRESA"}🏣</span></h2>
 
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Gestão da {empresaName || "NOME DA EMPRESA"}</h2>
             <div className="flex sm:justify-center xl:justify-normal items-center flex-wrap gap-4 w-full h-full">
                 <button
                     onClick={openModal}
@@ -155,11 +145,12 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                         </div>
                     </div>
                 </button>
+
+
                 <CadastrarTipo schema={schema} />
                 <Agenda />
-
-
             </div>
+
             <AnimatePresence initial={false}>
                 {isOpen && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -238,14 +229,14 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             <div className="relative">
                 {selectedPessoa && (
                     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-                        <div className="bg-gray-100 p-6 sm:p-8 md:p-10 rounded-lg shadow-lg w-full max-w-lg md:max-w-2xl lg:max-w-3xl h-auto max-h-screen overflow-y-auto flex">
+                        <div className=" p-6 sm:p-8 md:p-10 rounded-lg shadow-lg w-full max-w-lg md:max-w-2xl lg:max-w-3xl h-auto max-h-screen overflow-y-auto flex">
                             <div className="absolute top-1/4 left-0 flex flex-col space-y-4 ">
                                 <CadastrarEndereco schema={schema} />
                                 <ListEndPessoa selectedPessoa={selectedPessoa} schema={schema} />
                                 <ListarContatos selectedPessoa={selectedPessoa} schema={schema} />
                             </div>
 
-                            <div className="flex-1 p-4 rounded-lg max-w-full">
+                            <div className="flex-1 bg-white p-4 rounded-lg h-full">
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="text-xl md:text-2xl font-semibold text-gray-800 border-b pb-2">Detalhes da Pessoa</h2>
                                     <button
