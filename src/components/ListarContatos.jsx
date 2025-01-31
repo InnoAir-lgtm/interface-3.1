@@ -61,7 +61,7 @@ export default function ListarContatos({ selectedPessoa, schema }) {
                     </button>
                 </div>
 
-                <CadastrarEmail selectedPessoa={selectedPessoa} schema={schema} />
+                <CadastrarEmail selectedPessoa={selectedPessoa} schema={schema} atualizarListaContatos={() => listarContato(selectedPessoa.pes_id, schema)} />
 
                 <div className="p-4">
 

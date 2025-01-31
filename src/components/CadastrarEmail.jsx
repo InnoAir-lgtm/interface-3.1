@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import api from '../apiUrl';
 
-export default function CadastrarEmail({ selectedPessoa, schema }) {
+export default function CadastrarEmail({ selectedPessoa, schema, atualizarListaContatos }) {
     const [contato, setContato] = useState({ email: '', numero: '', email_tipo: '', pes_id: '' });
     const [inputPlaceholder, setInputPlaceholder] = useState('');
     const [openModal, setOpenModal] = useState(false);
@@ -28,6 +28,10 @@ export default function CadastrarEmail({ selectedPessoa, schema }) {
         }));
     };
 
+    const limparCampos = () => {
+        setContato({ email: '', numero: '', email_tipo: '', pes_id: '' });
+    };
+
     const salvarContato = async () => {
         if (!schema) {
             alert('Selecione um schema antes de salvar o contato.');
@@ -51,6 +55,8 @@ export default function CadastrarEmail({ selectedPessoa, schema }) {
             const response = await api.post('/associar-contato-pessoa', contatoData);
             alert(response.data.message);
             setOpenModal(false); // Fecha a modal ao salvar
+            limparCampos(); // Limpa os inputs
+            atualizarListaContatos();
         } catch (error) {
             console.error('Erro ao salvar contato:', error.message);
             alert('Não foi possível salvar o contato.');
@@ -79,6 +85,7 @@ export default function CadastrarEmail({ selectedPessoa, schema }) {
                                 id="tipo_email"
                                 className="mt-1 p-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
                                 onChange={handleTipoContatoChange}
+                                value={contato.email_tipo}
                             >
                                 <option value="">Selecione o tipo de contato</option>
                                 <option value="Email NFE">Email NFE</option>
@@ -102,6 +109,7 @@ export default function CadastrarEmail({ selectedPessoa, schema }) {
                                 className="mt-1 p-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
                                 type="text"
                                 placeholder="Contato"
+                                value={contato.numero}
                                 onChange={(e) =>
                                     setContato((prevState) => ({
                                         ...prevState,
@@ -133,7 +141,7 @@ export default function CadastrarEmail({ selectedPessoa, schema }) {
                         <div className="flex justify-end space-x-2">
                             <button
                                 className="bg-gray-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-500 focus:ring-2 focus:ring-gray-300 focus:outline-none"
-                                onClick={() => setOpenModal(false)}
+                                onClick={() => { setOpenModal(false); limparCampos(); }}
                             >
                                 Cancelar
                             </button>

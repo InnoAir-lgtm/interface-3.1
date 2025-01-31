@@ -69,20 +69,21 @@ const EmpresaComponent = ({ schema, empresaName }) => {
         try {
             const response = await api.delete(`/deletar-tipos-pessoa?pes_id=${pes_id}&tpp_id=${tpp_id}&schema=${schema}`);
             if (response.status === 200) {
-                setPessoas((prevPessoas) => {
-                    return prevPessoas.map((pessoa) => {
-                        if (pessoa.pes_id === pes_id) {
-                            const novosTipos = pessoa.tipos.filter((tipo) => tipo.tpp_id !== tpp_id);
-                            return { ...pessoa, tipos: novosTipos };
-                        }
-                        return pessoa;
-                    });
+                setPessoas((prevPessoas) =>
+                    prevPessoas.map((pessoa) =>
+                        pessoa.pes_id === pes_id
+                            ? { ...pessoa, tipos: pessoa.tipos.filter((tipo) => tipo.tpp_id !== tpp_id) }
+                            : pessoa
+                    )
+                );
+                setSelectedPessoa((prevSelectedPessoa) => {
+                    if (!prevSelectedPessoa || prevSelectedPessoa.pes_id !== pes_id) return prevSelectedPessoa;
+                    return {
+                        ...prevSelectedPessoa,
+                        tipos: prevSelectedPessoa.tipos.filter((tipo) => tipo.tpp_id !== tpp_id),
+                    };
                 });
-                setSelectedPessoa((prevSelectedPessoa) => ({
-                    ...prevSelectedPessoa,
-                    tipos: [],
-                }));
-
+    
                 alert('Tipo de pessoa excluído com sucesso!');
             }
         } catch (error) {
@@ -90,6 +91,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             alert('Erro ao excluir tipo de pessoa.');
         }
     };
+    
 
     const openModal = () => {
         setIsOpen(true)
@@ -258,9 +260,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 readOnly
                                             />
                                         </div>
-
-
-
                                         <div className="w-full md:w-1/2">
                                             <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo</label>
                                             <input
