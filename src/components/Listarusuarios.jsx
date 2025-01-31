@@ -119,7 +119,7 @@ export default function ListarUsuarios() {
         );
         setExpandedEmpresas((prev) => ({
             ...prev,
-            [cnpj]: !prev[cnpj], // Toggle apenas ao marcar/desmarcar
+            [cnpj]: !prev[cnpj],
         }));
     };
 
@@ -153,7 +153,7 @@ export default function ListarUsuarios() {
     return (
         <div>
 
-            <div className="bg-[#D9D9D9] backdrop-blur-lg h-64 rounded-[40px] p-7 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+            <div className="bg-[#D9D9D9] backdrop-blur-lg h-64 rounded-lg p-7 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                 <div className="flex flex-col justify-between h-full gap-4 sm:gap-3">
                     <div className="flex gap-5 sm:gap-3 flex-wrap items-center">
                         <div className="flex justify-center items-center bg-black w-16 h-16 rounded-full sm:w-12 sm:h-12">
@@ -262,7 +262,6 @@ export default function ListarUsuarios() {
                                                 ))}
                                             </div>
                                         )}
-
                                     </div>
                                 ))}
 

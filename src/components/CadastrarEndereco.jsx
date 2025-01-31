@@ -116,7 +116,7 @@ export default function CadastrarEndereco({ schema }) {
             <button
                 value="adicionarEndereco"
                 onClick={(e) => abrirModal(e.target.value)}
-                className="px-5 py-3 flex transition-transform transform -translate-x-32 hover:translate-x-0 duration-300 ease-in-out  text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="px-5 py-3 flex justify-center items-center w-48 transition-transform transform -translate-x-32 hover:translate-x-0 duration-300 ease-in-out text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
                 + Adicionar endereço
             </button>
@@ -132,9 +132,14 @@ export default function CadastrarEndereco({ schema }) {
                                     name="cep"
                                     value={endereco.cep}
                                     onChange={(e) => {
-                                        let cepValue = e.target.value;
-                                        cepValue = cepValue.replace(/[^\d-]/g, '');
+                                        let cepValue = e.target.value.replace(/\D/g, '');
+
+                                        if (cepValue.length > 5) {
+                                            cepValue = `${cepValue.slice(0, 5)}-${cepValue.slice(5, 8)}`;
+                                        }
+
                                         setEndereco({ ...endereco, cep: cepValue });
+
                                         if (cepValue.length === 9) {
                                             fetchEndereco(cepValue);
                                         }
@@ -143,6 +148,7 @@ export default function CadastrarEndereco({ schema }) {
                                     className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-400"
                                     required
                                 />
+
                                 <input
                                     type="text"
                                     name="logradouro"

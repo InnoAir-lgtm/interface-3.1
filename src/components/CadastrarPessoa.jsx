@@ -17,7 +17,7 @@ export default function CadastrarPessoa({ schema }) {
     const [isOpen, setIsOpen] = useState(false);
     const { verifyAndCreatePermission } = usePermissions()
     const [tipoPessoaT, setTipoPessoaT] = useState([]);
-    const [selectedTipo, setSelectedTipo] = useState('');
+    const [selectedTipos, setSelectedTipos] = useState([]);
 
     useEffect(() => {
         const fetchTipoPessoaT = async () => {
@@ -38,8 +38,12 @@ export default function CadastrarPessoa({ schema }) {
     }, []);
 
     const handleSelection = (e) => {
-        setSelectedTipo(e.target.value);
+        const value = e.target.value;
+        setSelectedTipos((prev) =>
+            prev.includes(value) ? prev.filter((tipo) => tipo !== value) : [...prev, value]
+        );
     };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -74,17 +78,29 @@ export default function CadastrarPessoa({ schema }) {
                 const pes_id = response.data.data[0]?.pes_id;
                 console.log("Pessoa cadastrada com ID:", pes_id);
 
-                if (pes_id && selectedTipo) {
-                    const tipoPessoaResponse = await api.post(`/associar-tipo-pessoa?schema=${schema}`,
-                        { pes_id, tpp_id: selectedTipo },
-                        { headers: { "Content-Type": "application/json" } }
-                    );
+                if (pes_id && selectedTipos.length > 0) {
+                    let sucesso = true;
 
-                    console.log(selectedTipo)
+                    for (const tpp_id of selectedTipos) {
+                        try {
+                            const tipoPessoaResponse = await api.post(`/associar-tipo-pessoa?schema=${schema}`,
+                                { pes_id, tpp_id },
+                                { headers: { "Content-Type": "application/json" } }
+                            );
 
-                    console.log("Resposta de associar tipo:", tipoPessoaResponse.data);
+                            console.log("Resposta de associar tipo:", tipoPessoaResponse.data);
 
-                    if (tipoPessoaResponse.status === 200) {
+                            if (tipoPessoaResponse.status !== 200) {
+                                sucesso = false;
+                            }
+                        } catch (error) {
+                            console.log("Resposta de associar tipo:", tipoPessoaResponse.data);
+                            console.error("Sucesso ao cadastrar pessoa:", error);
+                            sucesso = false;
+                        }
+                    }
+
+                    if (sucesso) {
                         setMessage("Pessoa e tipo associados com sucesso!");
                     } else {
                         setMessage("Erro ao associar tipo à pessoa.");
@@ -105,6 +121,7 @@ export default function CadastrarPessoa({ schema }) {
             setLoading(false);
         }
     };
+
     const resetForm = () => {
         setTipoPessoa("");
         setNome("");
@@ -114,8 +131,9 @@ export default function CadastrarPessoa({ schema }) {
         setCnpj("");
         setInscricaoEstadual("");
         setNomeFantasia("");
-        setSelectedTipo("");
+        setSelectedTipos([]); // Corrigido aqui
     };
+
 
     const abrirModal = async (permissionName) => {
         const hasPermission = await verifyAndCreatePermission(permissionName)
@@ -125,7 +143,7 @@ export default function CadastrarPessoa({ schema }) {
             setMessage('Você não tem permissão para acessar esta funcionalidade.')
         }
     }
-   
+
     return (
         <div className="relative">
 
@@ -139,6 +157,7 @@ export default function CadastrarPessoa({ schema }) {
                 </div>
                 Cadastrar pessoa
             </button>
+
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex justify-center items-center bg-gray-800 bg-opacity-50">
                     <div className="bg-white border border-gray-300 shadow-lg rounded-lg p-6 w-full max-w-lg relative">
@@ -230,27 +249,30 @@ export default function CadastrarPessoa({ schema }) {
                                             className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
+
+                                    {/* Seja multipla escolha de tipo */}
                                     <div>
-                                        <label htmlFor="tipoPessoa">Selecione o Tipo de Pessoa:</label>
+                                        <label htmlFor="tipoPessoa">Selecione o(s) Tipo(s) de Pessoa:</label>
                                         <select
                                             id="tipoPessoa"
-                                            value={selectedTipo}
+                                            multiple
+                                            value={selectedTipos}
                                             onChange={handleSelection}
                                             className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
                                         >
-                                            <option value="">-- Selecione --</option>
                                             {tipoPessoaT.map((tipo) => (
                                                 <option key={tipo.tpp_id} value={tipo.tpp_id}>
                                                     {tipo.tpp_descricao}
                                                 </option>
                                             ))}
                                         </select>
-                                        {selectedTipo && (
+                                        {selectedTipos.length > 0 && (
                                             <p className="mt-2 text-sm text-gray-700">
-                                                ID do tipo selecionado: <span className="font-bold">{selectedTipo}</span>
+                                                IDs dos tipos selecionados: <span className="font-bold">{selectedTipos.join(", ")}</span>
                                             </p>
                                         )}
                                     </div>
+
 
                                 </>
                             )}
@@ -318,6 +340,7 @@ export default function CadastrarPessoa({ schema }) {
                                     </div>
                                 </>
                             )}
+
                             <div className="text-center">
                                 <button
                                     type="submit"

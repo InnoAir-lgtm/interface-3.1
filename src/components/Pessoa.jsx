@@ -82,7 +82,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                     ...prevSelectedPessoa,
                     tipos: [],
                 }));
-    
+
                 alert('Tipo de pessoa excluído com sucesso!');
             }
         } catch (error) {
@@ -90,7 +90,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             alert('Erro ao excluir tipo de pessoa.');
         }
     };
-    
+
     const openModal = () => {
         setIsOpen(true)
     }
@@ -127,7 +127,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
 
     return (
         <div>
-            <h2 className="text-2xl font-normal text-gray-800 mb-4">Gestão da <span className="font-extralight">{empresaName || "NOME DA EMPRESA"}🏣</span></h2>
+            <h2 className="text-2xl font-normal text-gray-800 mb-4">Gestão da <span className="font-extralight">{empresaName || "NOME DA EMPRESA"}</span></h2>
 
             <div className="flex sm:justify-center xl:justify-normal items-center flex-wrap gap-4 w-full h-full">
                 <button
@@ -260,40 +260,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                         </div>
 
 
-                                        <div className="w-full md:w-1/2 flex items-center justify-between">
-                                        
-                                            <div className="w-full">
-                                                <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo Pessoa</label>
-                                                <div className="mt-1 p-2 border border-gray-300 rounded-lg w-full bg-gray-50 flex items-center justify-between">
-                                                    <span className="text-sm text-gray-700">
-                                                        {selectedPessoa.tipos.map((tipo, index) => (
-                                                            <span key={index}>{tipo.tpp_descricao}</span>
-                                                        ))}
-                                                    </span>
-
-                                                    <button
-                                                        className="ml-2 text-red-500 hover:text-red-700"
-                                                        onClick={(e) => {
-                                                            e.preventDefault(); 
-                                                            e.stopPropagation();  // Impede a propagação do evento
-
-
-                                                            const tipoPessoa = selectedPessoa.tipos[0]; // Ou a lógica que você desejar para pegar o tipo correto
-                                                            handleDeleteTipoPessoa(selectedPessoa.pes_id, tipoPessoa.tpp_id);  // Excluir o tipo de pessoa
-                                                        }}
-                                                    >
-                                                        <FiTrash className="w-5 h-5" />
-                                                    </button>
-
-
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-
-
-
 
                                         <div className="w-full md:w-1/2">
                                             <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo</label>
@@ -307,28 +273,57 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                         </div>
                                     </div>
                                     {selectedPessoa.pes_fis_jur === "cpf" ? (
-                                        <div className="flex flex-col md:flex-row gap-4 mb-6">
-                                            <div className="w-full md:w-1/2">
-                                                <label htmlFor="cpf" className="block text-sm font-medium text-gray-700">CPF</label>
-                                                <input
-                                                    type="text"
-                                                    id="cpf"
-                                                    className="mt-1 p-2 border border-gray-300 rounded-lg w-full"
-                                                    value={selectedPessoa.pes_cpf_cnpj}
-                                                    readOnly
-                                                />
+
+                                        <div>
+                                            <div className="flex flex-col md:flex-row gap-4 mb-2">
+                                                <div className="w-full md:w-1/2">
+                                                    <label htmlFor="cpf" className="block text-sm font-medium text-gray-700">CPF</label>
+                                                    <input
+                                                        type="text"
+                                                        id="cpf"
+                                                        className="mt-1 p-2 border border-gray-300 rounded-lg w-full"
+                                                        value={selectedPessoa.pes_cpf_cnpj}
+                                                        readOnly
+                                                    />
+                                                </div>
+                                                <div className="w-full md:w-1/2">
+                                                    <label htmlFor="rg" className="block text-sm font-medium text-gray-700">RG</label>
+                                                    <input
+                                                        type="text"
+                                                        id="rg"
+                                                        className="mt-1 p-2 border border-gray-300 rounded-lg w-full"
+                                                        value={selectedPessoa.pes_rg}
+                                                        readOnly
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className="w-full md:w-1/2">
-                                                <label htmlFor="rg" className="block text-sm font-medium text-gray-700">RG</label>
-                                                <input
-                                                    type="text"
-                                                    id="rg"
-                                                    className="mt-1 p-2 border border-gray-300 rounded-lg w-full"
-                                                    value={selectedPessoa.pes_rg}
-                                                    readOnly
-                                                />
-                                            </div>
+
+                                                <div className="mb-3">
+                                                    <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo Pessoa</label>
+                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                        {selectedPessoa.tipos.map((tipo, index) => (
+                                                            <span
+                                                                key={index}
+                                                                className="flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm border border-green-400"
+                                                            >
+                                                                {tipo.tpp_descricao}
+                                                                <button
+                                                                    className="ml-2 text-red-500 hover:text-red-700"
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        e.stopPropagation();
+                                                                        handleDeleteTipoPessoa(selectedPessoa.pes_id, tipo.tpp_id);
+                                                                    }}
+                                                                >
+                                                                    <FiTrash className="w-4 h-4" />
+                                                                </button>
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>  
                                         </div>
+
+
                                     ) : (
                                         <div className="flex flex-col md:flex-row gap-4 mb-6">
                                             <div className="w-full md:w-1/2">
