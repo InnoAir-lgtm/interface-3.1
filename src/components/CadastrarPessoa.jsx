@@ -101,13 +101,12 @@ export default function CadastrarPessoa({ schema }) {
                     }
 
                     if (sucesso) {
-                        setMessage("Pessoa e tipo associados com sucesso!");
+                        setMessage("Pessoa e tipo associados com falha");
                     } else {
-                        setMessage("Erro ao associar tipo à pessoa.");
+                        setMessage("Pessoa e tipo associados com sucesso!");
                     }
                 } else {
                     setMessage("Faltando dados para associar tipo de pessoa.");
-                    console.error("pes_id ou selectedTipo ausentes.");
                 }
 
                 resetForm();
@@ -115,7 +114,6 @@ export default function CadastrarPessoa({ schema }) {
                 setMessage(`Erro ao cadastrar pessoa: ${response.statusText}`);
             }
         } catch (error) {
-            console.error("Erro ao conectar com a API:", error);
             setMessage("Erro ao conectar com a API.");
         } finally {
             setLoading(false);
@@ -131,7 +129,7 @@ export default function CadastrarPessoa({ schema }) {
         setCnpj("");
         setInscricaoEstadual("");
         setNomeFantasia("");
-        setSelectedTipos([]); // Corrigido aqui
+        setTipoPessoa("");
     };
 
 
