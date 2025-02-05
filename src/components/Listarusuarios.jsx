@@ -185,42 +185,41 @@ export default function ListarUsuarios() {
 
 
             {isUserListModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                    <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md relative">
-                        <button
-                            onClick={fecharUserListModal}
-                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
-                        >
-                            ✕
-                        </button>
-
-                        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Lista de Usuários</h2>
-                        <ul className="max-h-96 ">
-                            {usuarios.length > 0 ? (
-                                usuarios.map((usuario) => (
-                                    <li
-                                        key={usuario.usr_id}
-                                        className="flex justify-between items-center bg-gray-100 hover:bg-gray-200 hover:shadow-lg hover:scale-[1.02] transition-transform cursor-pointer rounded-lg p-4 mb-2"
-                                    >
-                                        <div>
-                                            <p className="font-semibold">{usuario.usr_nome}</p>
-                                            <p className="text-sm text-gray-500">{usuario.usr_email}</p>
-                                        </div>
-                                        <button
-                                            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                                            onClick={() => abrirModal(usuario)}
-                                        >
-                                            Editar
-                                        </button>
-                                    </li>
-
-                                ))
-                            ) : (
-                                <p className="text-gray-600">Nenhum usuário encontrado</p>
-                            )}
-                        </ul>
-                    </div>
-                </div>
+               <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+               <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md relative">
+                   <button
+                       onClick={fecharUserListModal}
+                       className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                   >
+                       ✕
+                   </button>
+           
+                   <h2 className="text-2xl font-semibold text-gray-800 mb-4">Lista de Usuários</h2>
+                   <ul className="overflow-y-auto"> {/* Removido max-h-96 e adicionado overflow-y-auto */}
+                       {usuarios.length > 0 ? (
+                           usuarios.map((usuario) => (
+                               <li
+                                   key={usuario.usr_id}
+                                   className="flex justify-between items-center bg-gray-100 hover:bg-gray-200 hover:shadow-lg hover:scale-[1.02] transition-transform cursor-pointer rounded-lg p-4 mb-2"
+                               >
+                                   <div>
+                                       <p className="font-semibold">{usuario.usr_nome}</p>
+                                       <p className="text-sm text-gray-500">{usuario.usr_email}</p>
+                                   </div>
+                                   <button
+                                       className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                                       onClick={() => abrirModal(usuario)}
+                                   >
+                                       Editar
+                                   </button>
+                               </li>
+                           ))
+                       ) : (
+                           <p className="text-gray-600">Nenhum usuário encontrado</p>
+                       )}
+                   </ul>
+               </div>
+           </div>           
             )}
 
             {isModalOpen && usuarioSelecionado && (
