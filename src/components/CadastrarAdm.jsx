@@ -33,7 +33,7 @@ export default function CadastrarAdm() {
 
         try {
             const response = await api.post('/cadastrar-usuario', {
-                email: `${formData.email}@bela.com.br`,
+                email: formData.email,
                 nome: formData.name,
                 senha: formData.password,
                 grupo: formData.grupo,
@@ -96,9 +96,6 @@ export default function CadastrarAdm() {
                                         value={formData.email}
                                         onChange={handleInputChange}
                                     />
-                                    <span className="px-4 py-2 bg-gray-200 border border-gray-300 rounded-r-lg">
-                                        @bela.com.br
-                                    </span>
                                 </div>
                                 <div>
                                     <input

@@ -5,8 +5,7 @@ import Perfil from '../../components/Perfil';
 
 
 export default function DashboardAdm() {
-    const { logout } = useAuth();
-
+    
     return (
         <div className="min-h-screen bg-gray-50 text-gray-800 flex flex-col">
 
@@ -15,11 +14,8 @@ export default function DashboardAdm() {
                 <div className="container mx-auto flex justify-between items-center px-8">
                     <h1 className="text-4xl font-semibold tracking-tight">Dashboard do Administrador</h1>
                     <div className="flex items-center space-x-6">
- 
                         <div className="relative">
-                           
                                 <Perfil />
-                          
                             <div className="absolute bottom-0 right-0 bg-white w-4 h-4 rounded-full border-2 border-white"></div>
                         </div>
                     </div>
@@ -28,11 +24,8 @@ export default function DashboardAdm() {
 
             <main className="flex-grow container mx-auto px-8 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                   
-                        <CadastrarOpe />
-                
-                        <ListarUsuarios />
-                
+                    <CadastrarOpe />
+                    <ListarUsuarios />
                 </div>
             </main>
 
