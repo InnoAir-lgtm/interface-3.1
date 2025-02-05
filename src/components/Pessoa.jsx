@@ -24,6 +24,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     const fetchPessoas = async () => {
         try {
             const response = await api.get(`/pessoas?schema=${schema}`);
+            console.log("Schema enviado:", schema);
             const data = response.data;
             if (!data || data.length === 0) {
                 setError("Nenhuma pessoa encontrada para o schema especificado.");

@@ -27,7 +27,7 @@ export default function CadastrarOpe() {
 
         try {
             const response = await api.post('/cadastrar-usuario', {
-                email: formData.email,
+                email: `${formData.email}@bela.com.br`,
                 nome: formData.name,
                 senha: formData.password,
                 perfil: formData.perfil,
@@ -116,6 +116,9 @@ export default function CadastrarOpe() {
                                         value={formData.email}
                                         onChange={handleInputChange}
                                     />
+                                    <span className="px-4 py-2 bg-gray-200 border border-gray-300 rounded-r-lg">
+                                        @bela.com.br
+                                    </span>
                                 </div>
 
                                 <div>
