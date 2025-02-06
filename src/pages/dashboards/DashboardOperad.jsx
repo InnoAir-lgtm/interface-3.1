@@ -169,7 +169,7 @@ export default function DashboardOperad() {
                             <p className="text-lg font-light text-gray-600">{motivationalPhrase}</p>
                         </div>
 
-                        <div className="flex items-center gap-4 flex-shrink-0 border rounded-full p-2 shadow-md">
+                        <div className="flex items-center gap-2 flex-shrink-0 border rounded-full p-3 shadow-md">
                             <button
                                 className="flex justify-center items-center w-12 h-12 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition duration-200"
                                 onClick={togglePop}

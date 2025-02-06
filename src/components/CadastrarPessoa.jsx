@@ -336,6 +336,42 @@ export default function CadastrarPessoa({ schema }) {
                                             className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
+
+                                    <div>
+                                        <label htmlFor="dataNascimento" className="block text-sm font-semibold text-gray-700 mb-1">
+                                            Data de Nascimento:
+                                        </label>
+                                        <input
+                                            id="dataNascimento"
+                                            type="date"
+                                            value={dataNascimento}
+                                            onChange={(e) => setDataNascimento(e.target.value)}
+                                            required
+                                            className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="tipoPessoa">Selecione o(s) Tipo(s) de Pessoa:</label>
+                                        <select
+                                            id="tipoPessoa"
+                                            multiple
+                                            value={selectedTipos}
+                                            onChange={handleSelection}
+                                            className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
+                                        >
+                                            {tipoPessoaT.map((tipo) => (
+                                                <option key={tipo.tpp_id} value={tipo.tpp_id}>
+                                                    {tipo.tpp_descricao}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {selectedTipos.length > 0 && (
+                                            <p className="mt-2 text-sm text-gray-700">
+                                                IDs dos tipos selecionados: <span className="font-bold">{selectedTipos.join(", ")}</span>
+                                            </p>
+                                        )}
+                                    </div>
                                 </>
                             )}
 

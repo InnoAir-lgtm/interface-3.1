@@ -24,7 +24,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     const fetchPessoas = async () => {
         try {
             const response = await api.get(`/pessoas?schema=${schema}`);
-            console.log("Schema enviado:", schema);
             const data = response.data;
             if (!data || data.length === 0) {
                 setError("Nenhuma pessoa encontrada para o schema especificado.");
@@ -84,7 +83,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                         tipos: prevSelectedPessoa.tipos.filter((tipo) => tipo.tpp_id !== tpp_id),
                     };
                 });
-    
+
                 alert('Tipo de pessoa excluído com sucesso!');
             }
         } catch (error) {
@@ -92,7 +91,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             alert('Erro ao excluir tipo de pessoa.');
         }
     };
-    
+
 
     const openModal = () => {
         setIsOpen(true)
@@ -186,9 +185,8 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                             <IoReloadSharp />
                                         </button>
                                     </div>
-
-
                                 </div>
+
                                 <h3 className="text-2xl font-semibold mb-6 text-gray-800">Lista de Pessoas</h3>
                                 {pessoas.length > 0 ? (
                                     <ul className="space-y-4">
@@ -229,6 +227,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                     </div>
                 )}
             </AnimatePresence>
+            
             <div className="relative">
                 {selectedPessoa && (
                     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
@@ -272,8 +271,8 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                             />
                                         </div>
                                     </div>
-                                    {selectedPessoa.pes_fis_jur === "cpf" ? (
 
+                                    {selectedPessoa.pes_fis_jur === "cpf" ? (
                                         <div>
                                             <div className="flex flex-col md:flex-row gap-4 mb-2">
                                                 <div className="w-full md:w-1/2">
@@ -298,66 +297,92 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 </div>
                                             </div>
 
-                                                <div className="mb-3">
-                                                    <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo Pessoa</label>
-                                                    <div className="flex flex-wrap gap-2 mt-2">
-                                                        {selectedPessoa.tipos.map((tipo, index) => (
-                                                            <span
-                                                                key={index}
-                                                                className="flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm border border-green-400"
+                                            <div className="mb-4">
+                                                <label htmlFor="fundacao" className="block text-sm font-medium text-gray-700">Data de Fundação</label>
+                                                <input
+                                                    type="text"
+                                                    id="fundacao"
+                                                    className="mt-1 p-2 border border-gray-300 rounded-lg w-full"
+                                                    value={selectedPessoa.pes_dn}
+                                                    readOnly
+                                                />
+                                            </div>
+
+                                            <div className="mb-3">
+                                                <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo Pessoa</label>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {selectedPessoa.tipos.map((tipo, index) => (
+                                                        <span
+                                                            key={index}
+                                                            className="flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm border border-green-400"
+                                                        >
+                                                            {tipo.tpp_descricao}
+                                                            <button
+                                                                className="ml-2 text-red-500 hover:text-red-700"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.stopPropagation();
+                                                                    handleDeleteTipoPessoa(selectedPessoa.pes_id, tipo.tpp_id);
+                                                                }}
                                                             >
-                                                                {tipo.tpp_descricao}
-                                                                <button
-                                                                    className="ml-2 text-red-500 hover:text-red-700"
-                                                                    onClick={(e) => {
-                                                                        e.preventDefault();
-                                                                        e.stopPropagation();
-                                                                        handleDeleteTipoPessoa(selectedPessoa.pes_id, tipo.tpp_id);
-                                                                    }}
-                                                                >
-                                                                    <FiTrash className="w-4 h-4" />
-                                                                </button>
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>  
+                                                                <FiTrash className="w-4 h-4" />
+                                                            </button>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         </div>
-
-
                                     ) : (
-                                        <div className="flex flex-col md:flex-row gap-4 mb-6">
-                                            <div className="w-full md:w-1/2">
-                                                <label htmlFor="cnpj" className="block text-sm font-medium text-gray-700">CNPJ</label>
-                                                <input
-                                                    type="text"
-                                                    id="cnpj"
-                                                    className="mt-1 p-2 border border-gray-300 rounded-lg w-full"
-                                                    value={selectedPessoa.pes_cpf_cnpj}
-                                                    readOnly
-                                                />
+                                        <div>
+                                            <div className="flex flex-col md:flex-row gap-4 mb-6">
+                                                <div className="w-full md:w-1/2">
+                                                    <label htmlFor="cnpj" className="block text-sm font-medium text-gray-700">CNPJ</label>
+                                                    <input
+                                                        type="text"
+                                                        id="cnpj"
+                                                        className="mt-1 p-2 border border-gray-300 rounded-lg w-full"
+                                                        value={selectedPessoa.pes_cpf_cnpj}
+                                                        readOnly
+                                                    />
+                                                </div>
+                                                <div className="w-full md:w-1/2">
+                                                    <label htmlFor="ie" className="block text-sm font-medium text-gray-700">Inscrição Estadual</label>
+                                                    <input
+                                                        type="text"
+                                                        id="ie"
+                                                        className="mt-1 p-2 border border-gray-300 rounded-lg w-full"
+                                                        value={selectedPessoa.pes_ie}
+                                                        readOnly
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className="w-full md:w-1/2">
-                                                <label htmlFor="ie" className="block text-sm font-medium text-gray-700">Inscrição Estadual</label>
-                                                <input
-                                                    type="text"
-                                                    id="ie"
-                                                    className="mt-1 p-2 border border-gray-300 rounded-lg w-full"
-                                                    value={selectedPessoa.pes_ie}
-                                                    readOnly
-                                                />
+
+                                            <div className="mb-3">
+                                                <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo Pessoa</label>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {selectedPessoa.tipos.map((tipo, index) => (
+                                                        <span
+                                                            key={index}
+                                                            className="flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm border border-green-400"
+                                                        >
+                                                            {tipo.tpp_descricao}
+                                                            <button
+                                                                className="ml-2 text-red-500 hover:text-red-700"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.stopPropagation();
+                                                                    handleDeleteTipoPessoa(selectedPessoa.pes_id, tipo.tpp_id);
+                                                                }}
+                                                            >
+                                                                <FiTrash className="w-4 h-4" />
+                                                            </button>
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             </div>
+
                                         </div>
                                     )}
-                                    <div className="mb-4">
-                                        <label htmlFor="fundacao" className="block text-sm font-medium text-gray-700">Data de Fundação</label>
-                                        <input
-                                            type="text"
-                                            id="fundacao"
-                                            className="mt-1 p-2 border border-gray-300 rounded-lg w-full"
-                                            value={selectedPessoa.pes_dn}
-                                            readOnly
-                                        />
-                                    </div>
                                 </form>
 
 
