@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import CadastrarPessoa from "./CadastrarPessoa";
-import CadastrarTipo from "./CadastrarTipo";
-import CadastrarEndereco from "./CadastrarEndereco";
-import CadastrarComplementar from "./CadastrarComplementar";
-import ListEndPessoa from "./ListEndPessoa";
-import ListarContatos from "./ListarContatos";
-import { GiExpand } from "react-icons/gi";
+import CadastrarPessoa from "../cadastros/CadastrarPessoa";
+import CadastrarTipo from "../cadastros/CadastrarTipo";
+import CadastrarEndereco from "../cadastros/CadastrarEndereco";
+import CadastrarComplementar from "../cadastros/CadastrarComplementar";
+import ListEndPessoa from "../Listagem/ListEndPessoa";
+import ListarContatos from "../Listagem/ListarContatos";
+import Agenda from "./Agenda";
+import EditarUsuario from "./EditarUsuario";
 import api from "../apiUrl";
 import { FiTrash } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
-import Agenda from "./Agenda";
 import { IoReloadSharp } from "react-icons/io5";
+import { GiExpand } from "react-icons/gi";
 
 
 const EmpresaComponent = ({ schema, empresaName }) => {
@@ -20,7 +21,40 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     const [pessoas, setPessoas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [isAddTipoModalOpen, setIsAddTipoModalOpen] = useState(false);
+    const [availableTipos, setAvailableTipos] = useState([]);
+    const [selectedTipo, setSelectedTipo] = useState(null);
 
+    const fetchAvailableTipos = async () => {
+        try {
+            const response = await api.get(`/listar-tipos-pessoa?schema=${schema}`);
+            const data = response.data;
+            if (data && data.data) {
+                setAvailableTipos(data.data);
+            } else {
+                setAvailableTipos([]);
+            }
+        } catch (error) {
+            console.error("Erro ao buscar tipos de pessoa:", error);
+            setAvailableTipos([]);
+        }
+    };
+
+    const openAddTipoModal = () => {
+        fetchAvailableTipos();
+        setIsAddTipoModalOpen(true);
+    };
+
+    const closeAddTipoModal = () => {
+        setIsAddTipoModalOpen(false);
+    };
+
+    const handleAddTipo = () => {
+        if (selectedTipo && selectedPessoa) {
+            handleAddTipoPessoa(selectedPessoa.pes_id, selectedTipo);
+            closeAddTipoModal();
+        }
+    }
     const fetchPessoas = async () => {
         try {
             const response = await api.get(`/pessoas?schema=${schema}`);
@@ -92,6 +126,35 @@ const EmpresaComponent = ({ schema, empresaName }) => {
         }
     };
 
+    const handleAddTipoPessoa = async (pes_id, tpp_id) => {
+        try {
+            const response = await api.post(
+                `/associar-tipo-pessoa?schema=${schema}`,
+                { pes_id, tpp_id },
+                { headers: { "Content-Type": "application/json" } }
+            );
+
+            if (response.status === 200) {
+                setPessoas((prevPessoas) =>
+                    prevPessoas.map((pessoa) =>
+                        pessoa.pes_id === pes_id
+                            ? { ...pessoa, tipos: [...pessoa.tipos, response.data.data] }
+                            : pessoa
+                    )
+                );
+                setSelectedPessoa((prevSelectedPessoa) => ({
+                    ...prevSelectedPessoa,
+                    tipos: [...prevSelectedPessoa.tipos, response.data.data],
+                }));
+
+                alert('Tipo de pessoa adicionado com sucesso!');
+            }
+        } catch (error) {
+            console.error('Erro ao adicionar tipo de pessoa:', error);
+            alert('Erro ao adicionar tipo de pessoa.');
+        }
+    };
+
 
     const openModal = () => {
         setIsOpen(true)
@@ -150,7 +213,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
 
 
                 <CadastrarTipo schema={schema} />
-                <Agenda />
+                <Agenda schema={schema} selectedPessoa={selectedPessoa} />
             </div>
 
             <AnimatePresence initial={false}>
@@ -207,7 +270,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 </button>
 
                                                 <p className="text-lg font-medium text-gray-800">
-                                                    <strong>{pessoa.pes_fis_jur === "cnpj" ? "Nome Fantasia" : "Nome"}:</strong> {pessoa.pes_fantasia || pessoa.pes_nome}
+                                                    <strong>{pessoa.pes_fis_jur === "cnpj" ? "Nome Fantasia" : "Nome"}:</strong> {pessoa.pes_nome || pessoa.pes_nome}
                                                 </p>
                                                 {pessoa.pes_fis_jur === "cnpj" ? (
                                                     <p className="text-sm text-gray-600"><strong>CNPJ:</strong> {pessoa.pes_cpf_cnpj}</p>
@@ -227,7 +290,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                     </div>
                 )}
             </AnimatePresence>
-            
+
             <div className="relative">
                 {selectedPessoa && (
                     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
@@ -238,18 +301,59 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                 <ListarContatos selectedPessoa={selectedPessoa} schema={schema} />
                             </div>
 
-                            <div className="flex-1 bg-white p-4 rounded-lg h-full">
+                            <div className="flex-1 bg-white p-4 rounded-lg h-full ">
                                 <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-xl md:text-2xl font-semibold text-gray-800 border-b pb-2">Detalhes da Pessoa</h2>
-                                    <button
-                                        onClick={() => setSelectedPessoa(null)}
-                                        className="bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 transition duration-200"
-                                    >
-                                        X
-                                    </button>
+                                    <h2 className="text-xl md:text-2xl font-semibold text-gray-800">Detalhes da Pessoa</h2>
+
+                                    <div className="flex gap-5">
+                                        <EditarUsuario
+                                            schema={schema}
+                                            selectedPessoa={selectedPessoa}
+                                            fetchPessoas={fetchPessoas} 
+                                        />
+                                        <button
+                                            onClick={() => setSelectedPessoa(null)}
+                                            className="bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 transition duration-200"
+                                        >
+                                            X
+                                        </button>
+                                    </div>
                                 </div>
+
+                                {isAddTipoModalOpen && (
+                                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
+                                            <h3 className="text-xl font-semibold mb-4">Adicionar Tipo de Pessoa</h3>
+                                            <select
+                                                className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+                                                onChange={(e) => setSelectedTipo(e.target.value)}
+                                            >
+                                                <option value="">Selecione um tipo</option>
+                                                {availableTipos.map((tipo) => (
+                                                    <option key={tipo.tpp_id} value={tipo.tpp_id}>
+                                                        {tipo.tpp_descricao}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <div className="flex justify-end">
+                                                <button
+                                                    className="bg-gray-500 text-white px-4 py-2 rounded-lg mr-2"
+                                                    onClick={closeAddTipoModal}
+                                                >
+                                                    Cancelar
+                                                </button>
+                                                <button
+                                                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                                                    onClick={handleAddTipo}
+                                                >
+                                                    Adicionar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                                 <form>
-                                    <div className="flex flex-col md:flex-row gap-4 mb-6">
+                                    <div className="flex flex-col md:flex-row gap-4 mb-2">
                                         <div className="w-full md:w-1/2">
                                             <label htmlFor="nome" className="block text-sm font-medium text-gray-700">Nome</label>
                                             <input
@@ -297,8 +401,8 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 </div>
                                             </div>
 
-                                            <div className="mb-4">
-                                                <label htmlFor="fundacao" className="block text-sm font-medium text-gray-700">Data de Fundação</label>
+                                            <div className="mb-2">
+                                                <label htmlFor="fundacao" className="block text-sm font-medium text-gray-700">Data de nascimento</label>
                                                 <input
                                                     type="text"
                                                     id="fundacao"
@@ -309,7 +413,18 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                             </div>
 
                                             <div className="mb-3">
-                                                <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo Pessoa</label>
+                                                <div className="flex justify-between items-center">
+                                                    <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo Pessoa</label>
+                                                    <button
+                                                        className="bg-green-500 text-white p-1 rounded-lg"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            openAddTipoModal();
+                                                        }}
+                                                    >
+                                                        Adicionar Tipo
+                                                    </button>
+                                                </div>
                                                 <div className="flex flex-wrap gap-2 mt-2">
                                                     {selectedPessoa.tipos.map((tipo, index) => (
                                                         <span
@@ -358,7 +473,18 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                             </div>
 
                                             <div className="mb-3">
-                                                <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo Pessoa</label>
+                                                <div className="flex justify-between items-center">
+                                                    <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo Pessoa</label>
+                                                    <button
+                                                        className="bg-green-500 text-white p-1 rounded-lg"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            openAddTipoModal();
+                                                        }}
+                                                    >
+                                                        Adicionar Tipo
+                                                    </button>
+                                                </div>
                                                 <div className="flex flex-wrap gap-2 mt-2">
                                                     {selectedPessoa.tipos.map((tipo, index) => (
                                                         <span

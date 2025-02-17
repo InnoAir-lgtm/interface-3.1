@@ -41,7 +41,7 @@ export default function CadastrarEndereco({ schema }) {
             addEndereco(endereco);
 
             setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
-            setIsOpen(false); // Fecha o modal
+            setIsOpen(false); 
         } catch (error) {
             console.error('Erro ao cadastrar endereço:', error.message);
             alert('Falha ao cadastrar endereço.');

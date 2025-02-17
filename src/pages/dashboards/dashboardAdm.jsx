@@ -1,6 +1,6 @@
 import { useAuth } from '../../auth/AuthContext';
-import CadastrarOpe from '../../components/CadastrarOpe';
-import ListarUsuarios from '../../components/Listarusuarios';
+import CadastrarOpe from '../../cadastros/CadastrarOpe';
+import ListarUsuarios from '../../Listagem/Listarusuarios';
 import Perfil from '../../components/Perfil';
 
 

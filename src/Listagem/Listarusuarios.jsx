@@ -195,7 +195,7 @@ export default function ListarUsuarios() {
                    </button>
            
                    <h2 className="text-2xl font-semibold text-gray-800 mb-4">Lista de Usuários</h2>
-                   <ul className="overflow-y-auto"> {/* Removido max-h-96 e adicionado overflow-y-auto */}
+                   <ul className="overflow-y-auto">
                        {usuarios.length > 0 ? (
                            usuarios.map((usuario) => (
                                <li

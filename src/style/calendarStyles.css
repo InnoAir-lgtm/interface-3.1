@@ -1,0 +1,75 @@
+.rbc-calendar {
+    font-family: "Arial", sans-serif;
+    background-color: white;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+/* Barra de ferramentas do calendário */
+.rbc-toolbar {
+    background: #f1f3f4;
+    border-bottom: 1px solid #ddd;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+}
+
+
+/* Dia atual */
+.rbc-today {
+    background-color: #e3f2fd !important;
+}
+
+/* Botões de navegação */
+.rbc-btn-group button {
+    background-color: white;
+    color: #4285F4;
+    border: 1px solid #ddd;
+    padding: 5px 10px;
+    transition: all 0.2s;
+    border-radius: 5px;
+}
+
+.rbc-btn-group button:hover {
+    background-color: #4285F4;
+    color: white;
+}
+
+.rbc-event {
+    color: white !important;
+    border-radius: 5px;
+    padding: 100px;
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9rem; 
+    overflow: hidden; 
+    white-space: nowrap; 
+    text-overflow: ellipsis; 
+}
+
+/* Estilo dos eventos durante o histórico */
+.rbc-event.rbc-history {
+    background-color: #f6ad55 !important; /* Cor para eventos históricos */
+}
+
+/* Aumenta a visibilidade do título do evento */
+.rbc-event-content {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: 0 5px; /* Ajuste o padding para garantir que o texto não fique muito apertado */
+}
+
+/* Ajuste da altura do evento no calendário para um tamanho mais compacto */
+.rbc-event.rbc-selected {
+    min-height: 30px;
+}
+
+/* Ajuste do comportamento da célula do evento */
+.rbc-time-slot {
+    min-height: 40px;
+    line-height: 20px;
+}
+

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { RiContactsBook3Fill } from "react-icons/ri";
 import api from '../apiUrl';
 import { IoMdArrowDropright } from "react-icons/io"
-import CadastrarEmail from './CadastrarEmail';
+import CadastrarEmail from '../cadastros/CadastrarEmail';
 import { FiTrash } from "react-icons/fi";
 
 export default function ListarContatos({ selectedPessoa, schema }) {

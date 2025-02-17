@@ -7,13 +7,13 @@ import LoginMaster from './pages/LoginMaster';
 import DashboardAdm from './pages/dashboards/dashboardAdm';
 import DashboardOperad from './pages/dashboards/DashboardOperad';
 import ProtectedRoute from '../Routes/ProtectRoute';
-import CadastrarEndereco from './components/CadastrarEndereco';
-import CadastrarComplementar from './components/CadastrarComplementar';
+import CadastrarEndereco from './cadastros/CadastrarEndereco';
+import CadastrarComplementar from './cadastros/CadastrarComplementar';
 
 function App() {
   return (
     <AuthProvider>
-      <PermissionProvider> {/* Adicionando PermissionProvider */}
+      <PermissionProvider> 
         <Router>
           <EnderecoProviderWrapper>
             <Routes>

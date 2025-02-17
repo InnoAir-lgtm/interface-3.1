@@ -1,8 +1,7 @@
 import { useAuth } from '../../auth/AuthContext';
-import CadastrarAdm from '../../components/CadastrarAdm';
-import CadastrarPapel from '../../components/CadastrarPapel';
-import CadastrarPerm from '../../components/CadastrarPerm';
-import ListaPapeis from '../../components/ListaPapeis';
+import CadastrarAdm from '../../cadastros/CadastrarAdm';
+import CadastrarPapel from '../../cadastros/CadastrarPapel';
+import ListaPapeis from '../../Listagem/ListaPapeis';
 
 
 
@@ -42,8 +41,6 @@ export default function MasterPage() {
                 <CadastrarPapel />
 
                 <CadastrarAdm />
-
-                <CadastrarPerm />
             </div>
 
 
