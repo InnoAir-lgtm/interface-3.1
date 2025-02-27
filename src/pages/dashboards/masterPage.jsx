@@ -3,6 +3,8 @@ import CadastrarAdm from '../../cadastros/CadastrarAdm';
 import CadastrarPapel from '../../cadastros/CadastrarPapel';
 import ListaPapeis from '../../Listagem/ListaPapeis';
 
+import CadastrarPerm from '../../Desativao/CadastrarPerm'
+
 
 
 export default function MasterPage() {
@@ -40,6 +42,7 @@ export default function MasterPage() {
             <div className='flex gap-5'>
                 <CadastrarPapel />
 
+                <CadastrarPerm />
                 <CadastrarAdm />
             </div>
 

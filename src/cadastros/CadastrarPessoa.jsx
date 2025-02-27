@@ -10,6 +10,7 @@ export default function CadastrarPessoa({ schema }) {
     const [rg, setRg] = useState("");
     const [dataNascimento, setDataNascimento] = useState("");
     const [cnpj, setCnpj] = useState("");
+    const [email, setEmail] = useState("");
     const [inscricaoEstadual, setInscricaoEstadual] = useState("");
     const [fantasia, setNomeFantasia] = useState("");
     const [loading, setLoading] = useState(false);
@@ -59,6 +60,7 @@ export default function CadastrarPessoa({ schema }) {
             schema,
             tipoPessoa,
             nome,
+            email: tipoPessoa === "cpf" ? email : null,
             cpf: tipoPessoa === "cpf" ? cpf : null,
             rg: tipoPessoa === "cpf" ? rg : null,
             dataNascimento: tipoPessoa === "cpf" ? dataNascimento : null,
@@ -66,6 +68,8 @@ export default function CadastrarPessoa({ schema }) {
             inscricaoEstadual: tipoPessoa === "cnpj" ? inscricaoEstadual : null,
             fantasia: tipoPessoa === "cnpj" ? fantasia : null,
         };
+
+        console.log(dados)
 
         try {
             const response = await api.post("/cadastrar-pessoa", dados, {
@@ -130,6 +134,7 @@ export default function CadastrarPessoa({ schema }) {
         setInscricaoEstadual("");
         setNomeFantasia("");
         setTipoPessoa("");
+        setEmail("")
     };
 
 
@@ -231,6 +236,21 @@ export default function CadastrarPessoa({ schema }) {
                                             onChange={(e) => setRg(e.target.value)}
                                             required
                                             placeholder="Digite o RG"
+                                            className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="rg" className="block text-sm font-semibold text-gray-700 mb-1">
+                                            Email:
+                                        </label>
+                                        <input
+                                            id="email"
+                                            type="text"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
+                                            placeholder="Digite o email "
                                             className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
                                         />
                                     </div>

@@ -37,7 +37,6 @@ export default function CadastrarTipoModal({ schema }) {
         }
     };
 
-
     const openModal = async (permissionName) => {
         const hasPermission = await verifyAndCreatePermission(permissionName);
         if (hasPermission) {

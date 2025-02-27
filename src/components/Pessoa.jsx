@@ -13,7 +13,7 @@ import { FiTrash } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
 import { IoReloadSharp } from "react-icons/io5";
 import { GiExpand } from "react-icons/gi";
-
+import AgendaTecnico from "./AllCalender";
 
 const EmpresaComponent = ({ schema, empresaName }) => {
     const [selectedPessoa, setSelectedPessoa] = useState(null);
@@ -65,7 +65,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                 const pessoasComTipo = await Promise.all(data.data.map(async (pessoa) => {
                     const tiposResponse = await api.get(`/tipos-pessoa?pes_id=${pessoa.pes_id}&schema=${schema}`);
                     const tiposPessoa = tiposResponse.data.data;
-
                     return {
                         ...pessoa,
                         tipos: tiposPessoa
@@ -214,18 +213,20 @@ const EmpresaComponent = ({ schema, empresaName }) => {
 
                 <CadastrarTipo schema={schema} />
                 <Agenda schema={schema} selectedPessoa={selectedPessoa} />
+               <AgendaTecnico schema={schema} selectedPessoa={selectedPessoa} />
+
             </div>
 
             <AnimatePresence initial={false}>
                 {isOpen && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="fixed inset-0 flex items-center z-20 justify-center bg-black bg-opacity-50">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
                             transition={{ duration: 0.3 }}
                         >
-                            <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full sm:w-[700px] relative">
+                            <div className="bg-white z-20 rounded-lg shadow-lg p-8 max-w-2xl w-full sm:w-[700px] relative">
 
                                 <div className="flex justify-between">
                                     <button

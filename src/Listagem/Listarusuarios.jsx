@@ -70,8 +70,6 @@ export default function ListarUsuarios() {
 
             setSelectedPapeis(papeisPorEmpresa);
             setSelectedEmpresas(empresas);
-
-            // Abrir expand automaticamente para empresas selecionadas
             const expandState = {};
             empresas.forEach((empresaCnpj) => {
                 expandState[empresaCnpj] = true;

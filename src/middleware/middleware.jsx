@@ -6,11 +6,9 @@ const PermissionContext = createContext();
 export const PermissionProvider = ({ children }) => {
     const [permissions, setPermissions] = useState([]);
     const [loading, setLoading] = useState(true);
-
     useEffect(() => {
         fetchPermissions();
     }, []);
-
     const fetchPermissions = async () => {
         try {
             const response = await api.get('/listar-permissoes');
@@ -27,19 +25,14 @@ export const PermissionProvider = ({ children }) => {
             console.error("Erro: Nome da permissão não fornecido.");
             return false;
         }
-    
         const normalizedPermissionName = normalizePermissionName(permissionName); 
         const descricaoAmigavel = formatPermissionName(normalizedPermissionName);
-    
         try {
             let permissionExists = checkPermissionExists(descricaoAmigavel);
-    
             if (!permissionExists) {
                 permissionExists = await createPermission(descricaoAmigavel, normalizedPermissionName);
             }
-    
             if (!permissionExists) return false;
-    
             return await checkUserPermission(normalizedPermissionName);
         } catch (error) {
             console.error("Erro ao verificar ou criar permissão:", error);
@@ -47,7 +40,6 @@ export const PermissionProvider = ({ children }) => {
         }
     };
     
-
     const formatPermissionName = (permissionName) => {
         return permissionName
             .replace(/([A-Z])/g, ' $1')
@@ -64,14 +56,12 @@ export const PermissionProvider = ({ children }) => {
     const normalizePermissionName = (permissionName) => {
         return permissionName.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
     };
-    
     const createPermission = async (descricaoAmigavel, permissionName) => {
         try {
             const response = await api.post('/cadastrar-permissoes', {
                 descricao: descricaoAmigavel,
                 permissao: permissionName,
             });
-
             if (response.status === 201 || response.status === 200) {
                 setPermissions((prevPermissions) => [
                     ...prevPermissions,
@@ -89,7 +79,7 @@ export const PermissionProvider = ({ children }) => {
     };
 
   const checkUserPermission = async (permissionName) => {
-    const normalizedPermissionName = normalizePermissionName(permissionName); // Normalize o nome aqui
+    const normalizedPermissionName = normalizePermissionName(permissionName);
     const user = JSON.parse(localStorage.getItem('user'));
     const papelId = user?.pap_id;
 
@@ -109,7 +99,6 @@ export const PermissionProvider = ({ children }) => {
                 permission.per_permissao.toLowerCase() === normalizedPermissionName
             );
         });
-
         if (hasPermission) {
             console.log("Usuário tem permissão para:", normalizedPermissionName);
             return true;
@@ -134,10 +123,8 @@ export const PermissionProvider = ({ children }) => {
             alert("Erro: Papel do usuário não encontrado.");
             return false;
         }
-
         console.log("Papel do usuário:", papelId);
         console.log("Permissões carregadas:", permissions);
-
         const permissoesPorPapel = permissions.filter((perm) => perm.pap_id === papelId);
         console.log("Permissões do papel:", permissoesPorPapel);
 

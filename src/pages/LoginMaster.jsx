@@ -32,7 +32,7 @@ export default function LoginMaster() {
     };
 
     if (loading) {
-        return <div>Carregando...</div>;  // Mostra "Carregando..." enquanto busca as permissões.
+        return <div>Carregando...</div>; 
     }
 
     return (
