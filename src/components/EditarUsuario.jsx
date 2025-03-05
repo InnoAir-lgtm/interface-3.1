@@ -36,8 +36,8 @@ export default function EditarUsuario({ selectedPessoa, schema, fetchPessoas }) 
         try {
             const response = await api.put(`/pessoas/${pes_id}?schema=${schema}`, updatedData);
             alert(response.data.message);
-            fetchPessoas(); // Atualiza a lista de pessoas após a edição
-            fecharModal(); // Fecha o modal após a edição
+            fetchPessoas(); 
+            fecharModal();
         } catch (error) {
             console.error('Erro ao atualizar usuário:', error);
             alert('Erro ao atualizar usuário.');

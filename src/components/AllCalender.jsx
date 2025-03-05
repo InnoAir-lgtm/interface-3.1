@@ -15,14 +15,7 @@ export default function Agenda({ schema }) {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [selectedPersonId, setSelectedPersonId] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
-    const [newEvent, setNewEvent] = useState({
-        title: "",
-        description: "",
-        start: new Date(),
-        end: new Date(),
-        status: "agendado",
-        type: "", person: "",
-    });
+    const [newEvent, setNewEvent] = useState({ title: "", description: "", start: new Date(), end: new Date(), status: "agendado", type: "", person: "", });
     const [filterType, setFilterType] = useState("");
     const [people, setPeople] = useState([]);
     const [filteredPeople, setFilteredPeople] = useState([]);
@@ -33,8 +26,6 @@ export default function Agenda({ schema }) {
     const abrirModal = () => setOpenModal(true);
     const fecharModal = () => setOpenModal(false);
     const statusColors = { agendado: "#3182ce", confirmado: "#38a169", cancelado: "#e53e3e", pendente: "#f6ad55" };
-
-
     moment.locale("pt-br");
     const messages = {
         allDay: "Dia inteiro",
@@ -48,12 +39,9 @@ export default function Agenda({ schema }) {
         date: "Data",
         time: "Hora",
         event: "Evento",
-        noEventsInRange: "Nenhum evento nesse período.",
+        noEventsInRange: "Nenhum evento neste período.",
         showMore: (total) => `+ Ver mais (${total})`,
     };
-
-
-
     const buscarEnderecos = async (pes_id) => {
         try {
             const response = await api.get(`/listar-endereco?pes_id=${pes_id}&schema=${schema}`);
@@ -87,8 +75,6 @@ export default function Agenda({ schema }) {
             epe_latitude: address.epe_latitude,
             epe_longitude: address.epe_longitude
         }));
-
-        console.log("Novo evento atualizado:", newEvent);
     };
     useEffect(() => {
         if (people.length > 0) {
@@ -139,18 +125,14 @@ export default function Agenda({ schema }) {
         const now = new Date();
         const selectedDate = moment(start).startOf("day");
         const today = moment(now).startOf("day");
-
-        // Permite marcar eventos no dia atual, mas impede no passado
         if (selectedDate.isBefore(today)) {
             alert("Não é possível agendar eventos em datas passadas.");
             return;
         }
-
         if (!selectedPersonId) {
             alert("Selecione um técnico antes de marcar um evento.");
             return;
         }
-
         setNewEvent((prev) => ({
             ...prev,
             title: "",
@@ -165,10 +147,8 @@ export default function Agenda({ schema }) {
             epe_latitude: null,
             epe_longitude: null,
         }));
-
         setModalOpen(true);
     };
-
     const fetchEvents = async () => {
         if (!selectedPersonId) {
             setEvents([]);
@@ -178,7 +158,6 @@ export default function Agenda({ schema }) {
             const endpoint = `/eventos?schema=${schema}&pes_evento=${selectedPersonId}`;
             const response = await api.get(endpoint);
             const eventData = response.data.data;
-
             if (Array.isArray(eventData)) {
                 const loadedEvents = eventData.map(event => ({
                     id: event.evt_id,
@@ -193,7 +172,6 @@ export default function Agenda({ schema }) {
                     status: event.evt_status,
                     color: statusColors[event.evt_status] || "#3182ce",
                 }));
-
                 setEvents(loadedEvents);
             } else {
                 console.error("Formato de eventos inválido:", response.data);
@@ -202,19 +180,15 @@ export default function Agenda({ schema }) {
             console.error("Erro ao buscar eventos:", error);
         }
     };
-
     useEffect(() => {
         fetchEvents();
     }, [selectedPersonId, schema]);
-
 
     const handleSaveEvent = async () => {
         if (!newEvent.title || !newEvent.date || !newEvent.startTime || !newEvent.endTime) {
             alert("Todos os campos são obrigatórios.");
             return;
         }
-        const startDateTime = `${newEvent.date}T${newEvent.startTime}:00`;
-        const endDateTime = `${newEvent.date}T${newEvent.endTime}:00`;
 
         const formattedEvent = {
             evt_titulo: newEvent.title,
@@ -230,12 +204,10 @@ export default function Agenda({ schema }) {
             pes_destino: newEvent.pes_destino,
             schema
         };
-
         try {
             const response = await api.post(`/eventos?schema=${schema}`, formattedEvent);
-
             if (response.status === 201) {
-                setTimeout(() => fetchEvents(), 500); // Aguarda o backend processar e busca os eventos novamente
+                setTimeout(() => fetchEvents(), 500);
                 setModalOpen(false);
             } else {
                 console.error("Erro ao salvar evento:", response.data);
@@ -245,15 +217,41 @@ export default function Agenda({ schema }) {
         }
     };
 
+    const handleUpdateEvent = async () => {
+        if (!newEvent.title || !newEvent.date || !newEvent.startTime || !newEvent.endTime || !newEvent.evt_local) {
+            alert("Todos os campos são obrigatórios.");
+            return;
+        }
+        const formattedEvent = {
+            titulo: newEvent.title,
+            descricao: newEvent.description,
+            endereco: newEvent.evt_local,
+            status: newEvent.status,
+            observacao: newEvent.observacao || "",
+            schema
+        };
+        try {
+            const response = await api.put(`/eventos/${newEvent.id}?schema=${schema}`, formattedEvent);
+            if (response.status === 200) {
+                setTimeout(() => fetchEvents(), 500);
+                setModalOpen(false);
+            } else {
+                console.error("Erro ao atualizar evento:", response.data);
+            }
+        } catch (error) {
+            console.error("Erro ao conectar com o backend:", error);
+        }
+    };
 
     useEffect(() => {
         fetchEvents();
     }, [selectedPersonId, schema]);
 
 
+
     const handleEventClick = (event) => {
         if (event) {
-            console.log("Evento selecionado:", event);
+            setSelectedEvent(event); // Definindo selectedEvent
             setNewEvent({
                 title: event.title || "Sem título",
                 description: event.description || "Sem descrição",
@@ -266,11 +264,13 @@ export default function Agenda({ schema }) {
                 epe_latitude: event.epe_latitude || "",
                 epe_longitude: event.epe_longitude || "",
                 pes_evento: event.pes_evento || newEvent.pes_evento,
+                id: event.id // Incluindo o id para edição
             });
             setSelectedPersonId(event.pes_evento || selectedPersonId);
             setTimeout(() => setModalOpen(true), 100);
         }
     };
+
     const handleSelectPerson = (e, type) => {
         const personId = e.target.value;
         if (type === "cliente") {
@@ -287,6 +287,7 @@ export default function Agenda({ schema }) {
     };
     return (
         <div className="flex flex-col items-center">
+
             <button
                 onClick={abrirModal}
                 className="w-72 h-64 bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 text-gray-800 font-semibold flex justify-center items-center text-center relative overflow-hidden border border-gray-300 z-10"
@@ -297,8 +298,6 @@ export default function Agenda({ schema }) {
                     <span className="font-medium text-xl text-gray-700">Agenda</span>
                 </div>
             </button>
-
-
             {openModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-20">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl relative">
@@ -352,10 +351,32 @@ export default function Agenda({ schema }) {
                             draggableAccessor={() => true}
 
                         />
+                        <div>
+                            <ul className="flex space-x-4 mt-4">
+                                <li className="flex items-center space-x-2">
+                                    <div className="bg-[#e53e3e] w-4 h-4 rounded-full"></div>
+                                    <p>Cancelado</p>
+                                </li>
+
+                                <li className="flex items-center space-x-2">
+                                    <div className="bg-[#f6ad55] w-4 h-4 rounded-full"></div>
+                                    <p>Pendente</p>
+                                </li>
+
+                                <li className="flex items-center space-x-2">
+                                    <div className="bg-[#3182ce] w-4 h-4 rounded-full"></div>
+                                    <p>Agendado</p>
+                                </li>
+
+                                <li className="flex items-center space-x-2">
+                                    <div className="bg-[#38a169] w-4 h-4 rounded-full"></div>
+                                    <p>Confirmado</p>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             )}
-
 
             {modalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
@@ -478,11 +499,13 @@ export default function Agenda({ schema }) {
                         )}
                         <div className="flex justify-between items-center mt-4">
                             <button
-                                onClick={handleSaveEvent}
-                                className="bg-blue-500 text-white py-1 px-3 rounded-full hover:bg-blue-600 transition"
+                                onClick={selectedEvent ? handleUpdateEvent : handleSaveEvent}
+                                className="bg-blue-500 text-white py-2 px-4 rounded"
                             >
-                                Salvar Evento
+                                {selectedEvent ? "Atualizar Evento" : "Salvar Evento"}
                             </button>
+
+
                         </div>
                     </div>
                 </div>
