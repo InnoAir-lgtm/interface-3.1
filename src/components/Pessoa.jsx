@@ -6,7 +6,6 @@ import CadastrarEndereco from "../cadastros/CadastrarEndereco";
 import CadastrarComplementar from "../cadastros/CadastrarComplementar";
 import ListEndPessoa from "../Listagem/ListEndPessoa";
 import ListarContatos from "../Listagem/ListarContatos";
-import Agenda from "./Agenda";
 import EditarUsuario from "./EditarUsuario";
 import api from "../apiUrl";
 import { FiTrash } from "react-icons/fi";
@@ -14,6 +13,7 @@ import { IoMdClose } from "react-icons/io";
 import { IoReloadSharp } from "react-icons/io5";
 import { GiExpand } from "react-icons/gi";
 import AgendaTecnico from "./AllCalender";
+import Agenda from "./Agenda";
 
 const EmpresaComponent = ({ schema, empresaName }) => {
     const [selectedPessoa, setSelectedPessoa] = useState(null);

@@ -34,6 +34,26 @@ export default function Agenda({ schema }) {
     const fecharModal = () => setOpenModal(false);
     const statusColors = { agendado: "#3182ce", confirmado: "#38a169", cancelado: "#e53e3e", pendente: "#f6ad55" };
 
+
+    moment.locale("pt-br");
+    const messages = {
+        allDay: "Dia inteiro",
+        previous: "Anterior",
+        next: "Próximo",
+        today: "Hoje",
+        month: "Mês",
+        week: "Semana",
+        day: "Dia",
+        agenda: "Agenda",
+        date: "Data",
+        time: "Hora",
+        event: "Evento",
+        noEventsInRange: "Nenhum evento nesse período.",
+        showMore: (total) => `+ Ver mais (${total})`,
+    };
+
+
+
     const buscarEnderecos = async (pes_id) => {
         try {
             const response = await api.get(`/listar-endereco?pes_id=${pes_id}&schema=${schema}`);
@@ -114,16 +134,25 @@ export default function Agenda({ schema }) {
         }
         encontrarPessoas();
     }, [schema]);
+
     const handleSelectSlot = ({ start, end }) => {
-        if (start < new Date()) {
+        const now = new Date();
+        const selectedDate = moment(start).startOf("day");
+        const today = moment(now).startOf("day");
+
+        // Permite marcar eventos no dia atual, mas impede no passado
+        if (selectedDate.isBefore(today)) {
             alert("Não é possível agendar eventos em datas passadas.");
             return;
         }
+
         if (!selectedPersonId) {
             alert("Selecione um técnico antes de marcar um evento.");
             return;
         }
+
         setNewEvent((prev) => ({
+            ...prev,
             title: "",
             description: "",
             date: moment(start).format("YYYY-MM-DD"),
@@ -136,44 +165,49 @@ export default function Agenda({ schema }) {
             epe_latitude: null,
             epe_longitude: null,
         }));
+
         setModalOpen(true);
     };
 
-    useEffect(() => {
-        async function fetchEvents() {
-            if (!selectedPersonId) {
-                setEvents([]);
-                return;
-            }
-            try {
-                const endpoint = `/eventos?schema=${schema}&pes_evento=${selectedPersonId}`;
-                const response = await api.get(endpoint);
-                const eventData = response.data.data;
-                if (Array.isArray(eventData)) {
-                    const loadedEvents = eventData.map(event => ({
-                        id: event.evt_id,
-                        start: new Date(`${event.evt_evento}T${event.evt_inicio}`),
-                        end: new Date(`${event.evt_evento}T${event.evt_fim}`),
-                        title: event.evt_titulo || "Sem título",
-                        description: event.evt_descricao || "Sem descrição",
-                        evt_local: event.evt_local || "Local não informado",
-                        pes_destino: event.pes_destino || "Cliente não informado",
-                        epe_latitude: event.epe_latitude || null,
-                        epe_longitude: event.epe_longitude || null,
-                        status: event.evt_status,
-                        color: statusColors[event.status],
-                    }));
-                    setEvents(loadedEvents);
-                } else {
-                    console.error("Formato de eventos inválido:", response.data);
-                }
-            } catch (error) {
-                console.error("Erro ao buscar eventos:", error);
-            }
+    const fetchEvents = async () => {
+        if (!selectedPersonId) {
+            setEvents([]);
+            return;
         }
+        try {
+            const endpoint = `/eventos?schema=${schema}&pes_evento=${selectedPersonId}`;
+            const response = await api.get(endpoint);
+            const eventData = response.data.data;
+
+            if (Array.isArray(eventData)) {
+                const loadedEvents = eventData.map(event => ({
+                    id: event.evt_id,
+                    start: new Date(`${event.evt_evento}T${event.evt_inicio}`),
+                    end: new Date(`${event.evt_evento}T${event.evt_fim}`),
+                    title: event.evt_titulo || "Sem título",
+                    description: event.evt_descricao || "Sem descrição",
+                    evt_local: event.evt_local || "Local não informado",
+                    pes_destino: event.pes_destino || "Cliente não informado",
+                    epe_latitude: event.epe_latitude || null,
+                    epe_longitude: event.epe_longitude || null,
+                    status: event.evt_status,
+                    color: statusColors[event.evt_status] || "#3182ce",
+                }));
+
+                setEvents(loadedEvents);
+            } else {
+                console.error("Formato de eventos inválido:", response.data);
+            }
+        } catch (error) {
+            console.error("Erro ao buscar eventos:", error);
+        }
+    };
+
+    useEffect(() => {
         fetchEvents();
     }, [selectedPersonId, schema]);
-    
+
+
     const handleSaveEvent = async () => {
         if (!newEvent.title || !newEvent.date || !newEvent.startTime || !newEvent.endTime) {
             alert("Todos os campos são obrigatórios.");
@@ -181,6 +215,7 @@ export default function Agenda({ schema }) {
         }
         const startDateTime = `${newEvent.date}T${newEvent.startTime}:00`;
         const endDateTime = `${newEvent.date}T${newEvent.endTime}:00`;
+
         const formattedEvent = {
             evt_titulo: newEvent.title,
             evt_descricao: newEvent.description,
@@ -195,20 +230,13 @@ export default function Agenda({ schema }) {
             pes_destino: newEvent.pes_destino,
             schema
         };
+
         try {
             const response = await api.post(`/eventos?schema=${schema}`, formattedEvent);
+
             if (response.status === 201) {
-                const savedEvent = {
-                    ...formattedEvent,
-                    start: new Date(startDateTime),
-                    end: new Date(endDateTime),
-                    color: statusColors[newEvent.status],
-                    id: response.data.id,
-                };
-                setEvents(prevEvents => [...prevEvents, savedEvent]);
+                setTimeout(() => fetchEvents(), 500); // Aguarda o backend processar e busca os eventos novamente
                 setModalOpen(false);
-                fetchEvents();
-                setSelectedEvent(null);
             } else {
                 console.error("Erro ao salvar evento:", response.data);
             }
@@ -216,6 +244,13 @@ export default function Agenda({ schema }) {
             console.error("Erro ao conectar com o backend:", error);
         }
     };
+
+
+    useEffect(() => {
+        fetchEvents();
+    }, [selectedPersonId, schema]);
+
+
     const handleEventClick = (event) => {
         if (event) {
             console.log("Evento selecionado:", event);
@@ -262,6 +297,8 @@ export default function Agenda({ schema }) {
                     <span className="font-medium text-xl text-gray-700">Agenda</span>
                 </div>
             </button>
+
+
             {openModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-20">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl relative">
@@ -295,6 +332,7 @@ export default function Agenda({ schema }) {
                             endAccessor="end"
                             style={{ height: 600 }}
                             className="rbc-calendar"
+                            messages={messages}
                             eventPropGetter={(event) => ({
                                 style: {
                                     backgroundColor: event.color,
@@ -317,6 +355,8 @@ export default function Agenda({ schema }) {
                     </div>
                 </div>
             )}
+
+
             {modalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96">
