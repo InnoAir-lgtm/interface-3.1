@@ -101,31 +101,46 @@ export default function GestorEquipe({ schema }) {
     buscarAfazeresDoTecnico();
   }, [tecnicoSelecionado, schema]);
 
-  const handleConfirm = async (afazerId) => {
+  const handleUpdateEvent = async () => {
+    if (!status || !observacao) {
+      alert("Os campos Status e Observação são obrigatórios.");
+      return;
+    }
+
+    const formattedEvent = {
+      descricao: observacao,  // Atualiza o campo de descrição
+      status: status,         // Atualiza o campo de status
+      schema                  // Adiciona o schema à requisição
+    };
+
+    console.log('Tentando atualizar o evento com os seguintes dados:', formattedEvent);
+
+    const url = `/eventos/${confirmingAfazerId}/status-descricao?schema=${schema}`;
+    console.log('Requisição para a URL:', url);
+
     try {
-      const response = await api.put(`/eventos/${afazerId}`, {
-        status,
-        observacao,
-      });
-      console.log("Trabalho confirmado:", response);
-      setAfazeres((prevAfazeres) =>
-        prevAfazeres.map((afazer) =>
-          afazer.evt_id === afazerId
-            ? { ...afazer, status, observacao }
-            : afazer
-        )
-      );
-      setConfirm(false);
+      const response = await api.put(url, formattedEvent);
+      console.log('Resposta da requisição: ', response);
+
+      if (response.status === 200) {
+        console.log('Evento atualizado com sucesso');
+        setTimeout(() => fetchEvents(), 500);  // Atualiza a lista de eventos após a confirmação
+        setConfirmingAfazerId(null);
+      } else {
+        console.error("Erro ao atualizar evento:", response.data);
+      }
     } catch (error) {
-      console.error("Erro ao confirmar trabalho:", error);
+      console.error("Erro ao conectar com o backend:", error);
     }
   };
+
   const abrirModal = async (permissionName) => {
     const hasPermission = await verifyAndCreatePermission(permissionName);
-    if (!hasPermission) {
+    if (hasPermission) {
       setModalOpen(true);
     }
   };
+  
 
   const fecharModal = () => {
     setModalOpen(false);
@@ -209,10 +224,10 @@ export default function GestorEquipe({ schema }) {
                           </td>
                           <td className="border border-gray-300 px-4 py-2">
                             {afazer.evt_evento &&
-                            !isNaN(new Date(afazer.evt_evento))
+                              !isNaN(new Date(afazer.evt_evento))
                               ? DateTime.fromISO(afazer.evt_evento)
-                                  .setZone("America/Sao_Paulo")
-                                  .toFormat("dd/MM/yyyy")
+                                .setZone("America/Sao_Paulo")
+                                .toFormat("dd/MM/yyyy")
                               : "Data não informada"}
                           </td>
                           <td className="border border-gray-300 px-4 py-2">
@@ -262,27 +277,18 @@ export default function GestorEquipe({ schema }) {
                                           >
                                             Status:
                                           </label>
+
                                           <select
                                             id="status"
                                             value={status}
-                                            onChange={(e) =>
-                                              setStatus(e.target.value)
-                                            }
+                                            onChange={(e) => setStatus(e.target.value)}
                                             className="w-full border-gray-300 border p-2 rounded-lg"
                                           >
-                                            <option value="">
-                                              Selecione o status
-                                            </option>
-                                            <option value="confirmado">
-                                              Confirmado
-                                            </option>
-                                            <option value="pendente">
-                                              Pendente
-                                            </option>
-                                            <option value="concluido">
-                                              Concluído
-                                            </option>
+                                            <option value="">Selecione o status</option>
+                                            <option value="confirmado">Confirmado</option>
+                                            <option value="cancelado">Cancelado</option>
                                           </select>
+
                                         </div>
                                         <div className="mb-4">
                                           <label
@@ -303,13 +309,11 @@ export default function GestorEquipe({ schema }) {
                                           />
                                         </div>
                                         <button
-                                          onClick={() =>
-                                            handleConfirm(afazer.evt_id)
-                                          }
+                                          onClick={handleUpdateEvent}
                                           className="bg-blue-500 text-white p-2 rounded-lg"
                                         >
                                           Confirmar
-                                        </button>
+                                        </button>;
                                       </div>
                                     </div>
                                   </div>
