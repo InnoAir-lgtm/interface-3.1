@@ -11,11 +11,7 @@ export default function GestorEquipe({ schema }) {
 
   const [userId, setUserId] = useState(null);
   const [afazeres, setAfazeres] = useState([]);
-  const [confirm, setConfirm] = useState(false);
-  const [status, setStatus] = useState("");
-  const [observacao, setObservacao] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [confirmingAfazerId, setConfirmingAfazerId] = useState(null);
   const [tecnicos, setTecnicos] = useState([]);
   const [tecnicoSelecionado, setTecnicoSelecionado] = useState("");
 
@@ -101,38 +97,30 @@ export default function GestorEquipe({ schema }) {
     buscarAfazeresDoTecnico();
   }, [tecnicoSelecionado, schema]);
 
-  const handleUpdateEvent = async () => {
-    if (!status || !observacao) {
-      alert("Os campos Status e Observação são obrigatórios.");
-      return;
-    }
-
-    const formattedEvent = {
-      descricao: observacao,  // Atualiza o campo de descrição
-      status: status,         // Atualiza o campo de status
-      schema                  // Adiciona o schema à requisição
-    };
-
-    console.log('Tentando atualizar o evento com os seguintes dados:', formattedEvent);
-
-    const url = `/eventos/${confirmingAfazerId}/status-descricao?schema=${schema}`;
-    console.log('Requisição para a URL:', url);
+  const handleCompleteEvent = async (eventId) => {
+    setAfazeres((prevAfazeres) =>
+      prevAfazeres.map((afazer) =>
+        afazer.evt_id === eventId ? { ...afazer, evt_status: "Concluído" } : afazer
+      )
+    );
 
     try {
-      const response = await api.put(url, formattedEvent);
-      console.log('Resposta da requisição: ', response);
+      const response = await api.put(`/eventos/${eventId}/status-descricao?schema=${schema}`, {
+        status: "Concluído",
+        descricao: "Tarefa finalizada pelo técnico",
+        schema,
+      });
 
       if (response.status === 200) {
-        console.log('Evento atualizado com sucesso');
-        setTimeout(() => fetchEvents(), 500);  // Atualiza a lista de eventos após a confirmação
-        setConfirmingAfazerId(null);
-      } else {
-        console.error("Erro ao atualizar evento:", response.data);
+        console.log("Evento marcado como concluído com sucesso!");
       }
     } catch (error) {
-      console.error("Erro ao conectar com o backend:", error);
+      console.error("Erro ao atualizar o evento:", error);
+      alert("Houve um erro ao concluir o evento.");
     }
   };
+
+
 
   const abrirModal = async (permissionName) => {
     const hasPermission = await verifyAndCreatePermission(permissionName);
@@ -140,7 +128,7 @@ export default function GestorEquipe({ schema }) {
       setModalOpen(true);
     }
   };
-  
+
 
   const fecharModal = () => {
     setModalOpen(false);
@@ -204,6 +192,7 @@ export default function GestorEquipe({ schema }) {
                 </thead>
                 <tbody>
                   {afazeres.length > 0 ? (
+
                     afazeres.map((afazer) => {
                       const latitude = afazer.evt_lat;
                       const longitude = afazer.evt_log;
@@ -249,74 +238,15 @@ export default function GestorEquipe({ schema }) {
                               )}
 
                               <div>
-                                <button
-                                  onClick={() =>
-                                    setConfirmingAfazerId(afazer.evt_id)
-                                  }
-                                  className="bg-green-600 p-2 rounded-lg text-white"
-                                >
-                                  <FaCheck />
-                                </button>
-
-                                {confirmingAfazerId === afazer.evt_id && (
-                                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
-                                    <div className="bg-white p-6 rounded-lg shadow-lg w-[50%] max-w-6xl max-h-[80vh] overflow-y-auto relative z-30">
-                                      <button
-                                        className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
-                                        onClick={() =>
-                                          setConfirmingAfazerId(null)
-                                        }
-                                      >
-                                        &times;
-                                      </button>
-                                      <div>
-                                        <div className="mb-4">
-                                          <label
-                                            htmlFor="status"
-                                            className="block text-gray-700"
-                                          >
-                                            Status:
-                                          </label>
-
-                                          <select
-                                            id="status"
-                                            value={status}
-                                            onChange={(e) => setStatus(e.target.value)}
-                                            className="w-full border-gray-300 border p-2 rounded-lg"
-                                          >
-                                            <option value="">Selecione o status</option>
-                                            <option value="confirmado">Confirmado</option>
-                                            <option value="cancelado">Cancelado</option>
-                                          </select>
-
-                                        </div>
-                                        <div className="mb-4">
-                                          <label
-                                            htmlFor="observacao"
-                                            className="block text-gray-700"
-                                          >
-                                            Observação:
-                                          </label>
-                                          <textarea
-                                            id="observacao"
-                                            value={observacao}
-                                            onChange={(e) =>
-                                              setObservacao(e.target.value)
-                                            }
-                                            rows="4"
-                                            className="w-full border-gray-300 border p-2 rounded-lg"
-                                            placeholder="Adicione uma observação"
-                                          />
-                                        </div>
-                                        <button
-                                          onClick={handleUpdateEvent}
-                                          className="bg-blue-500 text-white p-2 rounded-lg"
-                                        >
-                                          Confirmar
-                                        </button>;
-                                      </div>
-                                    </div>
-                                  </div>
+                                {afazer.evt_status === "Concluído" ? (
+                                  <span className="text-green-600 font-bold">Atividade Concluída</span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleCompleteEvent(afazer.evt_id)}
+                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
+                                  >
+                                    Concluir
+                                  </button>
                                 )}
                               </div>
                             </div>
@@ -324,6 +254,7 @@ export default function GestorEquipe({ schema }) {
                         </tr>
                       );
                     })
+                    
                   ) : (
                     <tr>
                       <td

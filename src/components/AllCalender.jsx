@@ -42,6 +42,9 @@ export default function Agenda({ schema }) {
         noEventsInRange: "Nenhum evento neste período.",
         showMore: (total) => `+ Ver mais (${total})`,
     };
+    const [filteredTechnicians, setFilteredTechnicians] = useState([]);
+    const [filteredClients, setFilteredClients] = useState([]);
+    
     const buscarEnderecos = async (pes_id) => {
         try {
             const response = await api.get(`/listar-endereco?pes_id=${pes_id}&schema=${schema}`);
@@ -78,39 +81,39 @@ export default function Agenda({ schema }) {
     };
     useEffect(() => {
         if (people.length > 0) {
-            if (filterType) {
-                setFilteredPeople(people.filter(person => person.type === filterType));
-            } else {
-                setFilteredPeople(people);
-            }
+            const filteredTechnicians = people.filter(person => person.types.includes('tecnico'));
+            const filteredClients = people.filter(person => person.types.includes('cliente'));
+
+            setFilteredTechnicians(filteredTechnicians);
+            setFilteredClients(filteredClients);
         }
-    }, [filterType, people]);
+    }, [people]);
+
+
     useEffect(() => {
         async function encontrarPessoas() {
             try {
                 const response = await api.get(`/pessoas?schema=${schema}`);
                 if (Array.isArray(response.data.data)) {
                     const todasPessoas = response.data.data;
-                    const pessoasTecnicas = await Promise.all(
+                    const pessoasFiltradas = [];
+
+                    await Promise.all(
                         todasPessoas.map(async (pessoa) => {
                             try {
-                                const tipoResponse = await api.get(
-                                    `/tipos-pessoa?pes_id=${pessoa.pes_id}&schema=${schema}`
-                                );
+                                const tipoResponse = await api.get(`/tipos-pessoa?pes_id=${pessoa.pes_id}&schema=${schema}`);
                                 if (Array.isArray(tipoResponse.data.data)) {
-                                    const temTipoTecnico = tipoResponse.data.data.some(
-                                        (tipo) => tipo.pes_nome && tipo.tpp_descricao.toLowerCase() === "tecnico"
-                                    );
-
-                                    return temTipoTecnico ? pessoa : null;
+                                    const tipos = tipoResponse.data.data;
+                                    pessoa.types = tipos.map(tipo => tipo.tpp_descricao.toLowerCase()); // Armazena os tipos no próprio objeto
+                                    pessoasFiltradas.push(pessoa);
                                 }
                             } catch (error) {
                                 console.error(`Erro ao buscar tipos para a pessoa ${pessoa.pes_id}:`, error);
                             }
-                            return null;
                         })
                     );
-                    setPeople(pessoasTecnicas.filter(Boolean));
+
+                    setPeople(pessoasFiltradas);
                 } else {
                     console.error("Dados recebidos não são um array:", response.data.data);
                 }
@@ -120,6 +123,7 @@ export default function Agenda({ schema }) {
         }
         encontrarPessoas();
     }, [schema]);
+
 
     const handleSelectSlot = ({ start, end }) => {
         const now = new Date();
@@ -278,6 +282,7 @@ export default function Agenda({ schema }) {
             setSelectedPersonId(personId);
         }
     };
+
     const onEventResize = ({ event, start, end }) => {
         setEvents(prevEvents => prevEvents.map(evt =>
             evt.id === event.id ? { ...event, start, end } : evt
@@ -305,12 +310,10 @@ export default function Agenda({ schema }) {
                             className="border p-2 rounded"
                         >
                             <option value="">Selecione um técnico</option>
-                            {people.map(person => (
-                                person.pes_id ? (
-                                    <option key={person.pes_id} value={person.pes_id}>
-                                        {person.pes_nome}
-                                    </option>
-                                ) : null
+                            {filteredTechnicians.map(person => (
+                                <option key={person.pes_id} value={person.pes_id}>
+                                    {person.pes_nome}
+                                </option>
                             ))}
                         </select>
                         <button
@@ -395,13 +398,14 @@ export default function Agenda({ schema }) {
                             onChange={(e) => handleSelectPerson(e, "cliente")}
                             className="border p-2 rounded"
                         >
-                            <option value="">Selecione um Cliente</option>
-                            {people.map(person => (
+                            <option value="">Selecione um cliente</option>
+                            {filteredClients.map(person => (
                                 <option key={person.pes_id} value={person.pes_id}>
                                     {person.pes_nome}
                                 </option>
                             ))}
                         </select>
+
                         <select
                             value={selectedAddress ? selectedAddress.epe_id : ""}
                             onChange={handleSelectAddress}
