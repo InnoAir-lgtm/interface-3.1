@@ -217,6 +217,10 @@ export default function Agenda({ schema }) {
         }
     };
 
+    useEffect(() => {
+        fetchEvents();
+    }, [selectedPersonId, schema]);
+
     const handleUpdateEvent = async () => {
         if (!newEvent.title || !newEvent.date || !newEvent.startTime || !newEvent.endTime || !newEvent.evt_local) {
             alert("Todos os campos são obrigatórios.");
@@ -242,12 +246,6 @@ export default function Agenda({ schema }) {
             console.error("Erro ao conectar com o backend:", error);
         }
     };
-
-    useEffect(() => {
-        fetchEvents();
-    }, [selectedPersonId, schema]);
-
-
 
     const handleEventClick = (event) => {
         if (event) {
