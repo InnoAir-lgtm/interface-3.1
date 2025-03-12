@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import api from '../apiUrl';
 import { IoMdPersonAdd } from "react-icons/io";
+import { PiPersonArmsSpreadThin } from "react-icons/pi";
+import { IoPersonAddOutline } from "react-icons/io5";
 
 export default function CadastrarOpe() {
     const { user } = useAuth();
@@ -67,12 +69,14 @@ export default function CadastrarOpe() {
     return (
         <div>
 
-            <div className="bg-[#D9D9D9] backdrop-blur-lg h-64 rounded-lg p-7 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+            <div className="bg-[#D9D9D9] backdrop-blur-lg h-auto rounded-lg p-7 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                 <div className="flex flex-col justify-between h-full gap-4 sm:gap-3">
                     <div className="flex gap-5 sm:gap-3 flex-wrap items-center">
                         <div className="flex justify-center items-center bg-black w-16 h-16 rounded-full sm:w-12 sm:h-12">
                             <IoMdPersonAdd className="text-white text-[40px] sm:text-[30px]" />
                         </div>
+
+
                         <h2 className="text-2xl font-semibold text-black tracking-wider hover:text-white transition-all duration-300 sm:text-xl">
                             Cadastrar novos usuários
                             <p className="text-lg font-extralight mb-6 sm:mb-2 sm:text-sm">
@@ -80,6 +84,12 @@ export default function CadastrarOpe() {
                             </p>
                         </h2>
                     </div>
+
+                    <div className="flex justify-center items-center gap-5 flex-wrap sm:gap-3">
+                        <IoPersonAddOutline className="text-[50px] sm:text-[40px]" />
+                        <div className="text-[50px] sm:text-[40px]">+</div>
+                    </div>
+
 
                     <button
                         onClick={togglePopUp}
@@ -116,9 +126,7 @@ export default function CadastrarOpe() {
                                         value={formData.email}
                                         onChange={handleInputChange}
                                     />
-                                    <span className="px-4 py-2 bg-gray-200 border border-gray-300 rounded-r-lg">
-                                        @bela.com.br
-                                    </span>
+                                   
                                 </div>
 
                                 <div>

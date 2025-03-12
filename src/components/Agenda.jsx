@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import api from "../apiUrl";
 import { useAuth } from "../auth/AuthContext";
 import { DateTime } from "luxon";
-import { FaChevronDown, FaCheck } from "react-icons/fa";
+import { FaChevronDown } from "react-icons/fa";
 import GestorEquipe from "./AgendaTecnicos";
 
+import { usePermissions } from "../middleware/middleware";
+
 export default function ListagemAfazeres({ schema }) {
+  const { verifyAndCreatePermission } = usePermissions();
   const { user } = useAuth();
   const [userId, setUserId] = useState(null);
   const [afazeres, setAfazeres] = useState([]);
@@ -31,7 +34,7 @@ export default function ListagemAfazeres({ schema }) {
   }, [user?.email]);
 
   useEffect(() => {
-    if (!modalOpen) return; // Evita carregar afazeres quando a modal não está aberta
+    if (!modalOpen) return;
     async function buscarAfazeresDoUsuario() {
       if (!userId) return;
       setLoading(true); // Inicia o carregamento
@@ -75,13 +78,27 @@ export default function ListagemAfazeres({ schema }) {
     }
   };
 
+  const abrirModal = async (permissionName) => {
+    const hasPermission = await verifyAndCreatePermission(permissionName);
+    if (hasPermission) {
+      setModalOpen(true);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center p-4">
+
       <button
-        onClick={() => setModalOpen(true)}
-        className="w-72 h-64 bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 text-gray-800 font-semibold flex justify-center items-center text-center relative overflow-hidden border border-gray-300"
+        value="agendaTecn"
+        onClick={(e) => abrirModal(e.target.value || 'agendaTecn')}
+        className="w-72 h-64 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg hover:shadow-2xl hover:bg-gradient-to-br hover:from-green-100 hover:to-white transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center relative overflow-hidden"
       >
-        <span className="font-medium text-xl text-gray-700">Agenda Técnico</span>
+        <div className="absolute inset-0 bg-green-500 opacity-10 hover:opacity-20 transition-opacity duration-300 rounded-lg"></div>
+        <div className="h-full w-full relative flex flex-col items-center justify-center space-y-4">
+          <span className="font-medium text-lg transition transform hover:scale-105 hover:text-gray-600">
+            Agenda tecnico
+          </span>
+        </div>
       </button>
 
       {modalOpen && (
@@ -90,7 +107,7 @@ export default function ListagemAfazeres({ schema }) {
             <GestorEquipe schema={schema} />
             <h2 className="text-xl font-bold mb-4 text-center">Cronograma do Técnico</h2>
             <button
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
+             className="absolute top-4 right-4 bg-red-500 text-white py-1 px-3 rounded-full hover:bg-red-600 transition"
               onClick={() => setModalOpen(false)}
             >
               &times;

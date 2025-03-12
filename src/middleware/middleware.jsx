@@ -25,21 +25,34 @@ export const PermissionProvider = ({ children }) => {
             console.error("Erro: Nome da permissão não fornecido.");
             return false;
         }
-        const normalizedPermissionName = normalizePermissionName(permissionName); 
+
+        const normalizedPermissionName = normalizePermissionName(permissionName);
         const descricaoAmigavel = formatPermissionName(normalizedPermissionName);
+
         try {
-            let permissionExists = checkPermissionExists(descricaoAmigavel);
+            // 1. Verifica se a permissão já existe no estado local
+            let permissionExists = permissions.some(
+                (perm) => perm.per_descricao === descricaoAmigavel
+            );
+
+            // 2. Se não existir, tenta criar a permissão no backend
             if (!permissionExists) {
                 permissionExists = await createPermission(descricaoAmigavel, normalizedPermissionName);
             }
-            if (!permissionExists) return false;
-            return await checkUserPermission(normalizedPermissionName);
+
+            // 3. Se a permissão foi criada ou já existia, verifica se o usuário tem acesso
+            if (permissionExists) {
+                return await checkUserPermission(normalizedPermissionName);
+            } else {
+                return false;
+            }
         } catch (error) {
             console.error("Erro ao verificar ou criar permissão:", error);
             return false;
         }
     };
-    
+
+
     const formatPermissionName = (permissionName) => {
         return permissionName
             .replace(/([A-Z])/g, ' $1')
@@ -78,41 +91,41 @@ export const PermissionProvider = ({ children }) => {
         }
     };
 
-  const checkUserPermission = async (permissionName) => {
-    const normalizedPermissionName = normalizePermissionName(permissionName);
-    const user = JSON.parse(localStorage.getItem('user'));
-    const papelId = user?.pap_id;
+    const checkUserPermission = async (permissionName) => {
+        const normalizedPermissionName = normalizePermissionName(permissionName);
+        const user = JSON.parse(localStorage.getItem('user'));
+        const papelId = user?.pap_id;
 
-    if (!papelId) {
-        console.error("Erro: Papel do usuário não encontrado.");
-        alert("Erro: Papel do usuário não encontrado.");
-        return false;
-    }
-
-    try {
-        const response = await api.get(`/permissoes-por-papel/${papelId}`);
-        const permissoesPorPapel = response.data || [];
-        console.log("Permissões do papel:", permissoesPorPapel);
-        const hasPermission = permissoesPorPapel.some((permission) => {
-            return (
-                permission.per_permissao &&
-                permission.per_permissao.toLowerCase() === normalizedPermissionName
-            );
-        });
-        if (hasPermission) {
-            console.log("Usuário tem permissão para:", normalizedPermissionName);
-            return true;
-        } else {
-            console.log("Usuário não tem permissão para:", normalizedPermissionName);
-            alert(`Você não tem permissão para acessar a função: ${normalizedPermissionName}`);
+        if (!papelId) {
+            console.error("Erro: Papel do usuário não encontrado.");
+            alert("Erro: Papel do usuário não encontrado.");
             return false;
         }
-    } catch (error) {
-        console.error("Erro ao verificar permissões:", error.message);
-        alert("Erro ao verificar permissões.");
-        return false;
-    }
-};
+
+        try {
+            const response = await api.get(`/permissoes-por-papel/${papelId}`);
+            const permissoesPorPapel = response.data || [];
+            console.log("Permissões do papel:", permissoesPorPapel);
+            const hasPermission = permissoesPorPapel.some((permission) => {
+                return (
+                    permission.per_permissao &&
+                    permission.per_permissao.toLowerCase() === normalizedPermissionName
+                );
+            });
+            if (hasPermission) {
+                console.log("Usuário tem permissão para:", normalizedPermissionName);
+                return true;
+            } else {
+                console.log("Usuário não tem permissão para:", normalizedPermissionName);
+                alert(`Você não tem permissão para acessar a função: ${normalizedPermissionName}`);
+                return false;
+            }
+        } catch (error) {
+            console.error("Erro ao verificar permissões:", error.message);
+            alert("Erro ao verificar permissões.");
+            return false;
+        }
+    };
 
 
     const checkPermission = (permissionName) => {

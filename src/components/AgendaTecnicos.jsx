@@ -2,13 +2,11 @@ import React, { useState, useEffect } from "react";
 import api from "../apiUrl";
 import { useAuth } from "../auth/AuthContext";
 import { DateTime } from "luxon";
-import { FaCheck } from "react-icons/fa";
 import { usePermissions } from "../middleware/middleware";
 
 export default function GestorEquipe({ schema }) {
   const { verifyAndCreatePermission } = usePermissions();
   const { user } = useAuth();
-
   const [userId, setUserId] = useState(null);
   const [afazeres, setAfazeres] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -154,7 +152,7 @@ export default function GestorEquipe({ schema }) {
               Gestão equipe
             </h2>
             <button
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
+              className="absolute top-4 right-4 bg-red-500 text-white py-1 px-3 rounded-full hover:bg-red-600 transition"
               onClick={fecharModal}
             >
               &times;
