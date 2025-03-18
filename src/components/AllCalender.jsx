@@ -16,9 +16,7 @@ export default function Agenda({ schema }) {
     const [selectedPersonId, setSelectedPersonId] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [newEvent, setNewEvent] = useState({ title: "", description: "", start: new Date(), end: new Date(), status: "agendado", type: "", person: "", });
-    const [filterType, setFilterType] = useState("");
     const [people, setPeople] = useState([]);
-    const [filteredPeople, setFilteredPeople] = useState([]);
     const [addresses, setAddresses] = useState([]);
     const [selectedAddress, setSelectedAddress] = useState(null);
     const localizer = momentLocalizer(moment);
@@ -44,7 +42,7 @@ export default function Agenda({ schema }) {
     };
     const [filteredTechnicians, setFilteredTechnicians] = useState([]);
     const [filteredClients, setFilteredClients] = useState([]);
-    
+
     const buscarEnderecos = async (pes_id) => {
         try {
             const response = await api.get(`/listar-endereco?pes_id=${pes_id}&schema=${schema}`);
@@ -293,13 +291,13 @@ export default function Agenda({ schema }) {
 
             <button
                 onClick={abrirModal}
-                className="w-72 h-64 bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 text-gray-800 font-semibold flex justify-center items-center text-center relative overflow-hidden border border-gray-300 z-10"
+                className="w-72 h-64 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg hover:shadow-2xl hover:bg-gradient-to-br hover:from-green-100 hover:to-white transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center relative overflow-hidden"
             >
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-blue-50 opacity-30"></div>
-                <div className="relative flex flex-col items-center justify-center space-y-4 w-full h-full">
+                <div className="absolute inset-0 bg-green-500 opacity-10 hover:opacity-20 transition-opacity duration-300 rounded-lg pointer-events-none"></div>
+                <div className="flex items-center justify-center w-12 h-12 rounded-full shadow-md transform hover:scale-105 transition-transform duration-200">
                     <SlCalender className="text-blue-600 text-5xl transition transform hover:scale-110" />
-                    <span className="font-medium text-xl text-gray-700">Agenda</span>
                 </div>
+                Agenda
             </button>
             {openModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-20">

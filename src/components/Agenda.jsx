@@ -86,7 +86,7 @@ export default function ListagemAfazeres({ schema }) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-4">
+    <div className="flex flex-col items-center justify-center gap-2">
 
       <button
         value="agendaTecn"

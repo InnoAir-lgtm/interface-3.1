@@ -213,7 +213,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
 
                 <CadastrarTipo schema={schema} />
                 <Agenda schema={schema} selectedPessoa={selectedPessoa} />
-               <AgendaTecnico schema={schema} selectedPessoa={selectedPessoa} />
+                <AgendaTecnico schema={schema} selectedPessoa={selectedPessoa} />
 
             </div>
 
@@ -310,7 +310,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                         <EditarUsuario
                                             schema={schema}
                                             selectedPessoa={selectedPessoa}
-                                            fetchPessoas={fetchPessoas} 
+                                            fetchPessoas={fetchPessoas}
                                         />
                                         <button
                                             onClick={() => setSelectedPessoa(null)}

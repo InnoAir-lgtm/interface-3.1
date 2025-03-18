@@ -29,7 +29,7 @@ export default function CadastrarOpe() {
 
         try {
             const response = await api.post('/cadastrar-usuario', {
-                email: `${formData.email}@bela.com.br`,
+                email: `${formData.email}`,
                 nome: formData.name,
                 senha: formData.password,
                 perfil: formData.perfil,
