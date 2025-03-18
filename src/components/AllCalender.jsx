@@ -23,7 +23,7 @@ export default function Agenda({ schema }) {
     const DnDCalendar = withDragAndDrop(Calendar);
     const abrirModal = () => setOpenModal(true);
     const fecharModal = () => setOpenModal(false);
-    const statusColors = { agendado: "#3182ce", confirmado: "#38a169", cancelado: "#e53e3e", pendente: "#f6ad55" };
+    const statusColors = { agendado: "#3182ce", confirmado: "#38a169", cancelado: "#e53e3e", pendente: "#f6ad55", concluido: "#000" };
     moment.locale("pt-br");
     const messages = {
         allDay: "Dia inteiro",
@@ -371,6 +371,11 @@ export default function Agenda({ schema }) {
                                     <div className="bg-[#38a169] w-4 h-4 rounded-full"></div>
                                     <p>Confirmado</p>
                                 </li>
+
+                                <li className="flex items-center space-x-2">
+                                    <div className="bg-[#000] w-4 h-4 rounded-full"></div>
+                                    <p>Concluido</p>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -486,6 +491,7 @@ export default function Agenda({ schema }) {
                             <option value="confirmado">Confirmado</option>
                             <option value="cancelado">Cancelado</option>
                             <option value="pendente">Pendente</option>
+                            <option value="concluido">Concluido</option>
                         </select>
                         {selectedPersonId && (
                             <div className="mt-2 text-gray-600">

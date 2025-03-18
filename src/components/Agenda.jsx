@@ -14,7 +14,9 @@ export default function ListagemAfazeres({ schema }) {
   const [afazeres, setAfazeres] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [loading, setLoading] = useState(false); // Estado para carregamento
+  const [loading, setLoading] = useState(false);
+  const [observacao, setObservacao] = useState(""); // Estado para armazenar a observação
+
 
   useEffect(() => {
     async function buscarUsuarioLogado() {
@@ -37,7 +39,7 @@ export default function ListagemAfazeres({ schema }) {
     if (!modalOpen) return;
     async function buscarAfazeresDoUsuario() {
       if (!userId) return;
-      setLoading(true); // Inicia o carregamento
+      setLoading(true);
       try {
         const response = await api.get(
           `/eventos?schema=${schema}&pes_evento=${userId}`
@@ -58,25 +60,29 @@ export default function ListagemAfazeres({ schema }) {
   const handleCompleteEvent = async (eventId) => {
     setAfazeres((prevAfazeres) =>
       prevAfazeres.map((afazer) =>
-        afazer.evt_id === eventId ? { ...afazer, evt_status: "Concluído" } : afazer
+        afazer.evt_id === eventId ? { ...afazer, evt_status: "concluido" } : afazer
       )
     );
 
     try {
       const response = await api.put(`/eventos/${eventId}/status-descricao?schema=${schema}`, {
-        status: "Concluído",
+        status: "concluido",
         descricao: "Tarefa finalizada pelo técnico",
+        observacao: observacao || "Sem observação", // Passando a observação
         schema,
       });
 
       if (response.status === 200) {
         console.log("Evento marcado como concluído com sucesso!");
+        setObservacao(""); // Limpa o campo de observação após salvar
       }
     } catch (error) {
       console.error("Erro ao atualizar o evento:", error);
       alert("Houve um erro ao concluir o evento.");
     }
   };
+
+
 
   const abrirModal = async (permissionName) => {
     const hasPermission = await verifyAndCreatePermission(permissionName);
@@ -107,7 +113,7 @@ export default function ListagemAfazeres({ schema }) {
             <GestorEquipe schema={schema} />
             <h2 className="text-xl font-bold mb-4 text-center">Cronograma do Técnico</h2>
             <button
-             className="absolute top-4 right-4 bg-red-500 text-white py-1 px-3 rounded-full hover:bg-red-600 transition"
+              className="absolute top-4 right-4 bg-red-500 text-white py-1 px-3 rounded-full hover:bg-red-600 transition"
               onClick={() => setModalOpen(false)}
             >
               &times;
@@ -140,12 +146,23 @@ export default function ListagemAfazeres({ schema }) {
                           {mapsLink && (
                             <a href={mapsLink} target="_blank" className="text-blue-500" rel="noopener noreferrer">Ver no mapa</a>
                           )}
-                          {afazer.evt_status === "Concluído" ? (
+                          {afazer.evt_status === "concluido" ? (
                             <span className="text-green-600 font-bold">Atividade Concluída</span>
                           ) : (
-                            <button onClick={() => handleCompleteEvent(afazer.evt_id)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded">
-                              Concluir
-                            </button>
+                            <div className="mt-2">
+                              <textarea
+                                value={observacao}
+                                onChange={(e) => setObservacao(e.target.value)}
+                                className="w-full p-2 border rounded"
+                                placeholder="Digite a observação aqui"
+                              />
+                              <button
+                                onClick={() => handleCompleteEvent(afazer.evt_id)}
+                                className="mt-2 bg-green-500 text-white font-bold py-1 px-3 rounded"
+                              >
+                                Salvar Observação e Concluir
+                              </button>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -194,7 +211,7 @@ export default function ListagemAfazeres({ schema }) {
 
                           <td className="border border-gray-300 px-4 py-2">{afazer.evt_inicio} - {afazer.evt_fim}</td>
                           <td className="border border-gray-300 px-4 py-2">{afazer.evt_local || "Local não informado"}
-                            <div className="flex justify-between">
+                            <div className="flex flex-col justify-between">
                               {mapsLink && (
                                 <a
                                   href={mapsLink}
@@ -207,15 +224,23 @@ export default function ListagemAfazeres({ schema }) {
                               )}
 
                               <div>
-                                {afazer.evt_status === "Concluído" ? (
+                                {afazer.evt_status === "concluido" ? (
                                   <span className="text-green-600 font-bold">Atividade Concluída</span>
                                 ) : (
-                                  <button
-                                    onClick={() => handleCompleteEvent(afazer.evt_id)}
-                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
-                                  >
-                                    Concluir
-                                  </button>
+                                  <div className="mt-2">
+                                    <textarea
+                                      value={observacao}
+                                      onChange={(e) => setObservacao(e.target.value)}
+                                      className="w-full p-2 border rounded"
+                                      placeholder="Digite a observação aqui"
+                                    />
+                                    <button
+                                      onClick={() => handleCompleteEvent(afazer.evt_id)}
+                                      className="mt-2 bg-green-500 text-white font-bold py-1 px-3 rounded"
+                                    >
+                                      Salvar Observação e Concluir
+                                    </button>
+                                  </div>
                                 )}
                               </div>
                             </div>

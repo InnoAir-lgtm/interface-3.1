@@ -3,6 +3,7 @@ import api from "../apiUrl";
 import { useAuth } from "../auth/AuthContext";
 import { DateTime } from "luxon";
 import { usePermissions } from "../middleware/middleware";
+import { FaChevronDown } from "react-icons/fa";  // Adicionado ícone para dropdown
 
 export default function GestorEquipe({ schema }) {
   const { verifyAndCreatePermission } = usePermissions();
@@ -12,7 +13,7 @@ export default function GestorEquipe({ schema }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [tecnicos, setTecnicos] = useState([]);
   const [tecnicoSelecionado, setTecnicoSelecionado] = useState("");
-
+  const [selectedRow, setSelectedRow] = useState(null); // Controle de linha selecionada
   useEffect(() => {
     async function buscarUsuarioLogado() {
       if (!user?.email) return;
@@ -173,98 +174,77 @@ export default function GestorEquipe({ schema }) {
               </select>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full border-collapse border border-gray-300">
-                <thead>
-                  <tr className="bg-gray-200">
-                    <th className="border border-gray-300 px-4 py-2">Título</th>
-                    <th className="border border-gray-300 px-4 py-2">
-                      Descrição
-                    </th>
-                    <th className="border border-gray-300 px-4 py-2">Data</th>
-                    <th className="border border-gray-300 px-4 py-2">
-                      Horário
-                    </th>
-                    <th className="border border-gray-300 px-4 py-2">Local</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {afazeres.length > 0 ? (
-
-                    afazeres.map((afazer) => {
-                      const latitude = afazer.evt_lat;
-                      const longitude = afazer.evt_log;
-                      const mapsLink =
-                        latitude && longitude
-                          ? `https://www.google.com/maps?q=${latitude},${longitude}`
-                          : null;
-                      return (
-                        <tr
-                          key={afazer.evt_id}
-                          className="odd:bg-white even:bg-gray-100"
-                        >
-                          <td className="border border-gray-300 px-4 py-2">
-                            {afazer.evt_titulo || "Sem título"}
-                          </td>
-                          <td className="border border-gray-300 px-4 py-2 break-words max-w-xs">
-                            {afazer.evt_descricao || "Sem descrição"}
-                          </td>
-                          <td className="border border-gray-300 px-4 py-2">
-                            {afazer.evt_evento &&
-                              !isNaN(new Date(afazer.evt_evento))
-                              ? DateTime.fromISO(afazer.evt_evento)
-                                .setZone("America/Sao_Paulo")
-                                .toFormat("dd/MM/yyyy")
-                              : "Data não informada"}
-                          </td>
-                          <td className="border border-gray-300 px-4 py-2">
-                            {afazer.evt_inicio} - {afazer.evt_fim}
-                          </td>
-                          <td className="border border-gray-300 px-4 py-2">
-                            {afazer.evt_local || "Local não informado"}
-
-                            <div className="flex justify-between">
-                              {mapsLink && (
-                                <a
-                                  href={mapsLink}
-                                  target="_blank"
-                                  className="text-blue-500 ml-2"
-                                  rel="noopener noreferrer"
-                                >
-                                  Ver no mapa
-                                </a>
-                              )}
-
-                              <div>
-                                {afazer.evt_status === "Concluído" ? (
-                                  <span className="text-green-600 font-bold">Atividade Concluída</span>
-                                ) : (
-                                  <button
-                                    onClick={() => handleCompleteEvent(afazer.evt_id)}
-                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
-                                  >
-                                    Concluir
-                                  </button>
-                                )}
-                              </div>
+            <div className="md:hidden w-full">
+              {afazeres.map((afazer, index) => {
+                const latitude = afazer.evt_lat;
+                const longitude = afazer.evt_log;
+                const mapsLink =
+                  latitude && longitude
+                    ? `https://www.google.com/maps?q=${latitude},${longitude}`
+                    : null;
+                return (
+                  <div key={afazer.evt_id} className="border rounded-lg p-3 mb-2">
+                    <div className="flex justify-between items-center cursor-pointer" onClick={() => setSelectedRow(selectedRow === index ? null : index)}>
+                      <span className="font-medium">{afazer.evt_titulo || "Sem título"}</span>
+                      <FaChevronDown className={`${selectedRow === index ? "rotate-180" : "rotate-0"} transition-transform`} />
+                    </div>
+                    {selectedRow === index && (
+                      <div className="mt-2 text-sm">
+                        <p><strong>Descrição:</strong> {afazer.evt_descricao || "Sem descrição"}</p>
+                        <p><strong>Data:</strong> {DateTime.fromISO(afazer.evt_evento).toFormat("dd/MM/yyyy")}</p>
+                        <p><strong>Horário:</strong> {afazer.evt_inicio} - {afazer.evt_fim}</p>
+                        <p><strong>Local:</strong> {afazer.evt_local || "Local não informado"}</p>
+                        <div className="mt-2 flex flex-col gap-2">
+                          {mapsLink && (
+                            <a href={mapsLink} target="_blank" className="text-blue-500" rel="noopener noreferrer">Ver no mapa</a>
+                          )}
+                          {afazer.evt_status === "concluido" ? (
+                            <span className="text-green-600 font-bold">Atividade Concluída</span>
+                          ) : (
+                            <div className="mt-2">
+                              <button
+                                onClick={() => handleCompleteEvent(afazer.evt_id)}
+                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
+                              >
+                                Concluir
+                              </button>
                             </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                    
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="6"
-                        className="border border-gray-300 px-4 py-2 text-center text-gray-600"
-                      >
-                        Nenhum afazer encontrado.
-                      </td>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="hidden md:block">
+              <div className="overflow-x-auto">
+                <table className="min-w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-200">
+                      <th className="border border-gray-300 px-4 py-2">Título</th>
+                      <th className="border border-gray-300 px-4 py-2">Descrição</th>
+                      <th className="border border-gray-300 px-4 py-2">Data</th>
+                      <th className="border border-gray-300 px-4 py-2">Local</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {afazeres.map((afazer) => (
+                      <tr key={afazer.evt_id}>
+                        <td className="border border-gray-300 px-4 py-2">{afazer.evt_titulo || "Sem título"}</td>
+                        <td className="border border-gray-300 px-4 py-2">{afazer.evt_descricao || "Sem descrição"}</td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {DateTime.fromISO(afazer.evt_evento).toFormat("dd/MM/yyyy")}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          <p>Local:{afazer.evt_local || "Local não informado"}</p>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -272,3 +252,8 @@ export default function GestorEquipe({ schema }) {
     </div>
   );
 }
+
+
+
+
+
