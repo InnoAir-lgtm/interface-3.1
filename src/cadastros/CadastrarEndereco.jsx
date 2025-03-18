@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useEndereco } from '../auth/ProviderEndereco';
 import { usePermissions } from '../middleware/middleware';
+import { BsMailboxFlag } from "react-icons/bs";
 import api from '../apiUrl';
 
 export default function CadastrarEndereco({ schema }) {
@@ -8,6 +9,7 @@ export default function CadastrarEndereco({ schema }) {
     const { verifyAndCreatePermission } = usePermissions();
     const [endereco, setEndereco] = useState({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
     const [isOpen, setIsOpen] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
 
     const handleChange = async (e) => {
         e.preventDefault();
@@ -41,7 +43,7 @@ export default function CadastrarEndereco({ schema }) {
             addEndereco(endereco);
 
             setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
-            setIsOpen(false); 
+            setIsOpen(false);
         } catch (error) {
             console.error('Erro ao cadastrar endereço:', error.message);
             alert('Falha ao cadastrar endereço.');
@@ -116,9 +118,18 @@ export default function CadastrarEndereco({ schema }) {
             <button
                 value="adicionarEndereco"
                 onClick={(e) => abrirModal(e.target.value)}
-                className="px-5 py-3 flex justify-center items-center w-48 transition-transform transform -translate-x-32 hover:translate-x-0 duration-300 ease-in-out text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                className="flex justify-center items-center w-12 hover:w-48 overflow-hidden transition-all duration-300 ease-in-out text-white bg-blue-500 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 p-3"
             >
-                + Adicionar endereço
+                <BsMailboxFlag className="text-white text-lg transition-all duration-300" />
+
+                <span
+                    className={`ml-2 whitespace-nowrap transition-all duration-300 ${isHovered ? "opacity-100 w-auto" : "opacity-0 w-0"
+                        }`}
+                >
+                    Adicionar endereço
+                </span>
             </button>
 
             {isOpen && (

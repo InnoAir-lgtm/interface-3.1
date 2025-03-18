@@ -23,7 +23,7 @@ export default function Agenda({ schema }) {
     const DnDCalendar = withDragAndDrop(Calendar);
     const abrirModal = () => setOpenModal(true);
     const fecharModal = () => setOpenModal(false);
-    const statusColors = { agendado: "#3182ce", confirmado: "#38a169", cancelado: "#e53e3e", pendente: "#f6ad55", concluido: "#000" };
+    const statusColors = { agendado: "#ffff00", confirmado: "#38a169", cancelado: "#e53e3e", pendente: "#f6ad55", concluido: "#3182ce" };
     moment.locale("pt-br");
     const messages = {
         allDay: "Dia inteiro",

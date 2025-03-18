@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { RiContactsBook3Fill } from "react-icons/ri";
 import api from '../apiUrl';
-import { IoMdArrowDropright } from "react-icons/io"
+import { IoIosContacts } from "react-icons/io";
 import CadastrarEmail from '../cadastros/CadastrarEmail';
 import { FiTrash } from "react-icons/fi";
 
 export default function ListarContatos({ selectedPessoa, schema }) {
     const [contatos, setContatos] = useState([])
+    const [isHovered, setIsHovered] = useState(false);
     const [shopPopUp, setShoPopUp] = useState(false)
 
     useEffect(() => {
@@ -39,10 +39,20 @@ export default function ListarContatos({ selectedPessoa, schema }) {
     return (
         <div>
             <button
-                onClick={() => setShoPopUp(true)}
-                className="px-5 py-3 flex justify-center items-center w-48  transition-transform transform -translate-x-32 hover:translate-x-0 duration-300 ease-in-out  text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                onClick={() => setShowSidebar(true)}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                className="flex items-center justify-center w-12 hover:w-48 overflow-hidden transition-all duration-300 ease-in-out text-white bg-blue-500 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 p-3"
             >
-                <RiContactsBook3Fill /> Lista de contatos <IoMdArrowDropright />
+                <IoIosContacts className="text-white text-lg transition-all duration-300" />
+
+                {/* Texto aparece suavemente ao passar o mouse */}
+                <span
+                    className={`ml-2 whitespace-nowrap transition-all duration-300 ${isHovered ? "opacity-100 w-auto" : "opacity-0 w-0"
+                        }`}
+                >
+                    Lista de contatos
+                </span>
             </button>
 
 

@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import api from '../apiUrl';
-import { IoMdArrowDropright } from "react-icons/io";
+import { RiContactsBook2Line } from "react-icons/ri";
 import { FiTrash } from "react-icons/fi";
+
 
 export default function ListEndPessoa({ schema, selectedPessoa }) {
     const [showSidebar, setShowSidebar] = useState(false);
     const [enderecos, setEnderecos] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
         if (showSidebar && selectedPessoa) {
@@ -46,9 +48,19 @@ export default function ListEndPessoa({ schema, selectedPessoa }) {
         <div>
             <button
                 onClick={() => setShowSidebar(true)}
-                className="px-5 py-3 flex justify-center items-center w-48 transition-transform transform -translate-x-32 hover:translate-x-0 duration-300 ease-in-out text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                className="flex items-center justify-center w-12 hover:w-48 overflow-hidden transition-all duration-300 ease-in-out text-white bg-blue-500 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 p-3"
             >
-                Lista de endereços <IoMdArrowDropright />
+                <RiContactsBook2Line className="text-white text-lg transition-all duration-300" />
+
+                {/* Texto aparece suavemente ao passar o mouse */}
+                <span
+                    className={`ml-2 whitespace-nowrap transition-all duration-300 ${isHovered ? "opacity-100 w-auto" : "opacity-0 w-0"
+                        }`}
+                >
+                    Lista de endereços
+                </span>
             </button>
 
             <div

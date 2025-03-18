@@ -24,6 +24,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     const [isAddTipoModalOpen, setIsAddTipoModalOpen] = useState(false);
     const [availableTipos, setAvailableTipos] = useState([]);
     const [selectedTipo, setSelectedTipo] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const fetchAvailableTipos = async () => {
         try {
@@ -189,6 +190,12 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     }
 
 
+    const filteredPessoas = pessoas.filter((pessoa) =>
+        pessoa.pes_nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pessoa.pes_cpf_cnpj.includes(searchQuery)
+    );
+
+
     return (
         <div>
             <h2 className="text-2xl font-normal text-gray-800 mb-4">Gestão da <span className="font-extralight">{empresaName || "NOME DA EMPRESA"}</span></h2>
@@ -227,7 +234,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                             transition={{ duration: 0.3 }}
                         >
                             <div className="bg-white z-20 rounded-lg shadow-lg p-8 max-w-2xl w-full sm:w-[700px] relative">
-
                                 <div className="flex justify-between">
                                     <button
                                         className="text-gray-600 hover:text-gray-800 text-2xl"
@@ -252,9 +258,19 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                 </div>
 
                                 <h3 className="text-2xl font-semibold mb-6 text-gray-800">Lista de Pessoas</h3>
-                                {pessoas.length > 0 ? (
+
+                                {/* Input de busca */}
+                                <input
+                                    type="text"
+                                    placeholder="Buscar pessoas..."
+                                    className="mb-4 p-2 border border-gray-300 rounded-lg w-full"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)} // Atualiza a busca
+                                />
+
+                                {filteredPessoas.length > 0 ? (
                                     <ul className="space-y-4">
-                                        {pessoas.map((pessoa) => (
+                                        {filteredPessoas.map((pessoa) => (
                                             <li
                                                 key={pessoa.pes_id}
                                                 className="relative p-6 bg-gray-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-xl transition-all cursor-pointer"
@@ -280,11 +296,9 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 )}
                                             </li>
                                         ))}
-
-
                                     </ul>
                                 ) : (
-                                    <p className="text-gray-600">Nenhuma pessoa cadastrada.</p>
+                                    <p className="text-gray-600">Nenhuma pessoa encontrada.</p>
                                 )}
                             </div>
                         </motion.div>
