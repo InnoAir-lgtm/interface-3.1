@@ -77,6 +77,8 @@ export default function Agenda({ schema }) {
             epe_longitude: address.epe_longitude
         }));
     };
+
+    
     useEffect(() => {
         if (people.length > 0) {
             const filteredTechnicians = people.filter(person => person.types.includes('tecnico'));
@@ -289,16 +291,18 @@ export default function Agenda({ schema }) {
     return (
         <div className="flex flex-col items-center">
 
+
+
             <button
                 onClick={abrirModal}
-                className="w-72 h-64 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg hover:shadow-2xl hover:bg-gradient-to-br hover:from-green-100 hover:to-white transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center relative overflow-hidden"
+                className="w-72 h-64 bg-gradient-to-br to-gray-300 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center overflow-hidden"
             >
-                <div className="absolute inset-0 bg-green-500 opacity-10 hover:opacity-20 transition-opacity duration-300 rounded-lg pointer-events-none"></div>
-                <div className="flex items-center justify-center w-12 h-12 rounded-full shadow-md transform hover:scale-105 transition-transform duration-200">
+                <div>
                     <SlCalender className="text-blue-600 text-5xl transition transform hover:scale-110" />
                 </div>
                 Agenda
             </button>
+
             {openModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-20">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl relative">

@@ -4,6 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 import { DateTime } from "luxon";
 import { FaChevronDown } from "react-icons/fa";
 import GestorEquipe from "./AgendaTecnicos";
+import { SlCalender } from "react-icons/sl";
 
 import { usePermissions } from "../middleware/middleware";
 
@@ -97,15 +98,17 @@ export default function ListagemAfazeres({ schema }) {
       <button
         value="agendaTecn"
         onClick={(e) => abrirModal(e.target.value || 'agendaTecn')}
-        className="w-72 h-64 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg hover:shadow-2xl hover:bg-gradient-to-br hover:from-green-100 hover:to-white transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center relative overflow-hidden"
+        className="w-72 h-64 bg-gradient-to-br to-gray-300 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center overflow-hidden"
       >
-        <div className="absolute inset-0 bg-green-500 opacity-10 hover:opacity-20 transition-opacity duration-300 rounded-lg"></div>
-        <div className="h-full w-full relative flex flex-col items-center justify-center space-y-4">
-          <span className="font-medium text-lg transition transform hover:scale-105 hover:text-gray-600">
-            Agenda tecnico
-          </span>
-        </div>
+
+        <span className="font-medium flex items-center gap-1 text-lg transition transform hover:scale-105 hover:text-gray-600">
+          <SlCalender />
+        </span>
+        tecnico
+
       </button>
+
+
 
       {modalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">

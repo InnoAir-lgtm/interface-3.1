@@ -198,18 +198,6 @@ export default function GestorEquipe({ schema }) {
                           {mapsLink && (
                             <a href={mapsLink} target="_blank" className="text-blue-500" rel="noopener noreferrer">Ver no mapa</a>
                           )}
-                          {afazer.evt_status === "concluido" ? (
-                            <span className="text-green-600 font-bold">Atividade Concluída</span>
-                          ) : (
-                            <div className="mt-2">
-                              <button
-                                onClick={() => handleCompleteEvent(afazer.evt_id)}
-                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
-                              >
-                                Concluir
-                              </button>
-                            </div>
-                          )}
                         </div>
                       </div>
                     )}

@@ -170,6 +170,7 @@ export default function CadastrarPessoa({ schema }) {
                         >
                             &times;
                         </button>
+                        
                         <h1 className="text-xl font-bold text-gray-800 mb-4 text-center">
                             Cadastro de Pessoa
                         </h1>

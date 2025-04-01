@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import CadastrarPessoa from "../cadastros/CadastrarPessoa";
-import CadastrarTipo from "../cadastros/CadastrarTipo";
 import CadastrarEndereco from "../cadastros/CadastrarEndereco";
 import CadastrarComplementar from "../cadastros/CadastrarComplementar";
 import ListEndPessoa from "../Listagem/ListEndPessoa";
@@ -14,6 +13,7 @@ import { IoReloadSharp } from "react-icons/io5";
 import { GiExpand } from "react-icons/gi";
 import AgendaTecnico from "./AllCalender";
 import Agenda from "./Agenda";
+import EmpreendimentoRGI from "../cadastros/EmpreendimentoRGI";
 
 const EmpresaComponent = ({ schema, empresaName }) => {
     const [selectedPessoa, setSelectedPessoa] = useState(null);
@@ -203,25 +203,27 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             <div className="flex sm:justify-center xl:justify-normal items-center flex-wrap gap-4 w-full h-full">
                 <button
                     onClick={openModal}
-                    className="w-72 h-64 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg hover:shadow-2xl hover:bg-gradient-to-br hover:from-green-100 hover:to-white transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center relative overflow-hidden"
+                    className="w-72 h-64 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg hover:shadow-2xl hover:bg-gradient-to-br hover:from-green-100 hover:to-white transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center overflow-hidden"
                 >
-                    <div className="absolute inset-0 bg-green-500 opacity-10 hover:opacity-20 transition-opacity duration-300 rounded-lg"></div>
-                    <div className="h-full w-full relative flex flex-col items-center justify-center space-y-4">
+
+                    <div className="h-full w-full relative flex flex-col items-center justify-center space-y-4 z-10">
                         <GiExpand className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl transition transform hover:scale-110" />
                         <span className="font-medium text-lg transition transform hover:scale-105 hover:text-gray-600">
                             Pessoas
                         </span>
-                        <div className="absolute bottom-4 right-4 flex items-center justify-center bg-red-500 text-white rounded-full w-9 h-9 text-xl font-semibold shadow-md transition-transform duration-300 ease-in-out hover:scale-110 hover:rotate-12">
+                        <div className="bottom-4 right-4 flex items-center justify-center  text-black rounded-full w-9 h-9 text-xl font-semibold shadow-md transition-transform duration-300 ease-in-out hover:scale-110 hover:rotate-12">
                             {pessoas.length}
                         </div>
                     </div>
                 </button>
 
 
-                <CadastrarTipo schema={schema} />
+
+
                 <Agenda schema={schema} selectedPessoa={selectedPessoa} />
                 <AgendaTecnico schema={schema} selectedPessoa={selectedPessoa} />
 
+                <EmpreendimentoRGI schema={schema} />
             </div>
 
             <AnimatePresence initial={false}>
@@ -233,7 +235,8 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                             exit={{ opacity: 0, scale: 0.8 }}
                             transition={{ duration: 0.3 }}
                         >
-                            <div className="bg-white z-20 rounded-lg shadow-lg p-8 max-w-2xl w-full sm:w-[700px] relative">
+                            
+                            <div className="bg-white z-40 rounded-lg shadow-lg p-8 max-w-2xl w-full sm:w-[700px] relative">
                                 <div className="flex justify-between">
                                     <button
                                         className="text-gray-600 hover:text-gray-800 text-2xl"
