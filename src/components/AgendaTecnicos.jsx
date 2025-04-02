@@ -102,14 +102,12 @@ export default function GestorEquipe({ schema }) {
         afazer.evt_id === eventId ? { ...afazer, evt_status: "Concluído" } : afazer
       )
     );
-
     try {
       const response = await api.put(`/eventos/${eventId}/status-descricao?schema=${schema}`, {
         status: "Concluído",
         descricao: "Tarefa finalizada pelo técnico",
         schema,
       });
-
       if (response.status === 200) {
         console.log("Evento marcado como concluído com sucesso!");
       }
@@ -119,15 +117,12 @@ export default function GestorEquipe({ schema }) {
     }
   };
 
-
-
   const abrirModal = async (permissionName) => {
     const hasPermission = await verifyAndCreatePermission(permissionName);
     if (hasPermission) {
       setModalOpen(true);
     }
   };
-
 
   const fecharModal = () => {
     setModalOpen(false);

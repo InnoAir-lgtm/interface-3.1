@@ -56,7 +56,7 @@ export default function RegistrarProcedencia({ schema }) {
                             <h2 className="text-lg font-bold">Registrar procedencia</h2>
                             <button
                                 onClick={closeModal}
-                                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                                className="bg-red-500 rounded-full text-white px-4 py-2 hover:bg-red-600"
                             >
                                 X
                             </button>

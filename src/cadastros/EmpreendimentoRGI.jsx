@@ -290,16 +290,18 @@ export default function EmpreendimentoRGI({ schema }) {
                                         <div className="flex items-center justify-center w-[30px] h-[30px] rounded bg-gray-500">
                                             <GoPlus className="text-white" />
                                         </div>
-                                        empreendimento
+                                        Empreendimento
                                     </button>
+
 
 
                                     <button
                                         onClick={closeModal}
-                                        className="text-gray-600 hover:text-gray-800 text-2xl"
+                                        className=" bg-red-500 text-white py-1 px-3 rounded-full hover:bg-red-600 transition"
                                     >
                                         <IoMdClose />
                                     </button>
+
                                 </div>
                                 <h3 className="text-2xl font-semibold mb-6 text-gray-800">Lista empreendimento</h3>
 
@@ -413,12 +415,13 @@ export default function EmpreendimentoRGI({ schema }) {
                         {/* Cabeçalho */}
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-semibold text-gray-700">Novo Empreendimento</h3>
+
+
                             <button
-                                type="button"
                                 onClick={toggleModal}
-                                className="bg-red-500 text-white p-2 rounded-md"
+                                className=" bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
                             >
-                                X
+                                <IoMdClose />
                             </button>
                         </div>
 

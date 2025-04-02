@@ -23,7 +23,7 @@ export default function Agenda({ schema }) {
     const DnDCalendar = withDragAndDrop(Calendar);
     const abrirModal = () => setOpenModal(true);
     const fecharModal = () => setOpenModal(false);
-    const statusColors = { agendado: "#ffff00", confirmado: "#38a169", cancelado: "#e53e3e", pendente: "#f6ad55", concluido: "#3182ce" };
+    const statusColors = { agendado: "#3B82F6", confirmado: "#10B981", cancelado: "#DC2626", pendente: "#F59E0B", concluido: "#8B5CF6" };
     moment.locale("pt-br");
     const messages = {
         allDay: "Dia inteiro",
@@ -174,7 +174,7 @@ export default function Agenda({ schema }) {
                     epe_latitude: event.epe_latitude || null,
                     epe_longitude: event.epe_longitude || null,
                     status: event.evt_status,
-                    color: statusColors[event.evt_status] || "#3182ce",
+                    color: statusColors[event.evt_status] || "#3B82F6",
                 }));
                 setEvents(loadedEvents);
             } else {
@@ -266,7 +266,7 @@ export default function Agenda({ schema }) {
                 epe_latitude: event.epe_latitude || "",
                 epe_longitude: event.epe_longitude || "",
                 pes_evento: event.pes_evento || newEvent.pes_evento,
-                id: event.id // Incluindo o id para edição
+                id: event.id 
             });
             setSelectedPersonId(event.pes_evento || selectedPersonId);
             setTimeout(() => setModalOpen(true), 100);
@@ -358,23 +358,23 @@ export default function Agenda({ schema }) {
                         <div>
                             <ul className="flex space-x-4 mt-4">
                                 <li className="flex items-center space-x-2">
-                                    <div className="bg-[#e53e3e] w-4 h-4 rounded-full"></div>
+                                    <div className="bg-[#DC2626] w-4 h-4 rounded-full"></div>
                                     <p>Cancelado</p>
                                 </li>
                                 <li className="flex items-center space-x-2">
-                                    <div className="bg-[#f6ad55] w-4 h-4 rounded-full"></div>
+                                    <div className="bg-[#F59E0B] w-4 h-4 rounded-full"></div>
                                     <p>Pendente</p>
                                 </li>
                                 <li className="flex items-center space-x-2">
-                                    <div className="bg-[#3182ce] w-4 h-4 rounded-full"></div>
+                                    <div className="bg-[#3B82F6] w-4 h-4 rounded-full"></div>
                                     <p>Agendado</p>
                                 </li>
                                 <li className="flex items-center space-x-2">
-                                    <div className="bg-[#38a169] w-4 h-4 rounded-full"></div>
+                                    <div className="bg-[#10B981] w-4 h-4 rounded-full"></div>
                                     <p>Confirmado</p>
                                 </li>
                                 <li className="flex items-center space-x-2">
-                                    <div className="bg-[#000] w-4 h-4 rounded-full"></div>
+                                    <div className="bg-[#8B5CF6] w-4 h-4 rounded-full"></div>
                                     <p>Concluído</p>
                                 </li>
                             </ul>
@@ -387,7 +387,11 @@ export default function Agenda({ schema }) {
             {modalOpen && (
                 <div className="fixed z-[100] inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                        <div>
+                        <div className="flex justify-between">
+                            <h2 className="text-xl font-semibold text-gray-700">
+                                {selectedEvent ? "Editar Evento" : "Adicionar Evento"}
+                            </h2>
+
                             <button
                                 onClick={() => setModalOpen(false)}
                                 className=" bg-red-500 text-white py-1 px-3 rounded-full hover:bg-red-600 transition"
@@ -395,9 +399,8 @@ export default function Agenda({ schema }) {
                                 X
                             </button>
                         </div>
-                        <h2 className="text-xl font-semibold text-gray-700">
-                            {selectedEvent ? "Editar Evento" : "Adicionar Evento"}
-                        </h2>
+
+
                         <select
                             value={newEvent.pes_destino || ""}
                             onChange={(e) => handleSelectPerson(e, "cliente")}

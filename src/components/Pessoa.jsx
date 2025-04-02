@@ -255,8 +255,8 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                     </div>
 
                                     <button
-                                        className="text-white rounded-full bg-red-500 hover:text-gray-800 text-2xl"
                                         onClick={closeModal}
+                                        className=" bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
                                     >
                                         <IoMdClose />
                                     </button>

@@ -158,7 +158,7 @@ export default function CadastrarPessoa({ schema }) {
                 <div className="flex items-center justify-center w-[30px] h-[30px] rounded bg-gray-500">
                     <GoPlus className="text-white" />
                 </div>
-                Cadastrar pessoa
+                Pessoa
             </button>
 
             {isOpen && (
