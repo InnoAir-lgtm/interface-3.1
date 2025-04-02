@@ -304,88 +304,88 @@ export default function Agenda({ schema }) {
             </button>
 
             {openModal && (
-    <div className="fixed inset-0 z-[100] bg-black bg-opacity-40 flex items-start justify-center overflow-y-auto">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl relative overflow-y-auto max-h-screen mt-10">
-            <select
-                value={newEvent.pes_evento || ""}
-                onChange={(e) => handleSelectPerson(e, "tecnico")}
-                className="border p-2 rounded"
-            >
-                <option value="">Selecione um técnico</option>
-                {filteredTechnicians.map(person => (
-                    <option key={person.pes_id} value={person.pes_id}>
-                        {person.pes_nome}
-                    </option>
-                ))}
-            </select>
-            <button
-                className="absolute top-4 right-4 bg-red-500 text-white py-1 px-3 rounded-full hover:bg-red-600 transition"
-                onClick={fecharModal}
-            >
-                ✕
-            </button>
+                <div className="fixed inset-0 z-[100] bg-black bg-opacity-40 flex items-start justify-center overflow-y-auto">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl relative overflow-y-auto max-h-screen mt-10">
+                        <select
+                            value={newEvent.pes_evento || ""}
+                            onChange={(e) => handleSelectPerson(e, "tecnico")}
+                            className="border p-2 rounded"
+                        >
+                            <option value="">Selecione um técnico</option>
+                            {filteredTechnicians.map(person => (
+                                <option key={person.pes_id} value={person.pes_id}>
+                                    {person.pes_nome}
+                                </option>
+                            ))}
+                        </select>
+                        <button
+                            className="absolute top-4 right-4 bg-red-500 text-white py-1 px-3 rounded-full hover:bg-red-600 transition"
+                            onClick={fecharModal}
+                        >
+                            ✕
+                        </button>
 
-            <DnDCalendar
-                localizer={localizer}
-                events={events}
-                selectable
-                onSelectSlot={handleSelectSlot}
-                onSelectEvent={handleEventClick}
-                startAccessor="start"
-                endAccessor="end"
-                style={{ height: 600 }}
-                className="rbc-calendar"
-                messages={messages}
-                eventPropGetter={(event) => ({
-                    style: {
-                        backgroundColor: event.color,
-                        color: "black",
-                        borderRadius: "5px",
-                        padding: "2px",
-                        border: "none",
-                        fontWeight: "normal",
-                        fontSize: "14px",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                    },
-                })}
-                resizable
-                onEventResize={onEventResize}
-                draggableAccessor={() => true}
-            />
+                        <DnDCalendar
+                            localizer={localizer}
+                            events={events}
+                            selectable
+                            onSelectSlot={handleSelectSlot}
+                            onSelectEvent={handleEventClick}
+                            startAccessor="start"
+                            endAccessor="end"
+                            style={{ height: 600 }}
+                            className="rbc-calendar"
+                            messages={messages}
+                            eventPropGetter={(event) => ({
+                                style: {
+                                    backgroundColor: event.color,
+                                    color: "black",
+                                    borderRadius: "5px",
+                                    padding: "2px",
+                                    border: "none",
+                                    fontWeight: "normal",
+                                    fontSize: "14px",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                },
+                            })}
+                            resizable
+                            onEventResize={onEventResize}
+                            draggableAccessor={() => true}
+                        />
 
-            <div>
-                <ul className="flex space-x-4 mt-4">
-                    <li className="flex items-center space-x-2">
-                        <div className="bg-[#e53e3e] w-4 h-4 rounded-full"></div>
-                        <p>Cancelado</p>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                        <div className="bg-[#f6ad55] w-4 h-4 rounded-full"></div>
-                        <p>Pendente</p>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                        <div className="bg-[#3182ce] w-4 h-4 rounded-full"></div>
-                        <p>Agendado</p>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                        <div className="bg-[#38a169] w-4 h-4 rounded-full"></div>
-                        <p>Confirmado</p>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                        <div className="bg-[#000] w-4 h-4 rounded-full"></div>
-                        <p>Concluído</p>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-)}
+                        <div>
+                            <ul className="flex space-x-4 mt-4">
+                                <li className="flex items-center space-x-2">
+                                    <div className="bg-[#e53e3e] w-4 h-4 rounded-full"></div>
+                                    <p>Cancelado</p>
+                                </li>
+                                <li className="flex items-center space-x-2">
+                                    <div className="bg-[#f6ad55] w-4 h-4 rounded-full"></div>
+                                    <p>Pendente</p>
+                                </li>
+                                <li className="flex items-center space-x-2">
+                                    <div className="bg-[#3182ce] w-4 h-4 rounded-full"></div>
+                                    <p>Agendado</p>
+                                </li>
+                                <li className="flex items-center space-x-2">
+                                    <div className="bg-[#38a169] w-4 h-4 rounded-full"></div>
+                                    <p>Confirmado</p>
+                                </li>
+                                <li className="flex items-center space-x-2">
+                                    <div className="bg-[#000] w-4 h-4 rounded-full"></div>
+                                    <p>Concluído</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            )}
 
 
             {modalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
+                <div className="fixed z-[100] inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96">
                         <div>
                             <button
