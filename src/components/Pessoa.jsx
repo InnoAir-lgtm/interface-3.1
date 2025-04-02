@@ -56,6 +56,8 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             closeAddTipoModal();
         }
     }
+
+
     const fetchPessoas = async () => {
         try {
             const response = await api.get(`/pessoas?schema=${schema}`);
@@ -135,25 +137,26 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             );
 
             if (response.status === 200) {
-                setPessoas((prevPessoas) =>
-                    prevPessoas.map((pessoa) =>
-                        pessoa.pes_id === pes_id
-                            ? { ...pessoa, tipos: [...pessoa.tipos, response.data.data] }
-                            : pessoa
-                    )
-                );
-                setSelectedPessoa((prevSelectedPessoa) => ({
-                    ...prevSelectedPessoa,
-                    tipos: [...prevSelectedPessoa.tipos, response.data.data],
-                }));
-
                 alert('Tipo de pessoa adicionado com sucesso!');
+                closeAddTipoModal();
+                fetchPessoas(); // Força atualização do estado
             }
         } catch (error) {
             console.error('Erro ao adicionar tipo de pessoa:', error);
             alert('Erro ao adicionar tipo de pessoa.');
         }
     };
+
+
+    useEffect(() => {
+        if (selectedPessoa) {
+            const updatedPessoa = pessoas.find(p => p.pes_id === selectedPessoa.pes_id);
+            if (updatedPessoa) {
+                setSelectedPessoa(updatedPessoa);
+            }
+        }
+    }, [pessoas]);
+
 
 
     const openModal = () => {
@@ -228,23 +231,15 @@ const EmpresaComponent = ({ schema, empresaName }) => {
 
             <AnimatePresence initial={false}>
                 {isOpen && (
-                    <div className="fixed inset-0 flex items-center z-20 justify-center bg-black bg-opacity-50">
+                    <div className="fixed inset-0 p-10 flex items-start overflow-auto z-[100] justify-center bg-black bg-opacity-50">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
                             transition={{ duration: 0.3 }}
                         >
-                            
                             <div className="bg-white z-40 rounded-lg shadow-lg p-8 max-w-2xl w-full sm:w-[700px] relative">
                                 <div className="flex justify-between">
-                                    <button
-                                        className="text-gray-600 hover:text-gray-800 text-2xl"
-                                        onClick={closeModal}
-                                    >
-                                        <IoMdClose />
-                                    </button>
-
                                     <div className="flex gap-10">
                                         <CadastrarPessoa schema={schema} />
 
@@ -258,6 +253,13 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                             <IoReloadSharp />
                                         </button>
                                     </div>
+
+                                    <button
+                                        className="text-white rounded-full bg-red-500 hover:text-gray-800 text-2xl"
+                                        onClick={closeModal}
+                                    >
+                                        <IoMdClose />
+                                    </button>
                                 </div>
 
                                 <h3 className="text-2xl font-semibold mb-6 text-gray-800">Lista de Pessoas</h3>
@@ -272,7 +274,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                 />
 
                                 {filteredPessoas.length > 0 ? (
-                                    <ul className="space-y-4">
+                                    <ul className="space-y-4 overflow-auto">
                                         {filteredPessoas.map((pessoa) => (
                                             <li
                                                 key={pessoa.pes_id}
@@ -311,7 +313,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
 
             <div className="relative">
                 {selectedPessoa && (
-                    <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+                    <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-[100]">
                         <div className=" p-6 sm:p-8 md:p-10 rounded-lg shadow-lg w-full max-w-lg md:max-w-2xl lg:max-w-3xl h-auto max-h-screen overflow-y-auto flex">
                             <div className="absolute top-1/4 left-0 flex flex-col space-y-4 ">
                                 <CadastrarEndereco schema={schema} />
@@ -490,9 +492,12 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 </div>
                                             </div>
 
+
+
+                                            {/* AREA PARA ADICONAR TIPOS */}
                                             <div className="mb-3">
                                                 <div className="flex justify-between items-center">
-                                                    <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo Pessoa</label>
+                                                    <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipos Pessoa</label>
                                                     <button
                                                         className="bg-green-500 text-white p-1 rounded-lg"
                                                         onClick={(e) => {
@@ -500,10 +505,11 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                             openAddTipoModal();
                                                         }}
                                                     >
-                                                        Adicionar Tipo
+                                                        Adicionar Tipos
                                                     </button>
                                                 </div>
-                                                <div className="flex flex-wrap gap-2 mt-2">
+
+                                                <div className="flex flex-wrap gap-2 mt-2 border">
                                                     {selectedPessoa.tipos.map((tipo, index) => (
                                                         <span
                                                             key={index}

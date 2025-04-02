@@ -68,7 +68,6 @@ export default function Sidebar({ selectedEmpresa, selectedSchema }) {
                 <h2 className="text-2xl font-bold mb-6 text-center">🚀 Bem Vindo</h2>
 
                 <div className="flex flex-col items-center gap-4 p-3 rounded-lg bg-blue-600 shadow-md mb-6">
-                    <img src="https://avatars.githubusercontent.com/u/69748654?v=4" alt="Perfil" className="w-12 h-12 rounded-full" />
                     <div className="w-full">
                         <h3 className="text-sm font-semibold truncate">{user.nome || "Usuário"}</h3>
                         <p className="text-xs text-gray-200 truncate">{user.email || "email@example.com"}</p>

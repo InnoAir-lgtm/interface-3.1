@@ -48,7 +48,7 @@ export default function DashboardOperad() {
     if (error) return <p>Erro: {error}</p>;
 
     return (
-        <div className="flex">
+        <div className="flex overflow-auto">
             <div className="w-64">
                 <Sidebar selectedEmpresa={selectedEmpresa} selectedSchema={selectedSchema} />
             </div>

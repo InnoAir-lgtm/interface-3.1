@@ -3,6 +3,7 @@ import { IoBusinessOutline } from 'react-icons/io5';
 import api from '../apiUrl';
 import { IoMdClose } from "react-icons/io";
 import { AnimatePresence, motion } from "motion/react";
+import { GoPlus } from "react-icons/go";
 
 export default function EmpreendimentoRGI({ schema }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,6 +19,12 @@ export default function EmpreendimentoRGI({ schema }) {
     const [arquitetos, setArquitetos] = useState([]);
     const [empreendimentos, setEmpreendimentos] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
+
+    const [showModal, setShowModal] = useState(false);
+    const [enderecos, setEnderecos] = useState([]);
+
+
+    const [selectedEndereco, setSelectedEndereco] = useState(null);
     const [empreendimentoSelecionado, setEmpreendimentoSelecionado] = useState(null);
     const [formData, setFormData] = useState({
         cep: '',
@@ -30,9 +37,27 @@ export default function EmpreendimentoRGI({ schema }) {
         arquitetoSelecionado: ''
     });
 
+
+    const handleSelectEndereco = (endereco) => {
+        setCep(endereco.end_cep);
+        setLogradouro(endereco.end_logradouro);
+        setShowModal(false); // Fecha o modal após a seleção
+    };
+
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
+
+        setCep('');
+        setNumero('');
+        setLogradouro('');
+        setNomeEmpreendimento('');
+        setResponsavel('');
+        setConstrutora('');
+        setEngenheiro('');
+        setArquitetoSelecionado('');
     };
+
+
 
     const openEditModal = (emp) => {
         if (!emp) {
@@ -74,7 +99,8 @@ export default function EmpreendimentoRGI({ schema }) {
     const handleCepChange = async (e) => {
         const cepValue = e.target.value;
         setCep(cepValue);
-        if (cepValue.length === 8 && schema) {
+
+        if (cepValue.length === 8 && schema) { // Agora verifica se o CEP tem 8 dígitos antes de buscar
             try {
                 const response = await api.get(`/listar-enderecos?schema=${schema}&cep=${cepValue}`);
                 const data = response.data.data[0];
@@ -82,8 +108,8 @@ export default function EmpreendimentoRGI({ schema }) {
                 if (data) {
                     setLogradouro(data.end_logradouro || '');
                 } else {
-                    const apiResponse = await api.get(`https://viacep.com.br/ws/${cepValue}/json/`);
-                    setLogradouro(apiResponse.data.logradouro || '');
+                    setLogradouro('');
+                    console.warn('Nenhum endereço encontrado para este CEP.');
                 }
             } catch (error) {
                 console.error('Erro ao buscar CEP:', error);
@@ -91,8 +117,24 @@ export default function EmpreendimentoRGI({ schema }) {
         }
     };
 
+    const fetchEnderecos = async () => {
+        if (!schema) return;
 
-    // Deletar empreendimento
+        try {
+            const response = await api.get(`/listar-enderecos?schema=${schema}`);
+            setEnderecos(response.data.data);
+        } catch (error) {
+            console.error('Erro ao buscar endereços:', error);
+        }
+    };
+
+
+
+    useEffect(() => {
+        fetchEnderecos();
+    }, [schema]);
+
+
     const handleDelete = async (epd_id) => {
         if (!schema) {
             alert("Schema não definido!");
@@ -113,8 +155,6 @@ export default function EmpreendimentoRGI({ schema }) {
         }
     };
 
-
-
     // Listar empreendimentos cadastrados
     const fetchEmpreendimentos = async () => {
         try {
@@ -130,8 +170,7 @@ export default function EmpreendimentoRGI({ schema }) {
         fetchEmpreendimentos();
     }, [schema]);
 
-
-
+    //Cadastrar empreendimentos
     const handleSubmit = async (e) => {
         e.preventDefault();
         const empreendimentoData = {
@@ -192,7 +231,6 @@ export default function EmpreendimentoRGI({ schema }) {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-
     // Procurar tipos pessoas Arquitetos
     useEffect(() => {
         const fetchArquitetos = async () => {
@@ -233,9 +271,10 @@ export default function EmpreendimentoRGI({ schema }) {
                 <IoBusinessOutline className="text-blue-600 text-5xl" />
                 Adicionar Empreendimento
             </button>
+
             <AnimatePresence initial={false}>
                 {isOpen && (
-                    <div className="fixed inset-0 flex items-center z-20 justify-center bg-black bg-opacity-50">
+                    <div className="fixed z-[100] inset-0 flex items-center justify-center bg-black bg-opacity-50">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -245,17 +284,21 @@ export default function EmpreendimentoRGI({ schema }) {
                             <div className="bg-white z-40 rounded-lg shadow-lg p-8 max-w-2xl w-full sm:w-[700px] relative">
                                 <div className='flex justify-between'>
                                     <button
+                                        onClick={setIsModalOpen}
+                                        className="items-center justify-center gap-2 flex bg-green-500 text-white p-1 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <div className="flex items-center justify-center w-[30px] h-[30px] rounded bg-gray-500">
+                                            <GoPlus className="text-white" />
+                                        </div>
+                                        empreendimento
+                                    </button>
+
+
+                                    <button
                                         onClick={closeModal}
                                         className="text-gray-600 hover:text-gray-800 text-2xl"
                                     >
                                         <IoMdClose />
-                                    </button>
-                                    <button
-
-                                        onClick={setIsModalOpen}
-                                        className="items-center justify-center gap-2 flex bg-green-500 text-white p-1 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        empreendimento
                                     </button>
                                 </div>
                                 <h3 className="text-2xl font-semibold mb-6 text-gray-800">Lista empreendimento</h3>
@@ -297,9 +340,11 @@ export default function EmpreendimentoRGI({ schema }) {
                 )}
             </AnimatePresence>
 
+
+            {/* Modal de edição de empreendimento */}
             <AnimatePresence>
                 {editModal && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="fixed inset-0 flex items-start justify-center overflow-auto bg-black bg-opacity-50 z-[100]">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -313,13 +358,45 @@ export default function EmpreendimentoRGI({ schema }) {
                                 </button>
                             </div>
                             <form className="flex flex-col gap-4" onSubmit={handleFormSubmit}>
-                                <input type="text" name="nomeEmpreendimento" value={formData.nomeEmpreendimento} onChange={handleChange} placeholder="Nome do Empreendimento" className="p-2 border rounded" />
-                                <input type="text" name="cep" value={formData.cep} onChange={handleChange} placeholder="CEP" className="p-2 border rounded" />
-                                <input type="text" name="numero" value={formData.numero} onChange={handleChange} placeholder="Número" className="p-2 border rounded" />
-                                <input type="text" name="logradouro" value={formData.logradouro} onChange={handleChange} placeholder="Logradouro" className="p-2 border rounded" />
-                                <input type="text" name="responsavel" value={formData.responsavel} onChange={handleChange} placeholder="Responsável" className="p-2 border rounded" />
-                                <input type="text" name="engenheiro" value={formData.engenheiro} onChange={handleChange} placeholder="Engenheiro" className="p-2 border rounded" />
-                                <input type="text" name="construtora" value={formData.construtora} onChange={handleChange} placeholder="Construtora" className="p-2 border rounded" />
+
+                                <div className="grid grid-cols-1 gap-4">
+                                    <div className="flex flex-col">
+                                        <label className="text-sm text-gray-600">Nome do empreendimento</label>
+                                        <input type="text" name="nomeEmpreendimento" value={formData.nomeEmpreendimento} onChange={handleChange} placeholder="Nome do Empreendimento" className="p-2 border rounded text-sm" />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label className="text-sm text-gray-600">CEP</label>
+                                        <input type="text" name="cep" value={formData.cep} onChange={handleChange} placeholder="CEP" className="p-2 border rounded text-sm" />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label className="text-sm text-gray-600">Número</label>
+                                        <input type="text" name="numero" value={formData.numero} onChange={handleChange} placeholder="Número" className="p-2 border rounded text-sm" />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label className="text-sm text-gray-600">Logradouro</label>
+                                        <input type="text" name="logradouro" value={formData.logradouro} onChange={handleChange} placeholder="Logradouro" className="p-2 border rounded text-sm" />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label className="text-sm text-gray-600">Responsável</label>
+                                        <input type="text" name="responsavel" value={formData.responsavel} onChange={handleChange} placeholder="Responsável" className="p-2 border rounded text-sm" />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label className="text-sm text-gray-600">Engenheiro</label>
+                                        <input type="text" name="engenheiro" value={formData.engenheiro} onChange={handleChange} placeholder="Engenheiro" className="p-2 border rounded text-sm" />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label className="text-sm text-gray-600">Construtora</label>
+                                        <input type="text" name="construtora" value={formData.construtora} onChange={handleChange} placeholder="Construtora" className="p-2 border rounded text-sm" />
+                                    </div>
+                                </div>
+
+
                                 <button type="submit" className="bg-green-500 text-white p-2 rounded hover:bg-green-700">Salvar</button>
                             </form>
                         </motion.div>
@@ -329,61 +406,109 @@ export default function EmpreendimentoRGI({ schema }) {
 
 
 
+            {/* Modal de cadastro */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-[100] bg-black bg-opacity-50 flex justify-center items-center">
-                    <div className="bg-gray-100 p-6 rounded-md shadow-lg">
-                        <div className='flex justify-between items-center mb-4'>
+                <div className="fixed inset-0 z-[100] bg-black bg-opacity-50 flex justify-center items-center p-4">
+                    <div className="bg-gray-100 p-6 rounded-md shadow-lg w-full max-w-lg">
+                        {/* Cabeçalho */}
+                        <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-semibold text-gray-700">Novo Empreendimento</h3>
-                            <button type="button" onClick={toggleModal} className='bg-red-500 text-white p-2 rounded-md'>
+                            <button
+                                type="button"
+                                onClick={toggleModal}
+                                className="bg-red-500 text-white p-2 rounded-md"
+                            >
                                 X
                             </button>
                         </div>
-                        <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
+
+                        {/* Formulário */}
+                        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                             <input
                                 type="text"
                                 placeholder="Nome do empreendimento"
                                 value={nomeEmpreendimento}
                                 onChange={(e) => setNomeEmpreendimento(e.target.value)}
-                                className="p-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500"
+                                className="p-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500 w-full"
                             />
 
-                            <div className='flex gap-2'>
-                                <input
-                                    type="text"
-                                    placeholder="CEP"
-                                    value={cep}
-                                    onChange={handleCepChange}
-                                    className="w-96 p-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500"
-                                />
+                            {/* CEP e Número */}
+                            <div className="flex gap-2">
+                                <div className="border bg-white border-gray-400 rounded p-2 flex items-center w-full">
+                                    <input
+                                        type="text"
+                                        placeholder="Digite seu CEP"
+                                        value={cep}
+                                        onChange={handleCepChange}
+                                        className="w-full outline-none"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowModal(true)}
+                                        className="ml-2 bg-blue-500 text-white px-2 py-1 rounded text-sm"
+                                    >
+                                        Buscar
+                                    </button>
+                                </div>
+
                                 <input
                                     type="text"
                                     placeholder="Número"
                                     value={numero}
                                     onChange={(e) => setNumero(e.target.value)}
-                                    className="p-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500"
+                                    className="p-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500 w-1/3"
                                 />
                             </div>
 
+                            {/* Modal de Seleção de Endereço */}
+                            {showModal && (
+                                <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 p-4">
+                                    <div className="bg-white p-4 rounded shadow-lg w-full max-w-md">
+                                        <h2 className="text-lg font-bold mb-2">Selecione um endereço</h2>
+                                        <ul className="max-h-60 overflow-y-auto">
+                                            {enderecos.map((endereco, index) => (
+                                                <li
+                                                    key={index}
+                                                    className="p-2 cursor-pointer hover:bg-gray-200"
+                                                    onClick={() => handleSelectEndereco(endereco)}
+                                                >
+                                                    {endereco.end_cep} - {endereco.end_logradouro}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                        <button
+                                            onClick={() => setShowModal(false)}
+                                            className="mt-2 bg-gray-500 text-white px-4 py-1 rounded"
+                                        >
+                                            Fechar
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Logradouro */}
                             <input
                                 type="text"
                                 placeholder="Logradouro"
                                 value={logradouro}
                                 onChange={(e) => setLogradouro(e.target.value)}
-                                className="p-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500"
+                                className="p-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500 w-full"
                             />
 
+                            {/* Responsável */}
                             <input
                                 type="text"
                                 placeholder="Responsável"
                                 value={responsavel}
                                 onChange={(e) => setResponsavel(e.target.value)}
-                                className="p-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500"
+                                className="p-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500 w-full"
                             />
 
-                            <div className='flex justify-center gap-2'>
+                            {/* Engenheiro e Construtora */}
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 <input
                                     type="text"
-                                    placeholder="Eng"
+                                    placeholder="Engenheiro"
                                     value={engenheiro}
                                     onChange={(e) => setEngenheiro(e.target.value)}
                                     className="w-full p-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500"
@@ -398,6 +523,7 @@ export default function EmpreendimentoRGI({ schema }) {
                                 />
                             </div>
 
+                            {/* Arquiteto */}
                             <select
                                 value={arquitetoSelecionado}
                                 onChange={(e) => setArquitetoSelecionado(e.target.value)}
@@ -411,13 +537,18 @@ export default function EmpreendimentoRGI({ schema }) {
                                 ))}
                             </select>
 
-                            <button type="submit" className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                            {/* Botão de Cadastro */}
+                            <button
+                                type="submit"
+                                className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                            >
                                 Cadastrar
                             </button>
                         </form>
                     </div>
                 </div>
             )}
+
         </div>
     );
 }
