@@ -22,24 +22,26 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [isAddTipoModalOpen, setIsAddTipoModalOpen] = useState(false);
+    const [selectedTipoFiltro, setSelectedTipoFiltro] = useState("");
     const [availableTipos, setAvailableTipos] = useState([]);
     const [selectedTipo, setSelectedTipo] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
 
+
     const fetchAvailableTipos = async () => {
         try {
             const response = await api.get(`/listar-tipos-pessoa?schema=${schema}`);
-            const data = response.data;
-            if (data && data.data) {
-                setAvailableTipos(data.data);
-            } else {
-                setAvailableTipos([]);
-            }
+            setAvailableTipos(response.data.data || []);
         } catch (error) {
             console.error("Erro ao buscar tipos de pessoa:", error);
             setAvailableTipos([]);
         }
     };
+
+    useEffect(() => {
+        fetchAvailableTipos();
+    }, [schema]);
+
 
     const openAddTipoModal = () => {
         fetchAvailableTipos();
@@ -58,6 +60,9 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     }
 
 
+
+
+
     const fetchPessoas = async () => {
         try {
             const response = await api.get(`/pessoas?schema=${schema}`);
@@ -67,10 +72,9 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             } else {
                 const pessoasComTipo = await Promise.all(data.data.map(async (pessoa) => {
                     const tiposResponse = await api.get(`/tipos-pessoa?pes_id=${pessoa.pes_id}&schema=${schema}`);
-                    const tiposPessoa = tiposResponse.data.data;
                     return {
                         ...pessoa,
-                        tipos: tiposPessoa
+                        tipos: tiposResponse.data.data
                     };
                 }));
                 setPessoas(pessoasComTipo);
@@ -82,7 +86,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             setLoading(false);
         }
     };
-
     const handleDeletePessoa = async (id) => {
         try {
             const response = await api.delete(`/pessoas/${id}?schema=${schema}`);
@@ -139,7 +142,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             if (response.status === 200) {
                 alert('Tipo de pessoa adicionado com sucesso!');
                 closeAddTipoModal();
-                fetchPessoas(); // Força atualização do estado
+                fetchPessoas();
             }
         } catch (error) {
             console.error('Erro ao adicionar tipo de pessoa:', error);
@@ -191,11 +194,10 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     if (error) {
         return <p>Erro: {error}</p>;
     }
-
-
     const filteredPessoas = pessoas.filter((pessoa) =>
-        pessoa.pes_nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        pessoa.pes_cpf_cnpj.includes(searchQuery)
+        (pessoa.pes_nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            pessoa.pes_cpf_cnpj.includes(searchQuery)) &&
+        (selectedTipoFiltro === "" || pessoa.tipos.some(tipo => tipo.tpp_id === Number(selectedTipoFiltro)))
     );
 
 
@@ -219,10 +221,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                         </div>
                     </div>
                 </button>
-
-
-
-
                 <Agenda schema={schema} selectedPessoa={selectedPessoa} />
                 <AgendaTecnico schema={schema} selectedPessoa={selectedPessoa} />
 
@@ -240,23 +238,18 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                         >
                             <div className="bg-white z-40 rounded-lg shadow-lg p-8 max-w-2xl w-full sm:w-[700px] relative">
                                 <div className="flex justify-between">
-                                    <div className="flex gap-10">
+                                    <div className="flex gap-4">
                                         <CadastrarPessoa schema={schema} />
-
                                         <button
-                                            className=" bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-transform duration-300 ease-in-out"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleRefresh();
-                                            }}
+                                            className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600"
+                                            onClick={() => fetchPessoas()}
                                         >
                                             <IoReloadSharp />
                                         </button>
                                     </div>
-
                                     <button
-                                        onClick={closeModal}
-                                        className=" bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                                        onClick={() => setIsOpen(false)}
+                                        className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
                                     >
                                         <IoMdClose />
                                     </button>
@@ -264,14 +257,25 @@ const EmpresaComponent = ({ schema, empresaName }) => {
 
                                 <h3 className="text-2xl font-semibold mb-6 text-gray-800">Lista de Pessoas</h3>
 
-                                {/* Input de busca */}
-                                <input
-                                    type="text"
-                                    placeholder="Buscar pessoas..."
-                                    className="mb-4 p-2 border border-gray-300 rounded-lg w-full"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)} // Atualiza a busca
-                                />
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar pessoas..."
+                                        className="mb-4 p-2 border border-gray-300 rounded-lg w-full"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
+                                    <select
+                                        className="mb-4 p-2 border border-gray-300 rounded-lg"
+                                        value={selectedTipoFiltro}
+                                        onChange={(e) => setSelectedTipoFiltro(e.target.value)}
+                                    >
+                                        <option value="">Filtrar tipo</option>
+                                        {availableTipos.map((tipo) => (
+                                            <option key={tipo.tpp_id} value={tipo.tpp_id}>{tipo.tpp_descricao}</option>
+                                        ))}
+                                    </select>
+                                </div>
 
                                 {filteredPessoas.length > 0 ? (
                                     <ul className="space-y-4 overflow-auto">
@@ -282,7 +286,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 onClick={() => setSelectedPessoa(pessoa)}
                                             >
                                                 <button
-                                                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 transition-transform transform hover:scale-110"
+                                                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         handleDeletePessoa(pessoa.pes_id);
@@ -290,15 +294,12 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                 >
                                                     <FiTrash className="w-5 h-5" />
                                                 </button>
-
                                                 <p className="text-lg font-medium text-gray-800">
-                                                    <strong>{pessoa.pes_fis_jur === "cnpj" ? "Nome Fantasia" : "Nome"}:</strong> {pessoa.pes_nome || pessoa.pes_nome}
+                                                    <strong>{pessoa.pes_fis_jur === "cnpj" ? "Nome Fantasia" : "Nome"}:</strong> {pessoa.pes_nome}
                                                 </p>
-                                                {pessoa.pes_fis_jur === "cnpj" ? (
-                                                    <p className="text-sm text-gray-600"><strong>CNPJ:</strong> {pessoa.pes_cpf_cnpj}</p>
-                                                ) : (
-                                                    <p className="text-sm text-gray-600"><strong>CPF:</strong> {pessoa.pes_cpf_cnpj}</p>
-                                                )}
+                                                <p className="text-sm text-gray-600">
+                                                    <strong>{pessoa.pes_fis_jur === "cnpj" ? "CNPJ" : "CPF"}:</strong> {pessoa.pes_cpf_cnpj}
+                                                </p>
                                             </li>
                                         ))}
                                     </ul>
@@ -372,6 +373,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                         </div>
                                     </div>
                                 )}
+
                                 <form>
                                     <div className="flex flex-col md:flex-row gap-4 mb-2">
                                         <div className="w-full md:w-1/2">
@@ -396,7 +398,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                         </div>
                                     </div>
 
-                                    {selectedPessoa.pes_fis_jur === "cpf" ? (
+                                    {selectedPessoa.pes_fis_jur === "cpf" ?  (
                                         <div>
                                             <div className="flex flex-col md:flex-row gap-4 mb-2">
                                                 <div className="w-full md:w-1/2">
@@ -530,7 +532,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                                     ))}
                                                 </div>
                                             </div>
-
                                         </div>
                                     )}
                                 </form>

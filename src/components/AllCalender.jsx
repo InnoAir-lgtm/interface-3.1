@@ -8,6 +8,7 @@ import { SlCalender } from "react-icons/sl";
 import "../style/calendarStyles.css";
 import "moment/locale/pt-br";
 import api from "../apiUrl";
+import calender from "../assets/calendar.png";
 
 export default function Agenda({ schema }) {
     const [openModal, setOpenModal] = useState(false);
@@ -193,7 +194,6 @@ export default function Agenda({ schema }) {
             alert("Todos os campos são obrigatórios.");
             return;
         }
-
         const formattedEvent = {
             evt_titulo: newEvent.title,
             evt_descricao: newEvent.description,
@@ -230,14 +230,22 @@ export default function Agenda({ schema }) {
             alert("Todos os campos são obrigatórios.");
             return;
         }
+
         const formattedEvent = {
             titulo: newEvent.title,
             descricao: newEvent.description,
             endereco: newEvent.evt_local,
             status: newEvent.status,
             observacao: newEvent.observacao || "",
+            evt_evento: newEvent.date,
+            inicio: newEvent.startTime, // Corrigindo a referência
+            fim: newEvent.endTime,      // Corrigindo a referência
             schema
         };
+
+
+        console.log(formattedEvent)
+
         try {
             const response = await api.put(`/eventos/${newEvent.id}?schema=${schema}`, formattedEvent);
             if (response.status === 200) {
@@ -250,6 +258,7 @@ export default function Agenda({ schema }) {
             console.error("Erro ao conectar com o backend:", error);
         }
     };
+
 
     const handleEventClick = (event) => {
         if (event) {
@@ -266,7 +275,7 @@ export default function Agenda({ schema }) {
                 epe_latitude: event.epe_latitude || "",
                 epe_longitude: event.epe_longitude || "",
                 pes_evento: event.pes_evento || newEvent.pes_evento,
-                id: event.id 
+                id: event.id
             });
             setSelectedPersonId(event.pes_evento || selectedPersonId);
             setTimeout(() => setModalOpen(true), 100);
@@ -297,9 +306,9 @@ export default function Agenda({ schema }) {
                 onClick={abrirModal}
                 className="w-72 h-64 bg-gradient-to-br to-gray-300 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center overflow-hidden"
             >
-                <div>
-                    <SlCalender className="text-blue-600 text-5xl transition transform hover:scale-110" />
-                </div>
+               
+               
+                <img src={calender} alt="Calender" className="w-20 h-20 mt-2" />
                 Agenda
             </button>
 

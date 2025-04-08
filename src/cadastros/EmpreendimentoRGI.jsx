@@ -4,6 +4,7 @@ import api from '../apiUrl';
 import { IoMdClose } from "react-icons/io";
 import { AnimatePresence, motion } from "motion/react";
 import { GoPlus } from "react-icons/go";
+import empreendiment from '../assets/hotel.png';
 
 export default function EmpreendimentoRGI({ schema }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -100,22 +101,36 @@ export default function EmpreendimentoRGI({ schema }) {
         const cepValue = e.target.value;
         setCep(cepValue);
 
-        if (cepValue.length === 8 && schema) { // Agora verifica se o CEP tem 8 dígitos antes de buscar
-            try {
-                const response = await api.get(`/listar-enderecos?schema=${schema}&cep=${cepValue}`);
-                const data = response.data.data[0];
+        const cleanCep = cepValue.replace(/\D/g, ''); // Remove não-números
 
-                if (data) {
-                    setLogradouro(data.end_logradouro || '');
+        if (cleanCep.length === 8 && schema) {
+            try {
+                const response = await api.get(`/buscar-endereco?schema=${schema}&cep=${cleanCep}`);
+                const bancoData = response.data.data;
+
+                if (bancoData && bancoData.length > 0 && bancoData[0].end_logradouro !== 'Rua sete de setembro') {
+                    setLogradouro(bancoData[0].end_logradouro || '');
                 } else {
-                    setLogradouro('');
-                    console.warn('Nenhum endereço encontrado para este CEP.');
+                    // Busca na API do Google
+                    const googleRes = await fetch(
+                        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cleanCep)}&key=AIzaSyDtW8rulgb5mXwwiU7LvfgXOhFHZBV0xWQ`
+                    );
+                    const googleData = await googleRes.json();
+
+                    if (googleData.status === 'OK') {
+                        const result = googleData.results[0];
+                        const endereco = result.address_components.find(component => component.types.includes("route"));
+                        if (endereco) {
+                            setLogradouro(endereco.long_name);
+                        }
+                    }
                 }
             } catch (error) {
                 console.error('Erro ao buscar CEP:', error);
             }
         }
     };
+
 
     const fetchEnderecos = async () => {
         if (!schema) return;
@@ -268,7 +283,8 @@ export default function EmpreendimentoRGI({ schema }) {
                 onClick={openModal}
                 className="w-72 h-64 bg-gradient-to-br to-gray-300 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center overflow-hidden"
             >
-                <IoBusinessOutline className="text-blue-600 text-5xl" />
+                
+                <img src={empreendiment} alt="Empreendimento" className="w-20 h-20 mt-2" />
                 Adicionar Empreendimento
             </button>
 
@@ -283,6 +299,7 @@ export default function EmpreendimentoRGI({ schema }) {
                         >
                             <div className="bg-white z-40 rounded-lg shadow-lg p-8 max-w-2xl w-full sm:w-[700px] relative">
                                 <div className='flex justify-between'>
+
                                     <button
                                         onClick={setIsModalOpen}
                                         className="items-center justify-center gap-2 flex bg-green-500 text-white p-1 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -346,56 +363,62 @@ export default function EmpreendimentoRGI({ schema }) {
             {/* Modal de edição de empreendimento */}
             <AnimatePresence>
                 {editModal && (
-                    <div className="fixed inset-0 flex items-start justify-center overflow-auto bg-black bg-opacity-50 z-[100]">
+                    <div className="fixed inset-0 flex items-center justify-center overflow-auto bg-black bg-opacity-50 z-[100]">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            className="bg-white p-6 rounded-lg shadow-lg w-96"
+                            className="bg-white p-4 rounded-lg shadow-lg"
                         >
                             <div className="flex justify-between mb-4">
                                 <h3 className="text-lg font-semibold">Editar Empreendimento</h3>
-                                <button onClick={closeEditModal} className="text-gray-600 hover:text-gray-800">
+                                <button onClick={closeEditModal} className="bg-red-500 text-white rounded-full w-6 h-6 flex justify-center items-center">
                                     <IoMdClose />
                                 </button>
                             </div>
-                            <form className="flex flex-col gap-4" onSubmit={handleFormSubmit}>
 
-                                <div className="grid grid-cols-1 gap-4">
+                            <form className="flex flex-col gap-4" onSubmit={handleFormSubmit}>
+                                <div className="grid grid-cols-1 gap-2">
                                     <div className="flex flex-col">
-                                        <label className="text-sm text-gray-600">Nome do empreendimento</label>
-                                        <input type="text" name="nomeEmpreendimento" value={formData.nomeEmpreendimento} onChange={handleChange} placeholder="Nome do Empreendimento" className="p-2 border rounded text-sm" />
+                                        <label className="text-sm text-gray-600">Responsável</label>
+                                        <input className="w-full h-8 border rounded outline-none p-2" type="text" name="responsavel" value={formData.responsavel} onChange={handleChange} placeholder="Responsável" />
                                     </div>
 
-                                    <div className="flex flex-col">
-                                        <label className="text-sm text-gray-600">CEP</label>
-                                        <input type="text" name="cep" value={formData.cep} onChange={handleChange} placeholder="CEP" className="p-2 border rounded text-sm" />
+                                    <div className="flex gap-2">
+                                        <div className="flex flex-col">
+                                            <label className="text-sm text-gray-600">Logradouro</label>
+                                            <input className="w-full h-8 border rounded outline-none p-2" type="text" name="logradouro" value={formData.logradouro} onChange={handleChange} placeholder="Logradouro" />
+                                        </div>
+
+                                        <div className="flex flex-col">
+                                            <label className="text-sm text-gray-600">CEP</label>
+                                            <input className="w-full h-8 border rounded outline-none p-2" type="text" name="cep" value={formData.cep} onChange={handleChange} placeholder="CEP" />
+                                        </div>
                                     </div>
 
                                     <div className="flex flex-col">
                                         <label className="text-sm text-gray-600">Número</label>
-                                        <input type="text" name="numero" value={formData.numero} onChange={handleChange} placeholder="Número" className="p-2 border rounded text-sm" />
+                                        <input className="w-full h-8 border rounded outline-none p-2" type="text" name="numero" value={formData.numero} onChange={handleChange} placeholder="Número" />
                                     </div>
 
                                     <div className="flex flex-col">
-                                        <label className="text-sm text-gray-600">Logradouro</label>
-                                        <input type="text" name="logradouro" value={formData.logradouro} onChange={handleChange} placeholder="Logradouro" className="p-2 border rounded text-sm" />
+                                        <label className="text-sm text-gray-600">Nome do empreendimento</label>
+                                        <input className="w-full h-8 border rounded outline-none p-2" type="text" name="nomeEmpreendimento" value={formData.nomeEmpreendimento} onChange={handleChange} placeholder="Nome do Empreendimento" />
                                     </div>
 
-                                    <div className="flex flex-col">
-                                        <label className="text-sm text-gray-600">Responsável</label>
-                                        <input type="text" name="responsavel" value={formData.responsavel} onChange={handleChange} placeholder="Responsável" className="p-2 border rounded text-sm" />
+                                    <div className="flex gap-2">
+
+                                        <div className="flex flex-col">
+                                            <label className="text-sm text-gray-600">Construtora</label>
+                                            <input className="w-full h-8 border rounded outline-none p-2" type="text" name="construtora" value={formData.construtora} onChange={handleChange} placeholder="Construtora" />
+                                        </div>
+
+                                        <div className="flex flex-col">
+                                            <label className="text-sm text-gray-600">Engenheiro</label>
+                                            <input className="w-full h-8 border rounded outline-none p-2" type="text" name="engenheiro" value={formData.engenheiro} onChange={handleChange} placeholder="Engenheiro" />
+                                        </div>
                                     </div>
 
-                                    <div className="flex flex-col">
-                                        <label className="text-sm text-gray-600">Engenheiro</label>
-                                        <input type="text" name="engenheiro" value={formData.engenheiro} onChange={handleChange} placeholder="Engenheiro" className="p-2 border rounded text-sm" />
-                                    </div>
-
-                                    <div className="flex flex-col">
-                                        <label className="text-sm text-gray-600">Construtora</label>
-                                        <input type="text" name="construtora" value={formData.construtora} onChange={handleChange} placeholder="Construtora" className="p-2 border rounded text-sm" />
-                                    </div>
                                 </div>
 
 
@@ -551,7 +574,6 @@ export default function EmpreendimentoRGI({ schema }) {
                     </div>
                 </div>
             )}
-
         </div>
     );
 }

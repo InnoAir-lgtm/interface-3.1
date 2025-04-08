@@ -5,6 +5,7 @@ import { DateTime } from "luxon";
 import { FaChevronDown } from "react-icons/fa";
 import GestorEquipe from "./AgendaTecnicos";
 import { SlCalender } from "react-icons/sl";
+import tecnico from "../assets/engineer.png";
 
 import { usePermissions } from "../middleware/middleware";
 
@@ -101,9 +102,8 @@ export default function ListagemAfazeres({ schema }) {
         className="w-72 h-64 bg-gradient-to-br to-gray-300 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center overflow-hidden"
       >
 
-        <span className="font-medium flex items-center gap-1 text-lg transition transform hover:scale-105 hover:text-gray-600">
-          <SlCalender />
-        </span>
+       
+        <img src={tecnico} alt="Técnico" className="w-24 h-24 mb-2" />
         tecnico
 
       </button>

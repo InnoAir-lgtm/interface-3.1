@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { usePermissions } from '../middleware/middleware';
 import { FiTrash } from "react-icons/fi";
 import api from '../apiUrl';
+import { GoPlus } from "react-icons/go";
 
 export default function CadastrarTipoModal({ schema }) {
     const [descricao, setDescricao] = useState('');
@@ -20,11 +21,8 @@ export default function CadastrarTipoModal({ schema }) {
         }
     }, [schema]);
 
-
-
-
     const deletarTipoPessoa = async (tpp_id, schema) => {
-        console.log('Deletar Tipo:', tpp_id, schema); // Verifique os valores no console
+        console.log('Deletar Tipo:', tpp_id, schema);
         try {
             await api.delete(`/deletar-tipo-pessoa?tpp_id=${tpp_id}&schema=${schema}`);
             listarTiposPessoa();
@@ -123,14 +121,13 @@ export default function CadastrarTipoModal({ schema }) {
                     )
                 );
             }
-        }, 300); // Debounce de 300ms
+        }, 300);
     };
 
     return (
         <div>
             <button
-                value="cadastrarTipo"
-                onClick={(e) => openModal(e.target.value)}
+                onClick={openListModal}
                 className="w-full flex items-center gap-2 p-3 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-all duration-300"
             >
                 Tipo de Pessoa
@@ -149,7 +146,7 @@ export default function CadastrarTipoModal({ schema }) {
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-4 z-[100]">
                             <div>
                                 <label htmlFor="descricao" className="block text-gray-700">Descrição</label>
                                 <input
@@ -184,12 +181,6 @@ export default function CadastrarTipoModal({ schema }) {
                             </button>
                         </form>
 
-                        <button
-                            onClick={openListModal}
-                            className="mt-4 w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                        >
-                            Ver Tipos Cadastrados
-                        </button>
 
                         {message && (
                             <p className={`mt-2 ${message.includes('Erro') ? 'text-red-500' : 'text-green-500'}`}>
@@ -201,15 +192,31 @@ export default function CadastrarTipoModal({ schema }) {
             )}
 
             {isListModalOpen && (
-                <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50 w-screen h-screen">
+                <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 w-screen h-screen">
                     <div className="bg-white text-black p-6 rounded shadow-lg w-full max-w-md relative">
-                        <h3 className="text-lg font-bold mb-4">Selecionar Tipo de Pessoa</h3>
-                        <button
-                            onClick={closeListModal}
-                            className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                        >
-                            X
-                        </button>
+                        <h3 className="text-lg font-bold mb-4">Tipos de pessoas</h3>
+                        <div className='flex justify-between mb-7'>
+                            <button
+                                value="cadastrarTipo"
+                                onClick={(e) => openModal(e.target.value)}
+                                className="items-center justify-center gap-2 flex bg-green-500 text-white p-1 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                 <div className="flex items-center justify-center w-[30px] h-[30px] rounded bg-gray-500">
+                                    <GoPlus className="text-white" />
+                                </div>
+                                Tipos pessoas
+                            </button>
+
+                            
+
+                            <button
+                                onClick={closeListModal}
+                                className="bg-red-500 text-white px-3 py-1 rounded-full hover:bg-red-600"
+                            >
+                                X
+                            </button>
+                        </div>
+
                         <input
                             type="text"
                             placeholder="Buscar tipo de pessoa..."
@@ -233,7 +240,7 @@ export default function CadastrarTipoModal({ schema }) {
                                             onClick={() => {
                                                 if (tipo.tpp_id) {
                                                     deletarTipoPessoa(tipo.tpp_id, schema);
-                                                } 
+                                                }
                                             }}
                                         >
                                             <FiTrash />

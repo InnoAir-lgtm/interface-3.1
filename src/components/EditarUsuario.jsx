@@ -8,6 +8,10 @@ export default function EditarUsuario({ selectedPessoa, schema, fetchPessoas }) 
         pes_cpf_cnpj: '',
         pes_dn: '',
         pes_nome: '',
+        pes_rg: '',
+        pes_ie: '',
+        pes_fantasia: '',
+        pes_fis_jur: '',
     });
 
     const abrirModal = () => setOpenModal(true);
@@ -19,6 +23,10 @@ export default function EditarUsuario({ selectedPessoa, schema, fetchPessoas }) 
                 pes_cpf_cnpj: selectedPessoa.pes_cpf_cnpj || '',
                 pes_dn: selectedPessoa.pes_dn || '',
                 pes_nome: selectedPessoa.pes_nome || '',
+                pes_rg: selectedPessoa.pes_rg || '',
+                pes_ie: selectedPessoa.pes_ie || '',
+                pes_fantasia: selectedPessoa.pes_fantasia || '',
+                pes_fis_jur: selectedPessoa.pes_fis_jur || '',
             });
         }
     }, [selectedPessoa]);
@@ -33,10 +41,11 @@ export default function EditarUsuario({ selectedPessoa, schema, fetchPessoas }) 
         if (!updatedData.pes_dn || updatedData.pes_dn.trim() === '') {
             updatedData.pes_dn = null;
         }
+
         try {
             const response = await api.put(`/pessoas/${pes_id}?schema=${schema}`, updatedData);
             alert(response.data.message);
-            fetchPessoas(); 
+            fetchPessoas();
             fecharModal();
         } catch (error) {
             console.error('Erro ao atualizar usuário:', error);
@@ -64,30 +73,48 @@ export default function EditarUsuario({ selectedPessoa, schema, fetchPessoas }) 
                         </div>
 
                         <form onSubmit={(e) => handleUpdate(e, selectedPessoa.pes_id, schema)}>
-                            <label className="block">
-                                Nome:
-                                <input
-                                    type="text"
-                                    name="pes_nome"
-                                    value={formData.pes_nome}
-                                    onChange={handleChange}
-                                    className="w-full border p-2 rounded-md"
-                                />
-                            </label>
-                            <label className="block">
-                                CPF/CNPJ:
-                                <input
-                                    type="text"
-                                    name="pes_cpf_cnpj"
-                                    value={formData.pes_cpf_cnpj}
-                                    onChange={handleChange}
-                                    className="w-full border p-2 rounded-md"
-                                />
-                            </label>
-                            <button type="submit" className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md">
-                                Atualizar
-                            </button>
+                            <div className="grid grid-cols-2 gap-4">
+                                <label className="block">
+                                    Nome:
+                                    <input type="text" name="pes_nome" value={formData.pes_nome} onChange={handleChange} className="w-full border p-2 rounded-md" />
+                                </label>
+                                <label className="block">
+                                    CPF/CNPJ:
+                                    <input type="text" name="pes_cpf_cnpj" value={formData.pes_cpf_cnpj} onChange={handleChange} className="w-full border p-2 rounded-md" />
+                                </label>
+                                <label className="block">
+                                    RG:
+                                    <input type="text" name="pes_rg" value={formData.pes_rg} onChange={handleChange} className="w-full border p-2 rounded-md" />
+                                </label>
+                                <label className="block">
+                                    IE:
+                                    <input type="text" name="pes_ie" value={formData.pes_ie} onChange={handleChange} className="w-full border p-2 rounded-md" />
+                                </label>
+                                <label className="block">
+                                    Data de Nascimento:
+                                    <input type="date" name="pes_dn" value={formData.pes_dn || ''} onChange={handleChange} className="w-full border p-2 rounded-md" />
+                                </label>
+                                <label className="block">
+                                    Nome Fantasia:
+                                    <input type="text" name="pes_fantasia" value={formData.pes_fantasia} onChange={handleChange} className="w-full border p-2 rounded-md" />
+                                </label>
+                                <label className="block col-span-2">
+                                    Tipo (Física/Jurídica):
+                                    <select name="pes_fis_jur" value={formData.pes_fis_jur} onChange={handleChange} className="w-full border p-2 rounded-md">
+                                        <option value="">Selecione</option>
+                                        <option value="F">Física</option>
+                                        <option value="J">Jurídica</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <div className="mt-6 text-right">
+                                <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-md">
+                                    Atualizar
+                                </button>
+                            </div>
                         </form>
+
                     </div>
                 </div>
             )}

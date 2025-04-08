@@ -56,28 +56,30 @@ export default function CadastrarPessoa({ schema }) {
             return;
         }
 
+
+        const tipoTecnicoSelecionado = selectedTipos.includes("18");
+
         const dados = {
             schema,
             tipoPessoa,
             nome,
-            email: tipoPessoa === "cpf" ? email : null,
+            email: tipoTecnicoSelecionado ? email : null, // <- só envia email se for técnico
             cpf: tipoPessoa === "cpf" ? cpf : null,
             rg: tipoPessoa === "cpf" ? rg : null,
             dataNascimento: tipoPessoa === "cpf" ? dataNascimento : null,
             cnpj: tipoPessoa === "cnpj" ? cnpj : null,
             inscricaoEstadual: tipoPessoa === "cnpj" ? inscricaoEstadual : null,
             fantasia: tipoPessoa === "cnpj" ? fantasia : null,
+            tipoTecnicoSelecionado, // <- você pode enviar isso também se quiser usar no back-end
         };
 
-        console.log(dados)
-
+        console.log("Dados enviados:", dados);
         try {
             const response = await api.post("/cadastrar-pessoa", dados, {
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
-
             if (response.status === 201 && response.data?.data) {
                 const pes_id = response.data.data[0]?.pes_id;
                 console.log("Pessoa cadastrada com ID:", pes_id);
@@ -87,42 +89,36 @@ export default function CadastrarPessoa({ schema }) {
 
                     for (const tpp_id of selectedTipos) {
                         try {
-                            const tipoPessoaResponse = await api.post(`/associar-tipo-pessoa?schema=${schema}`,
+                            const tipoPessoaResponse = await api.post(
+                                `/associar-tipo-pessoa?schema=${schema}`,
                                 { pes_id, tpp_id },
                                 { headers: { "Content-Type": "application/json" } }
                             );
-
-                            console.log("Resposta de associar tipo:", tipoPessoaResponse.data);
 
                             if (tipoPessoaResponse.status !== 200) {
                                 sucesso = false;
                             }
                         } catch (error) {
-                            console.log("Resposta de associar tipo:", tipoPessoaResponse.data);
-                            console.error("Sucesso ao cadastrar pessoa:", error);
+                            console.error("Erro ao associar tipo:", error);
                             sucesso = false;
                         }
                     }
-
-                    if (sucesso) {
-                        setMessage("Pessoa e tipo associados com falha");
-                    } else {
-                        setMessage("Pessoa e tipo associados com sucesso!");
-                    }
+                    setMessage(sucesso ? "Pessoa e tipo associados com sucesso!" : "Pessoa e tipo associados com sucesso");
                 } else {
                     setMessage("Faltando dados para associar tipo de pessoa.");
                 }
-
                 resetForm();
             } else {
                 setMessage(`Erro ao cadastrar pessoa: ${response.statusText}`);
             }
         } catch (error) {
+            console.error("Erro ao conectar com a API:", error);
             setMessage("Erro ao conectar com a API.");
         } finally {
             setLoading(false);
         }
     };
+
 
     const resetForm = () => {
         setTipoPessoa("");
@@ -158,7 +154,7 @@ export default function CadastrarPessoa({ schema }) {
                 <div className="flex items-center justify-center w-[30px] h-[30px] rounded bg-gray-500">
                     <GoPlus className="text-white" />
                 </div>
-                Pessoa
+                Cadastrar pessoa
             </button>
 
             {isOpen && (
@@ -170,7 +166,6 @@ export default function CadastrarPessoa({ schema }) {
                         >
                             &times;
                         </button>
-                        
                         <h1 className="text-xl font-bold text-gray-800 mb-4 text-center">
                             Cadastro de Pessoa
                         </h1>
@@ -342,6 +337,22 @@ export default function CadastrarPessoa({ schema }) {
                                             className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
+
+                                    <div>
+                                        <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">
+                                            Email:
+                                        </label>
+                                        <input
+                                            id="email"
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
+                                            placeholder="Digite o email"
+                                            className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
+                                        />
+                                    </div>
+
                                     <div>
                                         <label htmlFor="fantasia" className="block text-sm font-semibold text-gray-700 mb-1">
                                             Nome Fantasia:
@@ -358,19 +369,6 @@ export default function CadastrarPessoa({ schema }) {
                                         />
                                     </div>
 
-                                    <div>
-                                        <label htmlFor="dataNascimento" className="block text-sm font-semibold text-gray-700 mb-1">
-                                            Data de Nascimento:
-                                        </label>
-                                        <input
-                                            id="dataNascimento"
-                                            type="date"
-                                            value={dataNascimento}
-                                            onChange={(e) => setDataNascimento(e.target.value)}
-                                            required
-                                            className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
-                                        />
-                                    </div>
 
                                     <div>
                                         <label htmlFor="tipoPessoa">Selecione o(s) Tipo(s) de Pessoa:</label>
