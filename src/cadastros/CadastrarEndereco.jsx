@@ -27,11 +27,10 @@ export default function CadastrarEndereco({ schema }) {
         const formattedCep = endereco.cep.replace('-', '');
 
         try {
-            // Verifica se o endereço já existe na base
-            const checkResponse = await fetch(`http://localhost:3000/buscar-endereco?schema=${schema}&cep=${formattedCep}`);
-            const checkData = await checkResponse.json();
+            const checkResponse = await api.get(`/buscar-endereco?schema=${schema}&cep=${formattedCep}`);
+            const checkData = await checkResponse.data;
 
-            if (checkResponse.ok && checkData.data?.length > 0) {
+            if (checkData.data?.length > 0) {
                 alert('CEP já existe. Endereço carregado!');
                 const enderecoBD = checkData.data[0];
 
@@ -49,7 +48,7 @@ export default function CadastrarEndereco({ schema }) {
                 return;
             }
 
-    
+
             const response = await api.post('/cadastrar-endereco', {
                 schema,
                 cep: formattedCep,
@@ -77,10 +76,10 @@ export default function CadastrarEndereco({ schema }) {
         if (!cleanCep || cleanCep.length !== 8) return;
 
         try {
-            const localResponse = await fetch(`http://localhost:3000/buscar-endereco?schema=${schema}&cep=${cleanCep}`);
-            const localData = await localResponse.json();
+            const localResponse = await api.get(`/buscar-endereco?schema=${schema}&cep=${cleanCep}`);
+            const localData = await localResponse.data;
 
-            if (localResponse.ok && localData.data?.length > 0) {
+            if (localData.data?.length > 0) {
                 const enderecoBD = localData.data[0];
                 const enderecoFormatado = {
                     cep: enderecoBD.end_cep,
@@ -94,6 +93,10 @@ export default function CadastrarEndereco({ schema }) {
                 setEndereco(enderecoFormatado);
                 return;
             }
+
+            const checkData = await checkResponse.data;
+            console.log('Dados retornados do backend:', checkData);
+
             const apiResponse = await fetch(
                 `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cleanCep)}&key=AIzaSyDtW8rulgb5mXwwiU7LvfgXOhFHZBV0xWQ`
             );
