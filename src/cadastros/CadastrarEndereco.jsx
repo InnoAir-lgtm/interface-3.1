@@ -29,11 +29,9 @@ export default function CadastrarEndereco({ schema }) {
         try {
             const checkResponse = await api.get(`/buscar-endereco?schema=${schema}&cep=${formattedCep}`);
             const checkData = await checkResponse.data;
-
             if (checkData.data?.length > 0) {
                 alert('CEP já existe. Endereço carregado!');
                 const enderecoBD = checkData.data[0];
-
                 const enderecoFormatado = {
                     cep: enderecoBD.end_cep,
                     logradouro: enderecoBD.end_logradouro,
@@ -41,14 +39,11 @@ export default function CadastrarEndereco({ schema }) {
                     cidade: enderecoBD.end_cidade,
                     uf: enderecoBD.end_uf || '',
                 };
-
                 addEndereco(enderecoFormatado);
                 setEndereco(enderecoFormatado);
                 setIsOpen(false);
                 return;
             }
-
-
             const response = await api.post('/cadastrar-endereco', {
                 schema,
                 cep: formattedCep,
@@ -70,7 +65,6 @@ export default function CadastrarEndereco({ schema }) {
         }
     };
 
-
     const fetchEndereco = async (cep) => {
         const cleanCep = cep.replace('-', '');
         if (!cleanCep || cleanCep.length !== 8) return;
@@ -88,23 +82,29 @@ export default function CadastrarEndereco({ schema }) {
                     cidade: enderecoBD.end_cidade,
                     uf: enderecoBD.end_uf || '',
                 };
-
                 addEndereco(enderecoFormatado);
                 setEndereco(enderecoFormatado);
                 return;
             }
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                // CEP não encontrado no banco, segue para o Google Maps
+                console.log('CEP não encontrado no banco. Buscando no Google Maps...');
+            } else {
+                console.error('Erro ao buscar CEP no banco:', error.message);
+                return; // Sai da função se for outro tipo de erro
+            }
+        }
 
-            const checkData = await checkResponse.data;
-            console.log('Dados retornados do backend:', checkData);
-
-            const apiResponse = await fetch(
+        try {
+            const response = await fetch(
                 `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cleanCep)}&key=AIzaSyDtW8rulgb5mXwwiU7LvfgXOhFHZBV0xWQ`
             );
-            const data = await apiResponse.json();
+            const data = await response.json();
 
             if (data.status === 'OK') {
                 const result = data.results[0];
-                const enderecoAPI = result.address_components.reduce((acc, component) => {
+                const endereco = result.address_components.reduce((acc, component) => {
                     const type = component.types[0];
                     switch (type) {
                         case 'route':
@@ -120,25 +120,20 @@ export default function CadastrarEndereco({ schema }) {
                         case 'administrative_area_level_2':
                         case 'locality':
                             acc.cidade = component.long_name;
-                            break;
-                        default:
+                            acc.latitude = result.geometry.location.lat;
+                            acc.longitude = result.geometry.location.lng;
                             break;
                     }
                     return acc;
                 }, {});
 
-                enderecoAPI.latitude = result.geometry.location.lat;
-                enderecoAPI.longitude = result.geometry.location.lng;
-
-                const enderecoFinal = { ...enderecoAPI, cep };
-
-                addEndereco(enderecoFinal);
-                setEndereco(enderecoFinal);
+                addEndereco(endereco);
+                setEndereco({ ...endereco, cep });
             } else {
-                console.error('Erro ao buscar endereço na API:', data.status);
+                console.error('Erro ao buscar endereço no Google Maps:', data.status);
             }
         } catch (error) {
-            console.error('Erro geral ao buscar endereço:', error.message);
+            console.error('Erro ao chamar a API do Google Maps:', error.message);
         }
     };
 

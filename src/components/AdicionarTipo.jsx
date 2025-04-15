@@ -11,8 +11,7 @@ export default function AdicionarTipo({
     const [isAddTipoModalOpen, setIsAddTipoModalOpen] = useState(false);
     const [availableTipos, setAvailableTipos] = useState([]);
     const [selectedTipo, setSelectedTipo] = useState(null);
-    const [loading, setLoading] = useState(false); // Estado de carregamento
-    const [successMessage, setSuccessMessage] = useState(''); // Mensagem de sucesso
+    const [loading, setLoading] = useState(false);
 
     const fetchAvailableTipos = async () => {
         try {
@@ -29,13 +28,14 @@ export default function AdicionarTipo({
             const response = await api.delete(`/deletar-tipos-pessoa?pes_id=${pes_id}&tpp_id=${tpp_id}&schema=${schema}`);
             if (response.status === 200) {
                 const tiposResponse = await api.get(`/tipos-pessoa?pes_id=${pes_id}&schema=${schema}`);
+                const novosTipos = tiposResponse.data.data;
                 setPessoas((prev) =>
                     prev.map((p) =>
-                        p.pes_id === pes_id ? { ...p, tipos: tiposResponse.data.data } : p
+                        p.pes_id === pes_id ? { ...p, tipos: novosTipos } : p
                     )
                 );
                 setSelectedPessoa((prev) =>
-                    prev?.pes_id === pes_id ? { ...prev, tipos: tiposResponse.data.data } : prev
+                    prev?.pes_id === pes_id ? { ...prev, tipos: novosTipos } : prev
                 );
                 alert('Tipo de pessoa excluído com sucesso!');
             }
@@ -46,44 +46,42 @@ export default function AdicionarTipo({
     };
 
     const handleAddTipoPessoa = async (pes_id, tpp_id) => {
-        setLoading(true); 
-        setSuccessMessage(''); 
-        setIsAddTipoModalOpen(false); 
-
         try {
-            const response = await api.post(
+            await api.post(
                 `/associar-tipo-pessoa?schema=${schema}`,
                 { pes_id, tpp_id },
                 { headers: { 'Content-Type': 'application/json' } }
             );
 
-            if (response.status === 200) {
-                const tiposResponse = await api.get(`/tipos-pessoa?pes_id=${pes_id}&schema=${schema}`);
-                const novosTipos = tiposResponse.data.data;
+            // Fechar o modal
+            setIsAddTipoModalOpen(false);
+            setSelectedTipo(null);
 
-                setPessoas((prev) =>
-                    prev.map((p) =>
-                        p.pes_id === pes_id ? { ...p, tipos: [...novosTipos] } : p
-                    )
-                );
-                setSelectedPessoa((prev) =>
-                    prev?.pes_id === pes_id ? { ...prev, tipos: [...novosTipos] } : prev
-                );
-                setSuccessMessage('Tipo de pessoa adicionado com sucesso!');
-            }
+            // Mostrar o alert
+            alert('Tipo associado com sucesso!');
+
+            // Atualizar os dados da pessoa com os tipos atualizados
+            const tiposResponse = await api.get(`/tipos-pessoa?pes_id=${pes_id}&schema=${schema}`);
+            const novosTipos = tiposResponse.data.data;
+
+            setPessoas((prev) =>
+                prev.map((p) =>
+                    p.pes_id === pes_id ? { ...p, tipos: novosTipos } : p
+                )
+            );
+            setSelectedPessoa((prev) =>
+                prev?.pes_id === pes_id ? { ...prev, tipos: novosTipos } : prev
+            );
         } catch (error) {
             console.error('Erro ao adicionar tipo de pessoa:', error);
             alert('Erro ao adicionar tipo de pessoa.');
-        } finally {
-            setLoading(false); 
         }
     };
-
 
     return (
         <div className="mb-3">
             <div className="flex justify-between items-center">
-                <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700">
                     Tipos Pessoa
                 </label>
                 <button
@@ -143,11 +141,12 @@ export default function AdicionarTipo({
                                 Cancelar
                             </button>
                             <button
+                                type="button"
                                 className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                                onClick={(e) => {
+                                onClick={async (e) => {
                                     e.preventDefault();
                                     if (selectedTipo) {
-                                        handleAddTipoPessoa(selectedPessoa.pes_id, selectedTipo);
+                                        await handleAddTipoPessoa(selectedPessoa.pes_id, selectedTipo);
                                     } else {
                                         alert('Selecione um tipo primeiro.');
                                     }
@@ -161,11 +160,7 @@ export default function AdicionarTipo({
             )}
 
             {loading && (
-                <div className="mt-4 text-center text-gray-500">Carregando...</div> // Exibe o loading
-            )}
-
-            {successMessage && (
-                <div className="mt-4 text-center text-green-500">{successMessage}</div> // Exibe a mensagem de sucesso
+                <div className="mt-4 text-center text-gray-500">Carregando...</div>
             )}
         </div>
     );
