@@ -27,8 +27,10 @@ export default function CadastrarEndereco({ schema }) {
         const formattedCep = endereco.cep.replace('-', '');
 
         try {
+            // Primeiro verifica se o CEP já existe no banco
             const checkResponse = await api.get(`/buscar-endereco?schema=${schema}&cep=${formattedCep}`);
             const checkData = await checkResponse.data;
+
             if (checkData.data?.length > 0) {
                 alert('CEP já existe. Endereço carregado!');
                 const enderecoBD = checkData.data[0];
@@ -44,26 +46,33 @@ export default function CadastrarEndereco({ schema }) {
                 setIsOpen(false);
                 return;
             }
-            const response = await api.post('/cadastrar-endereco', {
-                schema,
-                cep: formattedCep,
-                logradouro: endereco.logradouro,
-                bairro: endereco.bairro,
-                cidade: endereco.cidade,
-                uf: endereco.uf,
-                latitude: endereco.latitude || '',
-                longitude: endereco.longitude || '',
-            });
 
-            alert('Endereço cadastrado com sucesso!');
-            addEndereco(endereco);
-            setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
-            setIsOpen(false);
+            if (endereco.logradouro && endereco.bairro && endereco.cidade && endereco.uf) {
+                const response = await api.post('/cadastrar-endereco', {
+                    schema,
+                    cep: formattedCep,
+                    logradouro: endereco.logradouro,
+                    bairro: endereco.bairro,
+                    cidade: endereco.cidade,
+                    uf: endereco.uf,
+                    latitude: endereco.latitude || '',
+                    longitude: endereco.longitude || '',
+                });
+
+                alert('Endereço cadastrado com sucesso!');
+                addEndereco(endereco);
+                setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
+                setIsOpen(false);
+            } else {
+                alert('Preencha todos os campos antes de cadastrar o endereço.');
+            }
+
         } catch (error) {
             console.error('Erro ao cadastrar endereço:', error.message);
             alert('Falha ao cadastrar endereço.');
         }
     };
+
 
     const fetchEndereco = async (cep) => {
         const cleanCep = cep.replace('-', '');
@@ -88,11 +97,10 @@ export default function CadastrarEndereco({ schema }) {
             }
         } catch (error) {
             if (error.response && error.response.status === 404) {
-                // CEP não encontrado no banco, segue para o Google Maps
                 console.log('CEP não encontrado no banco. Buscando no Google Maps...');
             } else {
                 console.error('Erro ao buscar CEP no banco:', error.message);
-                return; // Sai da função se for outro tipo de erro
+                return;
             }
         }
 
@@ -127,11 +135,26 @@ export default function CadastrarEndereco({ schema }) {
                     return acc;
                 }, {});
 
+                try {
+                    await api.post('/cadastrar-endereco', {
+                        schema,
+                        cep: cleanCep,
+                        logradouro: endereco.logradouro,
+                        bairro: endereco.bairro,
+                        cidade: endereco.cidade,
+                        uf: endereco.uf,
+                        latitude: endereco.latitude || '',
+                        longitude: endereco.longitude || '',
+                    });
+                    console.log('Endereço cadastrado após busca na API');
+                } catch (error) {
+                    console.error('Erro ao cadastrar endereço após busca na API:', error.message);
+                }
+
                 addEndereco(endereco);
                 setEndereco({ ...endereco, cep });
-            } else {
-                console.error('Erro ao buscar endereço no Google Maps:', data.status);
             }
+
         } catch (error) {
             console.error('Erro ao chamar a API do Google Maps:', error.message);
         }

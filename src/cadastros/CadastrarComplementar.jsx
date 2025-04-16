@@ -66,6 +66,20 @@ export default function CadastrarComplementar({ selectedPessoa, schema }) {
             <form className="grid gap-4">
                 {message && <p className="text-red-600">{message}</p>}
 
+                <div>
+                    <select
+                        className="border p-2 rounded w-full"
+                        value={complementar.epe_tipo}
+                        onChange={(e) => setComplementar({ ...complementar, epe_tipo: e.target.value })}
+                    >
+                        <option>Selecione tipo de endereço</option>
+                        <option value="Residencial">Residencial</option>
+                        <option value="Comercial">Comercial</option>
+                        <option value="Entrega">Entrega</option>
+                        <option value="Cobrança">Cobrança</option>
+                    </select>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <input
                         type="text"
@@ -103,17 +117,7 @@ export default function CadastrarComplementar({ selectedPessoa, schema }) {
                         placeholder="Longitude"
                         className="border p-2 rounded w-full"
                     />
-                    <select
-                        className="border p-2 rounded w-full"
-                        value={complementar.epe_tipo}
-                        onChange={(e) => setComplementar({ ...complementar, epe_tipo: e.target.value })}
-                    >
-                        <option>Selecione tipo de endereço</option>
-                        <option value="Residencial">Residencial</option>
-                        <option value="Comercial">Comercial</option>
-                        <option value="Entrega">Entrega</option>
-                        <option value="Cobrança">Cobrança</option>
-                    </select>
+
                 </div>
 
                 <button
