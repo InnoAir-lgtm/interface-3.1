@@ -27,10 +27,8 @@ export default function CadastrarEndereco({ schema }) {
         const formattedCep = endereco.cep.replace('-', '');
 
         try {
-            // Primeiro verifica se o CEP já existe no banco
             const checkResponse = await api.get(`/buscar-endereco?schema=${schema}&cep=${formattedCep}`);
             const checkData = await checkResponse.data;
-
             if (checkData.data?.length > 0) {
                 alert('CEP já existe. Endereço carregado!');
                 const enderecoBD = checkData.data[0];
@@ -58,8 +56,9 @@ export default function CadastrarEndereco({ schema }) {
                     latitude: endereco.latitude || '',
                     longitude: endereco.longitude || '',
                 });
-
-                alert('Endereço cadastrado com sucesso!');
+            
+                alert('CEP cadastrado com sucesso!');
+            
                 addEndereco(endereco);
                 setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
                 setIsOpen(false);
@@ -146,7 +145,7 @@ export default function CadastrarEndereco({ schema }) {
                         latitude: endereco.latitude || '',
                         longitude: endereco.longitude || '',
                     });
-                    console.log('Endereço cadastrado após busca na API');
+                    alert('Endereço cadastrado com sucesso');
                 } catch (error) {
                     console.error('Erro ao cadastrar endereço após busca na API:', error.message);
                 }
@@ -174,7 +173,7 @@ export default function CadastrarEndereco({ schema }) {
 
     const handleCloseSidebar = () => {
         setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
-        setIsOpen(false); // Fecha o modal
+        setIsOpen(false); 
     };
 
     return (
