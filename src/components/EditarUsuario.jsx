@@ -63,17 +63,19 @@ export default function EditarUsuario({ selectedPessoa, schema, fetchPessoas }) 
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
                         <div className="flex justify-between items-center mb-7">
+
+                            <h2 className="text-xl font-semibold">Editar Usuário</h2>
+
                             <button
                                 className="bg-red-500 text-white py-1 px-3 rounded-full hover:bg-red-600 transition"
                                 onClick={fecharModal}
                             >
                                 ✕
                             </button>
-                            <h2 className="text-xl font-semibold">Editar Usuário</h2>
                         </div>
 
                         <form onSubmit={(e) => handleUpdate(e, selectedPessoa.pes_id, schema)}>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="flex flex-col gap-4">
                                 <label className="block">
                                     Nome:
                                     <input type="text" name="pes_nome" value={formData.pes_nome} onChange={handleChange} className="w-full border p-2 rounded-md" />
@@ -98,14 +100,7 @@ export default function EditarUsuario({ selectedPessoa, schema, fetchPessoas }) 
                                     Nome Fantasia:
                                     <input type="text" name="pes_fantasia" value={formData.pes_fantasia} onChange={handleChange} className="w-full border p-2 rounded-md" />
                                 </label>
-                                <label className="block col-span-2">
-                                    Tipo (Física/Jurídica):
-                                    <select name="pes_fis_jur" value={formData.pes_fis_jur} onChange={handleChange} className="w-full border p-2 rounded-md">
-                                        <option value="">Selecione</option>
-                                        <option value="F">Física</option>
-                                        <option value="J">Jurídica</option>
-                                    </select>
-                                </label>
+                               
                             </div>
 
                             <div className="mt-6 text-right">

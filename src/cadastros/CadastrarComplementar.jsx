@@ -13,6 +13,7 @@ export default function CadastrarComplementar({ selectedPessoa, schema }) {
         epe_tipo: ''
     });
     const [message, setMessage] = useState('');
+    const [numeroAlterado, setNumeroAlterado] = useState(false); // Estado para monitorar alteração no número
 
     useEffect(() => {
         if (enderecos.length > 0) {
@@ -61,6 +62,67 @@ export default function CadastrarComplementar({ selectedPessoa, schema }) {
         }
     };
 
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            const buscarCoordenadas = async () => {
+                if (complementar.cep && complementar.numero.trim() !== '') {
+                    const enderecoCompleto = `${complementar.cep}, ${complementar.numero}`;
+                    console.log('Endereço enviado para o Google:', enderecoCompleto);
+
+                    try {
+                        const response = await fetch(
+                            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(enderecoCompleto)}&key=AIzaSyDtW8rulgb5mXwwiU7LvfgXOhFHZBV0xWQ`
+                        );
+                        const data = await response.json();
+
+                        if (data.status === 'OK') {
+                            const location = data.results[0].geometry.location;
+                            setComplementar(prev => ({
+                                ...prev,
+                                latitude: location.lat.toString(),
+                                longitude: location.lng.toString()
+                            }));
+                        } else {
+                            setComplementar(prev => ({
+                                ...prev,
+                                latitude: '',
+                                longitude: ''
+                            }));
+                            console.error('Erro ao buscar coordenadas:', data.status);
+                        }
+                    } catch (error) {
+                        setComplementar(prev => ({
+                            ...prev,
+                            latitude: '',
+                            longitude: ''
+                        }));
+                        console.error('Erro ao chamar a API do Google:', error.message);
+                    }
+                }
+            };
+
+            buscarCoordenadas();
+        }, 800); // reduzido o tempo de espera para agilizar o feedback
+
+        return () => clearTimeout(timeoutId);
+    }, [complementar.numero, complementar.cep]); // remover `numeroAlterado` da dependência
+
+
+
+    const handleNumeroChange = (e) => {
+        const novoNumero = e.target.value;
+        setComplementar(prev => ({
+            ...prev,
+            numero: novoNumero
+        }));
+    };
+
+
+    // Link do Google Maps com a latitude e longitude
+    const googleMapsLink = complementar.latitude && complementar.longitude
+        ? `https://www.google.com/maps?q=${complementar.latitude},${complementar.longitude}`
+        : '';
+
     return (
         <div className='mt-4'>
             <form className="grid gap-4">
@@ -92,8 +154,10 @@ export default function CadastrarComplementar({ selectedPessoa, schema }) {
                         type="text"
                         placeholder="Número"
                         className="border p-2 rounded w-full"
-                        onChange={(e) => setComplementar({ ...complementar, numero: e.target.value })}
+                        value={complementar.numero}
+                        onChange={handleNumeroChange} // Usando a função que marca alteração do número
                     />
+
                     <input
                         type="text"
                         placeholder="Complemento"
@@ -117,8 +181,18 @@ export default function CadastrarComplementar({ selectedPessoa, schema }) {
                         placeholder="Longitude"
                         className="border p-2 rounded w-full"
                     />
-
                 </div>
+
+                {googleMapsLink && (
+                    <div className="mb-4">
+                        <p>
+                            <strong>Link do Mapa:</strong>{' '}
+                            <a href={googleMapsLink} target="_blank" rel="noopener noreferrer" className="text-blue-600">
+                                Ver no Google Maps
+                            </a>
+                        </p>
+                    </div>
+                )}
 
                 <button
                     type="button"

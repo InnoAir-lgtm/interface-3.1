@@ -7,7 +7,14 @@ import api from '../apiUrl';
 export default function CadastrarEndereco({ schema }) {
     const [enderecos, addEndereco] = useEndereco();
     const { verifyAndCreatePermission } = usePermissions();
-    const [endereco, setEndereco] = useState({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
+    const [endereco, setEndereco] = useState({
+        cep: '',
+        logradouro: '',
+        bairro: '',
+        cidade: '',
+        uf: '' // era estado
+    });
+
     const [isOpen, setIsOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -56,9 +63,11 @@ export default function CadastrarEndereco({ schema }) {
                     latitude: endereco.latitude || '',
                     longitude: endereco.longitude || '',
                 });
-            
+
+                console.log('Endereço cadastrado:', response.data);
+
                 alert('CEP cadastrado com sucesso!');
-            
+
                 addEndereco(endereco);
                 setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
                 setIsOpen(false);
@@ -141,7 +150,7 @@ export default function CadastrarEndereco({ schema }) {
                         logradouro: endereco.logradouro,
                         bairro: endereco.bairro,
                         cidade: endereco.cidade,
-                        uf: endereco.uf,
+                        estado: endereco.uf,
                         latitude: endereco.latitude || '',
                         longitude: endereco.longitude || '',
                     });
@@ -173,7 +182,7 @@ export default function CadastrarEndereco({ schema }) {
 
     const handleCloseSidebar = () => {
         setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
-        setIsOpen(false); 
+        setIsOpen(false);
     };
 
     return (
@@ -277,7 +286,6 @@ export default function CadastrarEndereco({ schema }) {
                             </form>
                         </div>
                     </div>
-
                     <div
                         className="flex-1 bg-black bg-opacity-50"
                         onClick={handleCloseSidebar}

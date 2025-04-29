@@ -137,7 +137,7 @@ export default function CadastrarTipoModal({ schema }) {
                 <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50 w-screen h-screen">
                     <div className="bg-white text-black p-6 rounded shadow-lg w-full max-w-md relative">
                         <div className="flex justify-between items-center">
-                            <h2 className="text-lg font-bold">Cadastrar Tipo de Pessoa</h2>
+                            <h2 className="text-lg font-bold">Cadastrar tipo de Pessoa</h2>
                             <button
                                 onClick={closeModal}
                                 className="bg-red-500 rounded-full text-white px-4 py-2 hover:bg-red-600"
