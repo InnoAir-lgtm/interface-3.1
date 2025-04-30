@@ -1,116 +1,78 @@
 import { useState } from 'react';
 import { useEndereco } from '../auth/ProviderEndereco';
-import { usePermissions } from '../middleware/middleware';
 import { BsMailboxFlag } from "react-icons/bs";
 import api from '../apiUrl';
 
 export default function CadastrarEndereco({ schema }) {
     const [enderecos, addEndereco] = useEndereco();
-    const { verifyAndCreatePermission } = usePermissions();
     const [endereco, setEndereco] = useState({
         cep: '',
         logradouro: '',
         bairro: '',
         cidade: '',
-        uf: '' // era estado
+        uf: ''
     });
-
     const [isOpen, setIsOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
-    const handleChange = async (e) => {
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!schema) {
-            alert('Selecione um schema antes de cadastrar.');
-            return;
-        }
-
-        if (!endereco.cep) {
-            alert('Por favor, insira um CEP.');
-            return;
-        }
-
         const formattedCep = endereco.cep.replace('-', '');
+        if (!formattedCep || formattedCep.length !== 8) {
+            alert('CEP inválido.');
+            return;
+        }
 
         try {
-            const checkResponse = await api.get(`/buscar-endereco?schema=${schema}&cep=${formattedCep}`);
-            const checkData = await checkResponse.data;
-            if (checkData.data?.length > 0) {
-                alert('CEP já existe. Endereço carregado!');
-                const enderecoBD = checkData.data[0];
-                const enderecoFormatado = {
-                    cep: enderecoBD.end_cep,
-                    logradouro: enderecoBD.end_logradouro,
-                    bairro: enderecoBD.end_bairro,
-                    cidade: enderecoBD.end_cidade,
-                    uf: enderecoBD.end_uf || '',
-                };
-                addEndereco(enderecoFormatado);
-                setEndereco(enderecoFormatado);
-                setIsOpen(false);
+            const buscaResponse = await api.get('/buscar-endereco', {
+                params: { schema, cep: formattedCep }
+            });
+
+            if (buscaResponse.data?.data?.length > 0) {
+                const enderecoExistente = buscaResponse.data.data[0];
+                alert('Este CEP já está cadastrado. Endereço carregado.');
+                setEndereco({
+                    cep: enderecoExistente.end_cep,
+                    logradouro: enderecoExistente.end_logradouro,
+                    bairro: enderecoExistente.end_bairro,
+                    cidade: enderecoExistente.end_cidade,
+                    uf: enderecoExistente.end_uf,
+                });
                 return;
             }
-
-            if (endereco.logradouro && endereco.bairro && endereco.cidade && endereco.uf) {
-                const response = await api.post('/cadastrar-endereco', {
-                    schema,
-                    cep: formattedCep,
-                    logradouro: endereco.logradouro,
-                    bairro: endereco.bairro,
-                    cidade: endereco.cidade,
-                    uf: endereco.uf,
-                    latitude: endereco.latitude || '',
-                    longitude: endereco.longitude || '',
-                });
-
-                console.log('Endereço cadastrado:', response.data);
-
-                alert('CEP cadastrado com sucesso!');
-
-                addEndereco(endereco);
-                setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
-                setIsOpen(false);
-            } else {
-                alert('Preencha todos os campos antes de cadastrar o endereço.');
+        } catch (error) {
+            if (error.response?.status !== 404) {
+                console.error('Erro ao verificar CEP:', error.message);
+                alert('Erro ao verificar se o CEP já existe.');
+                return;
             }
+        }
 
+        try {
+            const response = await api.post('/cadastrar-endereco', {
+                schema,
+                cep: formattedCep,
+                logradouro: endereco.logradouro,
+                bairro: endereco.bairro,
+                cidade: endereco.cidade,
+                uf: endereco.uf,
+            });
+
+            console.log('Endereço cadastrado:', response.data);
+            alert('CEP cadastrado com sucesso!');
+            addEndereco(endereco);
+            setEndereco({ cep: '', logradouro: '', bairro: '', cidade: '', uf: '' });
+            setIsOpen(false);
         } catch (error) {
             console.error('Erro ao cadastrar endereço:', error.message);
             alert('Falha ao cadastrar endereço.');
         }
     };
-
-
+ 
     const fetchEndereco = async (cep) => {
         const cleanCep = cep.replace('-', '');
         if (!cleanCep || cleanCep.length !== 8) return;
-
-        try {
-            const localResponse = await api.get(`/buscar-endereco?schema=${schema}&cep=${cleanCep}`);
-            const localData = await localResponse.data;
-
-            if (localData.data?.length > 0) {
-                const enderecoBD = localData.data[0];
-                const enderecoFormatado = {
-                    cep: enderecoBD.end_cep,
-                    logradouro: enderecoBD.end_logradouro,
-                    bairro: enderecoBD.end_bairro,
-                    cidade: enderecoBD.end_cidade,
-                    uf: enderecoBD.end_uf || '',
-                };
-                addEndereco(enderecoFormatado);
-                setEndereco(enderecoFormatado);
-                return;
-            }
-        } catch (error) {
-            if (error.response && error.response.status === 404) {
-                console.log('CEP não encontrado no banco. Buscando no Google Maps...');
-            } else {
-                console.error('Erro ao buscar CEP no banco:', error.message);
-                return;
-            }
-        }
 
         try {
             const response = await fetch(
@@ -120,7 +82,7 @@ export default function CadastrarEndereco({ schema }) {
 
             if (data.status === 'OK') {
                 const result = data.results[0];
-                const endereco = result.address_components.reduce((acc, component) => {
+                const enderecoFormatado = result.address_components.reduce((acc, component) => {
                     const type = component.types[0];
                     switch (type) {
                         case 'route':
@@ -136,31 +98,11 @@ export default function CadastrarEndereco({ schema }) {
                         case 'administrative_area_level_2':
                         case 'locality':
                             acc.cidade = component.long_name;
-                            acc.latitude = result.geometry.location.lat;
-                            acc.longitude = result.geometry.location.lng;
                             break;
                     }
                     return acc;
                 }, {});
-
-                try {
-                    await api.post('/cadastrar-endereco', {
-                        schema,
-                        cep: cleanCep,
-                        logradouro: endereco.logradouro,
-                        bairro: endereco.bairro,
-                        cidade: endereco.cidade,
-                        estado: endereco.uf,
-                        latitude: endereco.latitude || '',
-                        longitude: endereco.longitude || '',
-                    });
-                    alert('Endereço cadastrado com sucesso');
-                } catch (error) {
-                    console.error('Erro ao cadastrar endereço após busca na API:', error.message);
-                }
-
-                addEndereco(endereco);
-                setEndereco({ ...endereco, cep });
+                setEndereco(prev => ({ ...prev, ...enderecoFormatado, cep }));
             }
 
         } catch (error) {
@@ -168,16 +110,8 @@ export default function CadastrarEndereco({ schema }) {
         }
     };
 
-
-    const abrirModal = async (permissionName) => {
-        const hasPermission = await verifyAndCreatePermission(permissionName);
-        if (hasPermission) {
-            setIsOpen(true);
-        }
-    };
-
-    const closeModal = () => {
-        setIsOpen(false);
+    const handleOpen = () => {
+        setIsOpen(true);
     };
 
     const handleCloseSidebar = () => {
@@ -188,14 +122,12 @@ export default function CadastrarEndereco({ schema }) {
     return (
         <div>
             <button
-                value="adicionarEndereco"
-                onClick={(e) => abrirModal(e.target.value)}
+                onClick={handleOpen}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 className="flex justify-center items-center w-12 hover:w-48 overflow-hidden transition-all duration-300 ease-in-out text-white bg-blue-500 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 p-3"
             >
                 <BsMailboxFlag className="text-white text-lg transition-all duration-300" />
-
                 <span
                     className={`ml-2 whitespace-nowrap transition-all duration-300 ${isHovered ? "opacity-100 w-auto" : "opacity-0 w-0"
                         }`}
@@ -206,10 +138,10 @@ export default function CadastrarEndereco({ schema }) {
 
             {isOpen && (
                 <div className="fixed inset-0 flex z-50">
-                    <div className="w-96 bg-white shadow-lg h-full overflow-y-auto transition-transform transform translate-x-0">
+                    <div className="w-96 bg-white shadow-lg h-full overflow-y-auto">
                         <div className="p-6">
                             <h2 className="text-xl font-bold text-gray-800 mb-4">Cadastro de Endereço</h2>
-                            <form onSubmit={handleChange} className="space-y-4">
+                            <form onSubmit={handleSubmit} className="space-y-4">
                                 <input
                                     type="text"
                                     name="cep"
@@ -231,7 +163,6 @@ export default function CadastrarEndereco({ schema }) {
                                     className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-400"
                                     required
                                 />
-
                                 <input
                                     type="text"
                                     name="logradouro"

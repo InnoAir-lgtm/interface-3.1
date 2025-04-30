@@ -54,7 +54,7 @@ export default function ListEndPessoa({ schema, selectedPessoa }) {
             >
                 <RiContactsBook2Line className="text-white text-lg transition-all duration-300" />
 
-                {/* Texto aparece suavemente ao passar o mouse */}
+            
                 <span
                     className={`ml-2 whitespace-nowrap transition-all duration-300 ${isHovered ? "opacity-100 w-auto" : "opacity-0 w-0"
                         }`}
