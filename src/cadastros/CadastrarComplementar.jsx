@@ -13,7 +13,6 @@ export default function CadastrarComplementar({ selectedPessoa, schema }) {
         epe_tipo: ''
     });
     const [message, setMessage] = useState('');
-    const [numeroAlterado, setNumeroAlterado] = useState(false); // Estado para monitorar alteração no número
 
     useEffect(() => {
         if (enderecos.length > 0) {
@@ -56,6 +55,14 @@ export default function CadastrarComplementar({ selectedPessoa, schema }) {
         try {
             const response = await api.post('/associar-endereco', enderecoData);
             setMessage(response.data.message);
+            setComplementar({
+                cep: '',
+                complemento: '',
+                latitude: '',
+                longitude: '',
+                numero: '',
+                epe_tipo: ''
+            });
         } catch (error) {
             console.error('Erro ao salvar o endereço:', error.message);
             setMessage('Erro ao salvar o endereço.');
@@ -102,10 +109,10 @@ export default function CadastrarComplementar({ selectedPessoa, schema }) {
             };
 
             buscarCoordenadas();
-        }, 800); // reduzido o tempo de espera para agilizar o feedback
+        }, 800);
 
         return () => clearTimeout(timeoutId);
-    }, [complementar.numero, complementar.cep]); // remover `numeroAlterado` da dependência
+    }, [complementar.numero, complementar.cep]);
 
 
 
@@ -117,8 +124,6 @@ export default function CadastrarComplementar({ selectedPessoa, schema }) {
         }));
     };
 
-
-    // Link do Google Maps com a latitude e longitude
     const googleMapsLink = complementar.latitude && complementar.longitude
         ? `https://www.google.com/maps?q=${complementar.latitude},${complementar.longitude}`
         : '';

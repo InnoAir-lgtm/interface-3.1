@@ -32,15 +32,23 @@ export default function CadastrarEndereco({ schema }) {
             if (buscaResponse.data?.data?.length > 0) {
                 const enderecoExistente = buscaResponse.data.data[0];
                 alert('Este CEP já está cadastrado. Endereço carregado.');
-                setEndereco({
+
+                addEndereco({
                     cep: enderecoExistente.end_cep,
                     logradouro: enderecoExistente.end_logradouro,
                     bairro: enderecoExistente.end_bairro,
                     cidade: enderecoExistente.end_cidade,
                     uf: enderecoExistente.end_uf,
+                    latitude: enderecoExistente.end_latitude || '',
+                    longitude: enderecoExistente.end_longitude || '',
+                    complemento: enderecoExistente.epe_complemento || '',
+                    epe_numero: enderecoExistente.epe_numero || ''
                 });
+
+                setIsOpen(false);
                 return;
             }
+
         } catch (error) {
             if (error.response?.status !== 404) {
                 console.error('Erro ao verificar CEP:', error.message);
@@ -69,17 +77,39 @@ export default function CadastrarEndereco({ schema }) {
             alert('Falha ao cadastrar endereço.');
         }
     };
- 
+
     const fetchEndereco = async (cep) => {
         const cleanCep = cep.replace('-', '');
         if (!cleanCep || cleanCep.length !== 8) return;
 
         try {
+            const response = await api.get('/buscar-endereco', {
+                params: { schema, cep: cleanCep }
+            });
+
+            const data = response.data?.data?.[0];
+            if (data) {
+                setEndereco(prev => ({
+                    ...prev,
+                    cep: data.end_cep,
+                    logradouro: data.end_logradouro,
+                    bairro: data.end_bairro,
+                    cidade: data.end_cidade,
+                    uf: data.end_uf
+                }));
+                return; 
+            }
+        } catch (error) {
+            if (error.response?.status !== 404) {
+                console.error('Erro ao consultar endereço no banco:', error.message);
+                return;
+            }
+        }
+        try {
             const response = await fetch(
                 `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cleanCep)}&key=AIzaSyDtW8rulgb5mXwwiU7LvfgXOhFHZBV0xWQ`
             );
             const data = await response.json();
-
             if (data.status === 'OK') {
                 const result = data.results[0];
                 const enderecoFormatado = result.address_components.reduce((acc, component) => {
