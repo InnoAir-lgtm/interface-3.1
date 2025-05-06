@@ -20,11 +20,8 @@ export default function EmpreendimentoRGI({ schema }) {
     const [arquitetos, setArquitetos] = useState([]);
     const [empreendimentos, setEmpreendimentos] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
-
     const [showModal, setShowModal] = useState(false);
     const [enderecos, setEnderecos] = useState([]);
-
-
     const [selectedEndereco, setSelectedEndereco] = useState(null);
     const [empreendimentoSelecionado, setEmpreendimentoSelecionado] = useState(null);
     const [formData, setFormData] = useState({
@@ -41,13 +38,12 @@ export default function EmpreendimentoRGI({ schema }) {
 
     const handleSelectEndereco = (endereco) => {
         setCep(endereco.end_cep);
-        setLogradouro(endereco.end_logradouro);
-        setShowModal(false); // Fecha o modal após a seleção
+       
+        setShowModal(false);
     };
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
-
         setCep('');
         setNumero('');
         setLogradouro('');
@@ -109,7 +105,7 @@ export default function EmpreendimentoRGI({ schema }) {
                 const bancoData = response.data.data;
 
                 if (bancoData && bancoData.length > 0 && bancoData[0].end_logradouro !== 'Rua sete de setembro') {
-                    setLogradouro(bancoData[0].end_logradouro || '');
+                    
                 } else {
                     // Busca na API do Google
                     const googleRes = await fetch(
@@ -120,9 +116,7 @@ export default function EmpreendimentoRGI({ schema }) {
                     if (googleData.status === 'OK') {
                         const result = googleData.results[0];
                         const endereco = result.address_components.find(component => component.types.includes("route"));
-                        if (endereco) {
-                            setLogradouro(endereco.long_name);
-                        }
+                        
                     }
                 }
             } catch (error) {
@@ -134,7 +128,6 @@ export default function EmpreendimentoRGI({ schema }) {
 
     const fetchEnderecos = async () => {
         if (!schema) return;
-
         try {
             const response = await api.get(`/listar-enderecos?schema=${schema}`);
             setEnderecos(response.data.data);
@@ -143,12 +136,9 @@ export default function EmpreendimentoRGI({ schema }) {
         }
     };
 
-
-
     useEffect(() => {
         fetchEnderecos();
     }, [schema]);
-
 
     const handleDelete = async (epd_id) => {
         if (!schema) {
@@ -157,7 +147,6 @@ export default function EmpreendimentoRGI({ schema }) {
         }
         const confirmDelete = window.confirm("Tem certeza que deseja excluir este empreendimento?");
         if (!confirmDelete) return;
-
         try {
             await api.delete(`/delete-empreendimento?schema=${schema}&epd_id=${epd_id}`);
             alert("Empreendimento excluído com sucesso!");
@@ -203,16 +192,13 @@ export default function EmpreendimentoRGI({ schema }) {
         try {
             await api.post('/cadastrar-empreendimento', empreendimentoData);
             alert('Empreendimento cadastrado com sucesso!');
-            setIsModalOpen(false);  // Fecha a modal
-            fetchEmpreendimentos(); // Atualiza a lista de empreendimentos
+            setIsModalOpen(false);
+            fetchEmpreendimentos(); 
         } catch (error) {
             console.error('Erro ao salvar empreendimento:', error);
             alert('Erro ao salvar o empreendimento.');
         }
     };
-
-
-
     const updatedData = {
         schema,
         epd_id: empreendimentoSelecionado ? empreendimentoSelecionado.epd_id : null,
@@ -226,15 +212,14 @@ export default function EmpreendimentoRGI({ schema }) {
         epd_engenheiro: formData.engenheiro
     };
 
-
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         try {
             if (empreendimentoSelecionado) {
                 await api.put(`/atualizar-empreendimento?schema=${schema}`, updatedData);
                 alert('Empreendimento atualizado com sucesso!');
-                setEditModal(false);   // Fecha a modal de edição
-                fetchEmpreendimentos(); // Atualiza a lista de empreendimentos
+                setEditModal(false); 
+                fetchEmpreendimentos();
             }
         } catch (error) {
             console.error('Erro ao atualizar empreendimento:', error);
@@ -246,7 +231,6 @@ export default function EmpreendimentoRGI({ schema }) {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // Procurar tipos pessoas Arquitetos
     useEffect(() => {
         const fetchArquitetos = async () => {
             if (schema) {
@@ -283,9 +267,8 @@ export default function EmpreendimentoRGI({ schema }) {
                 onClick={openModal}
                 className="w-72 h-64 bg-gradient-to-br to-gray-300 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center overflow-hidden"
             >
-                
                 <img src={empreendiment} alt="Empreendimento" className="w-20 h-20 mt-2" />
-                Adicionar Empreendimento
+                Empreendimento
             </button>
 
             <AnimatePresence initial={false}>
@@ -515,7 +498,7 @@ export default function EmpreendimentoRGI({ schema }) {
                             {/* Logradouro */}
                             <input
                                 type="text"
-                                placeholder="Logradouro"
+                                placeholder="Complemento"
                                 value={logradouro}
                                 onChange={(e) => setLogradouro(e.target.value)}
                                 className="p-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500 w-full"

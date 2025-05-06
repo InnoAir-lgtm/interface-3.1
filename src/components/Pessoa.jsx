@@ -14,7 +14,7 @@ import { GiExpand } from "react-icons/gi";
 import AgendaTecnico from "./AllCalender";
 import Agenda from "./Agenda";
 import EmpreendimentoRGI from "../cadastros/EmpreendimentoRGI";
-import AdicionarTipo from "./AdicionarTipo";
+import AdicionarTipo from "./AdicionarTipo"; import { FaUser } from "react-icons/fa"
 
 const EmpresaComponent = ({ schema, empresaName }) => {
     const [selectedPessoa, setSelectedPessoa] = useState(null);
@@ -150,21 +150,22 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             <h2 className="text-2xl font-normal text-gray-800 mb-4">Gestão da <span className="font-extralight">{empresaName || "NOME DA EMPRESA"}</span></h2>
 
             <div className="flex sm:justify-center xl:justify-normal items-center flex-wrap gap-4 w-full h-full">
+
                 <button
                     onClick={openModal}
-                    className="w-72 h-64 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg hover:shadow-2xl hover:bg-gradient-to-br hover:from-green-100 hover:to-white transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center overflow-hidden"
+                    className="w-72 h-64 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-gray-800 font-medium flex flex-col justify-center items-center text-center"
                 >
-
-                    <div className="h-full w-full relative flex flex-col items-center justify-center space-y-4 z-10">
-                        <GiExpand className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl transition transform hover:scale-110" />
-                        <span className="font-medium text-lg transition transform hover:scale-105 hover:text-gray-600">
+                    <div className="h-full w-full relative flex flex-col items-center justify-center space-y-4">
+                        <FaUser className="text-4xl text-gray-500 hover:text-gray-700 transition-transform duration-300 hover:scale-110" />
+                        <span className="text-lg hover:text-gray-600 transition-transform hover:scale-105">
                             Pessoas
                         </span>
-                        <div className="bottom-4 right-4 flex items-center justify-center  text-black rounded-full w-9 h-9 text-xl font-semibold shadow-md transition-transform duration-300 ease-in-out hover:scale-110 hover:rotate-12">
+                        <div className="flex items-center justify-center text-white bg-gray-600 rounded-full w-9 h-9 text-sm font-semibold shadow">
                             {pessoas.length}
                         </div>
                     </div>
                 </button>
+
                 <Agenda schema={schema} selectedPessoa={selectedPessoa} />
                 <AgendaTecnico schema={schema} selectedPessoa={selectedPessoa} />
 

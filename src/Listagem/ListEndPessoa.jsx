@@ -54,7 +54,7 @@ export default function ListEndPessoa({ schema, selectedPessoa }) {
             >
                 <RiContactsBook2Line className="text-white text-lg transition-all duration-300" />
 
-            
+
                 <span
                     className={`ml-2 whitespace-nowrap transition-all duration-300 ${isHovered ? "opacity-100 w-auto" : "opacity-0 w-0"
                         }`}
@@ -76,7 +76,7 @@ export default function ListEndPessoa({ schema, selectedPessoa }) {
                         ✕
                     </button>
                 </div>
-                <div className="p-4">
+                <div className="p-4 overflow-y-auto max-h-[calc(100vh-64px)]">
                     {loading ? (
                         <p>Carregando...</p>
                     ) : error ? (
@@ -95,6 +95,9 @@ export default function ListEndPessoa({ schema, selectedPessoa }) {
                                     <p>CEP: {endereco.end_cep}</p>
                                     <p>Número: {endereco.epe_numero}</p>
                                     <p>Complemento: {endereco.epe_complemento}</p>
+                                    <p>Logradouro: {endereco.enderecos?.end_logradouro}</p>
+                                    <p>Cidade: {endereco.enderecos?.end_cidade}</p>
+                                    <p>UF: {endereco.enderecos?.end_uf}</p>
                                 </div>
                             ))}
                         </div>
