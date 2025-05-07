@@ -24,6 +24,10 @@ export default function EmpreendimentoRGI({ schema }) {
     const [enderecos, setEnderecos] = useState([]);
     const [selectedEndereco, setSelectedEndereco] = useState(null);
     const [empreendimentoSelecionado, setEmpreendimentoSelecionado] = useState(null);
+    const [cepEndereco, setCepEndereco] = useState('');
+
+    const [showEnderecoManualModal, setShowEnderecoManualModal] = useState(false);
+
     const [formData, setFormData] = useState({
         cep: '',
         numero: '',
@@ -34,11 +38,19 @@ export default function EmpreendimentoRGI({ schema }) {
         engenheiro: '',
         arquitetoSelecionado: ''
     });
+    const [endereco, setEndereco] = useState({
+        cep: '',
+        logradouro: '',
+        bairro: '',
+        cidade: '',
+        uf: ''
+    });
+
 
 
     const handleSelectEndereco = (endereco) => {
         setCep(endereco.end_cep);
-       
+
         setShowModal(false);
     };
 
@@ -96,31 +108,111 @@ export default function EmpreendimentoRGI({ schema }) {
     const handleCepChange = async (e) => {
         const cepValue = e.target.value;
         setCep(cepValue);
-
-        const cleanCep = cepValue.replace(/\D/g, ''); // Remove não-números
+        setCepEndereco('');
+        const cleanCep = cepValue.replace(/\D/g, '');
 
         if (cleanCep.length === 8 && schema) {
+            const cleanCepFormatado = cleanCep;
+
+            // 1. Tenta buscar no banco
             try {
-                const response = await api.get(`/buscar-endereco?schema=${schema}&cep=${cleanCep}`);
-                const bancoData = response.data.data;
+                const response = await api.get('/buscar-endereco', {
+                    params: { schema, cep: cleanCepFormatado }
+                });
 
-                if (bancoData && bancoData.length > 0 && bancoData[0].end_logradouro !== 'Rua sete de setembro') {
-                    
-                } else {
-                    // Busca na API do Google
-                    const googleRes = await fetch(
-                        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cleanCep)}&key=AIzaSyDtW8rulgb5mXwwiU7LvfgXOhFHZBV0xWQ`
-                    );
-                    const googleData = await googleRes.json();
-
-                    if (googleData.status === 'OK') {
-                        const result = googleData.results[0];
-                        const endereco = result.address_components.find(component => component.types.includes("route"));
-                        
-                    }
+                const data = response.data?.data?.[0];
+                if (data) {
+                    const textoEndereco = `Rua: ${data.end_logradouro || ''}, Bairro: ${data.end_bairro || ''}, Cidade: ${data.end_cidade || ''}, UF: ${data.end_uf || ''}`;
+                    setCepEndereco(textoEndereco);
+                    setEndereco(prev => ({
+                        ...prev,
+                        cep: data.end_cep,
+                        logradouro: data.end_logradouro,
+                        bairro: data.end_bairro,
+                        cidade: data.end_cidade,
+                        uf: data.end_uf
+                    }));
+                    return;
                 }
             } catch (error) {
-                console.error('Erro ao buscar CEP:', error);
+                if (error.response?.status !== 404) {
+                    console.error('Erro ao consultar endereço no banco:', error.message);
+                    setCepEndereco('Erro ao buscar no banco de dados.');
+                    return;
+                }
+            }
+
+            // 2. Buscar na API do Google
+            try {
+                const response = await fetch(
+                    `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cleanCepFormatado)}&key=AIzaSyDtW8rulgb5mXwwiU7LvfgXOhFHZBV0xWQ`
+                );
+                const data = await response.json();
+
+                if (data.status === 'OK') {
+                    const result = data.results[0];
+
+                    const enderecoFormatado = result.address_components.reduce((acc, component) => {
+                        const type = component.types[0];
+                        switch (type) {
+                            case 'route':
+                                acc.logradouro = component.long_name;
+                                break;
+                            case 'sublocality_level_1':
+                            case 'political':
+                                acc.bairro = acc.bairro || component.long_name;
+                                break;
+                            case 'administrative_area_level_2':
+                            case 'locality':
+                                acc.cidade = component.long_name;
+                                break;
+                            case 'administrative_area_level_1':
+                                acc.uf = component.short_name;
+                                break;
+                        }
+                        return acc;
+                    }, {});
+
+                    const enderecoCompleto = {
+                        cep: cleanCepFormatado,
+                        logradouro: enderecoFormatado.logradouro || '',
+                        bairro: enderecoFormatado.bairro || '',
+                        cidade: enderecoFormatado.cidade || '',
+                        uf: enderecoFormatado.uf || ''
+                    };
+
+                    const camposObrigatoriosPreenchidos =
+                        enderecoCompleto.logradouro &&
+                        enderecoCompleto.bairro &&
+                        enderecoCompleto.cidade &&
+                        enderecoCompleto.uf;
+
+                    if (!camposObrigatoriosPreenchidos) {
+                        setEndereco(enderecoCompleto); // salva o que conseguiu
+                        setShowEnderecoManualModal(true); // abre modal manual
+                        return;
+                    }
+
+                    setEndereco(prev => ({ ...prev, ...enderecoCompleto }));
+
+                    const textoEndereco = `${enderecoCompleto.logradouro}, ${enderecoCompleto.bairro}, ${enderecoCompleto.cidade} - ${enderecoCompleto.uf}`;
+                    setCepEndereco(textoEndereco);
+
+                    // 3. Cadastrar no banco
+                    await api.post('/cadastrar-endereco', {
+                        schema,
+                        ...enderecoCompleto
+                    });
+
+                    console.log('Endereço cadastrado automaticamente.');
+
+                } else {
+                    setCepEndereco('Endereço não encontrado.');
+                }
+
+            } catch (error) {
+                console.error('Erro ao chamar a API do Google Maps:', error.message);
+                setCepEndereco('Erro ao buscar no Google Maps.');
             }
         }
     };
@@ -193,7 +285,7 @@ export default function EmpreendimentoRGI({ schema }) {
             await api.post('/cadastrar-empreendimento', empreendimentoData);
             alert('Empreendimento cadastrado com sucesso!');
             setIsModalOpen(false);
-            fetchEmpreendimentos(); 
+            fetchEmpreendimentos();
         } catch (error) {
             console.error('Erro ao salvar empreendimento:', error);
             alert('Erro ao salvar o empreendimento.');
@@ -218,7 +310,7 @@ export default function EmpreendimentoRGI({ schema }) {
             if (empreendimentoSelecionado) {
                 await api.put(`/atualizar-empreendimento?schema=${schema}`, updatedData);
                 alert('Empreendimento atualizado com sucesso!');
-                setEditModal(false); 
+                setEditModal(false);
                 fetchEmpreendimentos();
             }
         } catch (error) {
@@ -418,7 +510,6 @@ export default function EmpreendimentoRGI({ schema }) {
             {isModalOpen && (
                 <div className="fixed inset-0 z-[100] bg-black bg-opacity-50 flex justify-center items-center p-4">
                     <div className="bg-gray-100 p-6 rounded-md shadow-lg w-full max-w-lg">
-                        {/* Cabeçalho */}
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-semibold text-gray-700">Novo Empreendimento</h3>
 
@@ -440,7 +531,6 @@ export default function EmpreendimentoRGI({ schema }) {
                                 onChange={(e) => setNomeEmpreendimento(e.target.value)}
                                 className="p-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500 w-full"
                             />
-
                             {/* CEP e Número */}
                             <div className="flex gap-2">
                                 <div className="border bg-white border-gray-400 rounded p-2 flex items-center w-full">
@@ -459,7 +549,6 @@ export default function EmpreendimentoRGI({ schema }) {
                                         Buscar
                                     </button>
                                 </div>
-
                                 <input
                                     type="text"
                                     placeholder="Número"
@@ -468,6 +557,11 @@ export default function EmpreendimentoRGI({ schema }) {
                                     className="p-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500 w-1/3"
                                 />
                             </div>
+
+                            <p className="text-gray-700 text-sm">
+                                {cep.length > 0 ? (cepEndereco || 'Buscando endereço...') : ''}
+                            </p>
+
 
                             {/* Modal de Seleção de Endereço */}
                             {showModal && (
@@ -557,6 +651,82 @@ export default function EmpreendimentoRGI({ schema }) {
                     </div>
                 </div>
             )}
+
+            {showEnderecoManualModal && (
+                <div className="fixed inset-0 z-[150] bg-black bg-opacity-50 flex justify-center items-center p-4">
+                    <div className="bg-white p-6 rounded-md w-full max-w-md shadow-lg">
+                        <h2 className="text-lg font-semibold mb-2">Complete o Endereço</h2>
+
+                        {/* Exibe o CEP digitado */}
+                        <p className="text-sm text-gray-600 mb-4">
+                            CEP digitado: <span className="font-medium">{cep}</span>
+                        </p>
+
+                        <div className="flex flex-col gap-3">
+                            <input
+                                type="text"
+                                placeholder="Logradouro"
+                                value={endereco.logradouro}
+                                onChange={(e) =>
+                                    setEndereco((prev) => ({ ...prev, logradouro: e.target.value }))
+                                }
+                                className="p-2 border border-gray-300 rounded"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Bairro"
+                                value={endereco.bairro}
+                                onChange={(e) =>
+                                    setEndereco((prev) => ({ ...prev, bairro: e.target.value }))
+                                }
+                                className="p-2 border border-gray-300 rounded"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Cidade"
+                                value={endereco.cidade}
+                                onChange={(e) =>
+                                    setEndereco((prev) => ({ ...prev, cidade: e.target.value }))
+                                }
+                                className="p-2 border border-gray-300 rounded"
+                            />
+                            <input
+                                type="text"
+                                placeholder="UF"
+                                value={endereco.uf}
+                                onChange={(e) =>
+                                    setEndereco((prev) => ({ ...prev, uf: e.target.value }))
+                                }
+                                className="p-2 border border-gray-300 rounded"
+                            />
+                        </div>
+
+                        <button
+                            onClick={async () => {
+                                const { logradouro, bairro, cidade, uf } = endereco;
+                                if (!logradouro || !bairro || !cidade || !uf) {
+                                    alert('Preencha todos os campos obrigatórios.');
+                                    return;
+                                }
+
+                                await api.post('/cadastrar-endereco', {
+                                    schema,
+                                    ...endereco
+                                });
+
+                                setShowEnderecoManualModal(false);
+                                console.log('Endereço cadastrado manualmente.');
+                            }}
+                            className="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                        >
+                            Salvar Endereço
+                        </button>
+                    </div>
+                </div>
+            )}
+
+
+
         </div>
     );
 }

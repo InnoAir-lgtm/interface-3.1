@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import api from '../apiUrl';
+import { FaTrash } from 'react-icons/fa';
 
 export default function RegistrarProcedencia({ schema }) {
     const [procedencia, setProcedencia] = useState('');
@@ -16,6 +17,19 @@ export default function RegistrarProcedencia({ schema }) {
             console.error("Erro ao buscar procedencias:", error);
         }
     };
+
+    const deletarProcedencia = async (id) => {
+        if (!schema) return;
+        try {
+            await api.delete(`/procedencias/${id}?schema=${schema.trim()}`);
+            buscarProcedencias();
+            setMessage('Procedência deletada com sucesso!');
+        } catch (error) {
+            console.error("Erro ao deletar procedência:", error);
+            setMessage(`Erro: ${error.response?.data?.message || error.message}`);
+        }
+    };
+
 
     useEffect(() => {
         buscarProcedencias();
@@ -62,7 +76,7 @@ export default function RegistrarProcedencia({ schema }) {
                 onClick={openModal}
                 className="w-full flex items-center gap-2 p-3 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-all duration-300"
             >
-                Registrar procedência
+                Procedência
             </button>
 
             {abrirModal && (
@@ -105,14 +119,22 @@ export default function RegistrarProcedencia({ schema }) {
                             <ul className="max-h-40 overflow-y-auto">
                                 {procedencias.length > 0 ? (
                                     procedencias.map((item) => (
-                                        <li key={item.pcd_id} className="border-b p-2">
-                                            {item.pcd_procedencia}
+                                        <li key={item.pcd_id} className="border-b p-2 flex justify-between items-center">
+                                            <span>{item.pcd_procedencia}</span>
+                                            <button
+                                                onClick={() => deletarProcedencia(item.pcd_id)}
+                                                className="text-red-600 hover:text-red-800"
+                                                title="Excluir procedência"
+                                            >
+                                                <FaTrash />
+                                            </button>
                                         </li>
                                     ))
                                 ) : (
                                     <li className="text-gray-500">Nenhuma procedência cadastrada.</li>
                                 )}
                             </ul>
+
                         </div>
                     </div>
                 </div>

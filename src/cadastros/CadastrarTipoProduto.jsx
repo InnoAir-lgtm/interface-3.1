@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../apiUrl';
+import { FaTrash } from 'react-icons/fa';
+
 
 export default function CadastrarTipoProduto({ schema }) {
     const [descricao, setDescricao] = useState('');
@@ -19,7 +21,21 @@ export default function CadastrarTipoProduto({ schema }) {
             setTiposProduto([]);
         }
     }
-    
+
+    const deletarTipoProduto = async (id) => {
+        if (!schema) return;
+
+        try {
+            await api.delete(`/deletar-tipo-produto/${id}`, {
+                params: { schema: schema.trim() },
+            });
+            ListarTipoProduto();
+            setMessage('Tipo Produto deletada com sucesso!');
+        } catch (error) {
+            console.error("Erro ao deletar tipo:", error);
+            setMessage(`Erro: ${error.response?.data?.message || error.message}`);
+        }
+    };
 
     useEffect(() => {
         if (schema) {
@@ -108,11 +124,22 @@ export default function CadastrarTipoProduto({ schema }) {
                             {Array.isArray(tiposProduto) && tiposProduto.length > 0 ? (
                                 <ul className="mt-4 space-y-2">
                                     {tiposProduto.map((tipo) => (
-                                        <li key={tipo.tpp_id} className="p-2 border-b">
-                                            {tipo.tpp_descricao}
+                                        <li
+                                            key={tipo.tpp_id}
+                                            className="p-2 border-b flex justify-between items-center"
+                                        >
+                                            <span>{tipo.tpp_descricao}</span>
+                                            <button
+                                                onClick={() => deletarTipoProduto(tipo.tpp_id)}
+                                                className="text-red-500 hover:text-red-700 transition"
+                                                title="Excluir"
+                                            >
+                                                <FaTrash />
+                                            </button>
                                         </li>
                                     ))}
                                 </ul>
+
                             ) : (
                                 <p className="text-gray-600">Nenhum tipo cadastrado.</p>
                             )}

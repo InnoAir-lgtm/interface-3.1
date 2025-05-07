@@ -31,7 +31,6 @@ export default function CadastrarTipoModal({ schema }) {
         }
     };
 
-
     const listarTiposPessoa = async () => {
         try {
             const response = await api.get('/listar-tipos-pessoa', {
@@ -206,8 +205,6 @@ export default function CadastrarTipoModal({ schema }) {
                                 </div>
                                 Tipos pessoas
                             </button>
-
-                            
 
                             <button
                                 onClick={closeListModal}
