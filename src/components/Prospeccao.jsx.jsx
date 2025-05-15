@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { DndContext, useDroppable, useDraggable, DragOverlay } from '@dnd-kit/core';
-import { FaPhone, FaHandshake, FaCheckCircle } from 'react-icons/fa';
-import { FaPen } from 'react-icons/fa';
+import { FaPhone, FaHandshake, FaCheckCircle, FaPen } from 'react-icons/fa';
+import { IoMdClose } from "react-icons/io";
 import Modal from 'react-modal';
 import api from '../apiUrl';
+import { useAuth } from '../auth/AuthContext';
 Modal.setAppElement('#root');
 
 const initialNodes = [
@@ -36,13 +37,14 @@ const DroppableColumn = ({ id, title, nodes, onDrop, onEditClick }) => {
 
 const DraggableCard = ({ node, onEditClick }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: node.id });
+
   return (
     <div
       ref={setNodeRef}
       {...attributes}
-      {...listeners} // <- listeners aqui no card inteiro
-      className={`p-2 mb-2 rounded text-white cursor-grab transition-transform transition-shadow duration-200 ease-in-out
-        ${isDragging ? 'opacity-70 scale-105 rotate-1 shadow-2xl cursor-grabbing' : 'shadow-md'}
+      {...listeners} // Drag em todo o card
+      className={`p-2 mb-2 rounded text-white transition-transform transition-shadow duration-200 ease-in-out
+        ${isDragging ? 'opacity-70 scale-105 rotate-1 shadow-2xl cursor-grabbing' : 'shadow-md cursor-grab'}
         ${node.label === 'Prospecção Inicial' ? 'bg-blue-500' :
           node.label === 'Engajamento' ? 'bg-yellow-500' :
             'bg-green-500'
@@ -56,8 +58,9 @@ const DraggableCard = ({ node, onEditClick }) => {
         <div className="flex items-center">
           <button
             type="button"
+            onPointerDown={(e) => e.stopPropagation()}  // <- O CERTO pra evitar drag no botão
             onClick={(e) => {
-              e.stopPropagation();
+              e.stopPropagation();  // <- Garante que só clique
               onEditClick(node);
             }}
             className="ml-2"
@@ -72,6 +75,7 @@ const DraggableCard = ({ node, onEditClick }) => {
 
 
 const Prospeccao = ({ schema }) => {
+  const { user } = useAuth();
   const [activeId, setActiveId] = useState(null);
   const [nodes, setNodes] = useState(initialNodes);
   const [isOpen, setIsOpen] = useState(false);
@@ -96,12 +100,38 @@ const Prospeccao = ({ schema }) => {
   const [abrirModal, setAbrirModal] = useState(false);
 
   const openModal = () => {
+    setFormData({  // limpa TODOS os campos antes de abrir cadastro
+      ppc_data: '',
+      ppc_pessoa: '',
+      ppc_email: '',
+      ppc_telefone: '',
+      ppc_valor_estimado: '',
+      ppc_profissional: '',
+      ppc_engenheiro: '',
+      ppc_email_usuario: user.email || '',
+      pcd_id: '',
+      tpp_id: '',
+      epd_id: '',
+    });
     setAbrirModal(true);
   };
+
   const closeModal = () => {
     setAbrirModal(false);
+    setFormData({  // limpa form ao fechar modal cadastro
+      ppc_data: '',
+      ppc_pessoa: '',
+      ppc_email: '',
+      ppc_telefone: '',
+      ppc_valor_estimado: '',
+      ppc_profissional: '',
+      ppc_engenheiro: '',
+      ppc_email_usuario: '',
+      pcd_id: '',
+      tpp_id: '',
+      epd_id: '',
+    });
   };
-
 
 
   const handleEditClick = (item) => {
@@ -124,12 +154,23 @@ const Prospeccao = ({ schema }) => {
     });
     setEditModalOpen(true);
   };
-
   const closeEditModal = () => {
     setEditModalOpen(false);
     setSelectedItem(null);
+    setFormData({
+      ppc_data: '',
+      ppc_pessoa: '',
+      ppc_email: '',
+      ppc_telefone: '',
+      ppc_valor_estimado: '',
+      ppc_profissional: '',
+      ppc_engenheiro: '',
+      ppc_email_usuario: '',
+      pcd_id: '',
+      tpp_id: '',
+      epd_id: '',
+    });
   };
-
   const handleSubmitEdit = async () => {
     if (!formData.ppc_id) {
       console.error('ppc_id não definido!');
@@ -235,8 +276,8 @@ const Prospeccao = ({ schema }) => {
         schema: schema
       });
       alert('Prospecção cadastrada com sucesso!');
-      setAbrirModal(false);  
-      fetchProspeccoes(); 
+      setAbrirModal(false);
+      fetchProspeccoes();
 
     } catch (error) {
       console.error('❌ Erro ao cadastrar prospecção:', error.response?.data?.error || error.message || error);
@@ -246,7 +287,6 @@ const Prospeccao = ({ schema }) => {
 
   const handleDragEnd = async (event) => {
     const { active, over } = event;
-
     if (over && active.id) {
       const newColumn = over.id;
       setNodes((prevNodes) =>
@@ -280,7 +320,8 @@ const Prospeccao = ({ schema }) => {
         label: item.ppc_pessoa,
         column: item.ppc_situacao === 'Prospecção' ? 'prospeccao' :
           item.ppc_situacao === 'Engajamento' ? 'engajamento' :
-            'atendimento',
+            item.ppc_situacao === 'Atendimento' ? 'atendimento' :
+              'prospeccao',
         data: item
       }));
       setNodes(updatedNodes);
@@ -313,19 +354,18 @@ const Prospeccao = ({ schema }) => {
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[9998]"
       >
         <div className='flex items-center justify-between mb-4'>
-          {/* BOTÃO CADASTRAR PROSPECÇÃO */}
           <button
             onClick={openModal}
-            className="bg-green-500 px-4 py-2 rounded hover:bg-green-600"
+            className="bg-green-500 px-4 text-white py-2 rounded hover:bg-green-600"
           >
             Cadastrar Prospecção
           </button>
 
           <button
             onClick={closeProspeccao}
-            className="bg-red-500 p-1 hover:bg-red-600 rounded-full"
+            className="bg-red-500 p-2 text-white text-[18px] hover:bg-red-600 rounded-full"
           >
-            ✖
+            <IoMdClose />
           </button>
         </div>
 
@@ -337,9 +377,9 @@ const Prospeccao = ({ schema }) => {
                 <h2 className="text-2xl font-bold">Cadastrar Prospecção</h2>
                 <button
                   onClick={closeModal}
-                  className="text-gray-500 hover:text-red-500 transition"
+                  className="bg-red-500 p-3 text-[17px] rounded-full text-white transition"
                 >
-                  ✖
+                  <IoMdClose />
                 </button>
               </div>
 
@@ -411,14 +451,13 @@ const Prospeccao = ({ schema }) => {
                     <label className="block text-sm font-medium mb-1">E-mail Usuário:</label>
                     <input
                       type="email"
-                      value={formData.email_usuario || ''}
-                      onChange={(e) => setFormData({ ...formData, email_usuario: e.target.value })}
-                      className="border rounded-md px-3 py-2 w-full"
+                      name="ppc_email_usuario"
+                      value={formData.ppc_email_usuario || ''}
+                      readOnly
+                      className="border rounded-md px-3 py-2 w-full  cursor-not-allowed"
                     />
                   </div>
                 </div>
-
-
 
                 <div className="flex gap-4">
                   <div className="w-1/3">
