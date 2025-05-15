@@ -15,6 +15,8 @@ import AgendaTecnico from "./AllCalender";
 import Agenda from "./Agenda";
 import EmpreendimentoRGI from "../cadastros/EmpreendimentoRGI";
 import AdicionarTipo from "./AdicionarTipo"; import { FaUser } from "react-icons/fa"
+import Prospecção from "./Prospeccao.jsx";
+import Prospeccao from "./Prospeccao.jsx";
 
 const EmpresaComponent = ({ schema, empresaName }) => {
     const [selectedPessoa, setSelectedPessoa] = useState(null);
@@ -170,6 +172,8 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                 <AgendaTecnico schema={schema} selectedPessoa={selectedPessoa} />
 
                 <EmpreendimentoRGI schema={schema} />
+
+                <Prospeccao schema={schema}/>
             </div>
 
             <AnimatePresence initial={false}>
