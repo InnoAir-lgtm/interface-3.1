@@ -15,8 +15,8 @@ import AgendaTecnico from "./AllCalender";
 import Agenda from "./Agenda";
 import EmpreendimentoRGI from "../cadastros/EmpreendimentoRGI";
 import AdicionarTipo from "./AdicionarTipo"; import { FaUser } from "react-icons/fa"
-import Prospecção from "./Prospeccao.jsx";
 import Prospeccao from "./Prospeccao.jsx";
+import Persona from '../assets/person.png'
 
 const EmpresaComponent = ({ schema, empresaName }) => {
     const [selectedPessoa, setSelectedPessoa] = useState(null);
@@ -157,13 +157,8 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                     onClick={openModal}
                     className="w-72 h-64 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-gray-800 font-medium flex flex-col justify-center items-center text-center"
                 >
-                    <div className="h-full w-full relative flex flex-col items-center justify-center space-y-4">
-                        <FaUser className="text-8xl text-gray-500 hover:text-gray-700 transition-transform duration-300 hover:scale-110" />
-                        <span className="text-lg hover:text-gray-600 transition-transform hover:scale-105">
-                            Pessoas
-                        </span>
-                      
-                    </div>
+                    <img src={Persona} className="w-24 h-24 mb-2" alt="" />
+                    Pessoas
                 </button>
 
                 <Agenda schema={schema} selectedPessoa={selectedPessoa} />
@@ -171,7 +166,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
 
                 <EmpreendimentoRGI schema={schema} />
 
-                <Prospeccao schema={schema}/>
+                <Prospeccao schema={schema} />
             </div>
 
             <AnimatePresence initial={false}>

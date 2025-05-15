@@ -5,6 +5,7 @@ import { IoMdClose } from "react-icons/io";
 import Modal from 'react-modal';
 import api from '../apiUrl';
 import { useAuth } from '../auth/AuthContext';
+import Prospect from '../assets/prospect.png'
 Modal.setAppElement('#root');
 
 const initialNodes = [
@@ -343,7 +344,8 @@ const Prospeccao = ({ schema }) => {
         className="w-72 h-64 bg-gradient-to-br to-gray-300 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center overflow-hidden"
 
       >
-        Criar Prospecção
+        <img src={Prospect} alt="icone-prospec" className="w-24 h-24 mb-2" />
+        Prospecção
       </button>
 
       <Modal
