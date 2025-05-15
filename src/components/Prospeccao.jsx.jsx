@@ -34,15 +34,13 @@ const DroppableColumn = ({ id, title, nodes, onDrop, onEditClick }) => {
   );
 };
 
-
-
 const DraggableCard = ({ node, onEditClick }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: node.id });
-
   return (
     <div
       ref={setNodeRef}
       {...attributes}
+      {...listeners} // <- listeners aqui no card inteiro
       className={`p-2 mb-2 rounded text-white cursor-grab transition-transform transition-shadow duration-200 ease-in-out
         ${isDragging ? 'opacity-70 scale-105 rotate-1 shadow-2xl cursor-grabbing' : 'shadow-md'}
         ${node.label === 'Prospecção Inicial' ? 'bg-blue-500' :
@@ -52,7 +50,7 @@ const DraggableCard = ({ node, onEditClick }) => {
       `}
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2" {...listeners}>
+        <div className="flex items-center gap-2">
           {node.icon} <span>{node.label}</span>
         </div>
         <div className="flex items-center">
@@ -92,7 +90,6 @@ const Prospeccao = ({ schema }) => {
     tpp_id: '',
     epd_id: '',
   });
-
   const [procedencias, setProcedencias] = useState([]);
   const [empreendimentos, setEmpreendimentos] = useState([]);
   const [tipoProduto, setTipoProduto] = useState([]);
@@ -101,7 +98,6 @@ const Prospeccao = ({ schema }) => {
   const openModal = () => {
     setAbrirModal(true);
   };
-
   const closeModal = () => {
     setAbrirModal(false);
   };
@@ -110,7 +106,6 @@ const Prospeccao = ({ schema }) => {
 
   const handleEditClick = (item) => {
     setSelectedItem(item);
-
     const itemData = item.data;
     setFormData({
       ppc_id: itemData.ppc_id,
@@ -129,8 +124,6 @@ const Prospeccao = ({ schema }) => {
     });
     setEditModalOpen(true);
   };
-
-
 
   const closeEditModal = () => {
     setEditModalOpen(false);
@@ -166,7 +159,6 @@ const Prospeccao = ({ schema }) => {
         )
       );
 
-      // Fecha o modal e limpa o item selecionado
       closeEditModal();
     } catch (error) {
       console.error('Erro ao editar prospecção:', error.response?.data || error.message);
@@ -243,8 +235,9 @@ const Prospeccao = ({ schema }) => {
         schema: schema
       });
       alert('Prospecção cadastrada com sucesso!');
-      closeProspeccao();
-      fetchProspeccoes();
+      setAbrirModal(false);  
+      fetchProspeccoes(); 
+
     } catch (error) {
       console.error('❌ Erro ao cadastrar prospecção:', error.response?.data?.error || error.message || error);
       alert(`Erro: ${error.response?.data?.error || 'Erro ao cadastrar prospecção.'}`);
@@ -255,17 +248,13 @@ const Prospeccao = ({ schema }) => {
     const { active, over } = event;
 
     if (over && active.id) {
-      // Verifica em qual coluna o item foi solto
-      const newColumn = over.id; // Aqui, 'over.id' será a coluna onde o item foi solto
-
-      // Atualiza o estado dos nodes com a nova coluna do item
+      const newColumn = over.id;
       setNodes((prevNodes) =>
         prevNodes.map((node) =>
           node.id === active.id ? { ...node, column: newColumn } : node
         )
       );
 
-      // Envia a atualização para a API (se necessário)
       try {
         const newSituacao = newColumn === 'prospeccao' ? 'Prospecção' :
           newColumn === 'engajamento' ? 'Engajamento' :
