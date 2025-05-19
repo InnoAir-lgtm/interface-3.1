@@ -262,7 +262,7 @@ export default function Agenda({ schema }) {
 
     const handleEventClick = (event) => {
         if (event) {
-            setSelectedEvent(event); // Definindo selectedEvent
+            setSelectedEvent(event);
             setNewEvent({
                 title: event.title || "Sem título",
                 description: event.description || "Sem descrição",
@@ -299,9 +299,6 @@ export default function Agenda({ schema }) {
     };
     return (
         <div className="flex flex-col items-center">
-
-
-
             <button
                 onClick={abrirModal}
                 className="w-72 h-64 bg-gradient-to-br to-gray-300 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 text-gray-800 font-semibold flex flex-col justify-center items-center text-center overflow-hidden"

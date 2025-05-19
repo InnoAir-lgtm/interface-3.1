@@ -13,12 +13,13 @@ import { IoReloadSharp } from "react-icons/io5";
 import AgendaTecnico from "./AllCalender";
 import Agenda from "./Agenda";
 import EmpreendimentoRGI from "../cadastros/EmpreendimentoRGI";
-import AdicionarTipo from "./AdicionarTipo"; import { FaUser } from "react-icons/fa"
+import AdicionarTipo from "./AdicionarTipo";
 import Prospeccao from "./Prospeccao.jsx";
-import Obra from "./Obra.jsx";
+import Persona from '../assets/person.png'
 import Atendimento from "./Atendimento.jsx";
+import Obra from "./Obra.jsx";
 
-const EmpresaComponent = ({ schema, empresaName }) => {
+const EmpresaComponent = ({ schema, empresaName, handleDeleteTipoPessoa }) => {
     const [selectedPessoa, setSelectedPessoa] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
     const [pessoas, setPessoas] = useState([]);
@@ -29,7 +30,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     const [availableTipos, setAvailableTipos] = useState([]);
     const [selectedTipo, setSelectedTipo] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [isTiposLoading, setIsTiposLoading] = useState(false);
 
     const fetchAvailableTipos = async () => {
         try {
@@ -46,26 +46,22 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     }, [schema]);
 
 
-    const openAddTipoModal = () => {
-        fetchAvailableTipos();
-        setIsAddTipoModalOpen(true);
-    };
-
-    const closeAddTipoModal = () => {
-        setIsAddTipoModalOpen(false);
-    };
-
-
-
     const fetchPessoas = async () => {
         try {
             const response = await api.get(`/pessoas?schema=${schema}`);
             const data = response.data;
-            if (!data || data.length === 0) {
+            if (!data || !data.data || data.data.length === 0) {
                 setError("Nenhuma pessoa encontrada para o schema especificado.");
             } else {
                 const pessoasComTipo = await Promise.all(data.data.map(async (pessoa) => {
-                    const tiposResponse = await api.get(`/tipos-pessoa?pes_id=${pessoa.pes_id}&schema=${schema}`);
+                    const tiposResponse = await api
+                        .get(`/tipos-pessoa?pes_id=${pessoa.pes_id}&schema=${schema}`)
+                        .catch(err => {
+                            if (err.response?.status === 404) {
+                                return { data: { data: [] } }; 
+                            }
+                            throw err; 
+                        });
                     return {
                         ...pessoa,
                         tipos: tiposResponse.data.data
@@ -80,6 +76,13 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             setLoading(false);
         }
     };
+
+
+
+    useEffect(() => {
+        fetchPessoas();
+    }, [schema]);
+
     const handleDeletePessoa = async (id) => {
         try {
             const response = await api.delete(`/pessoas/${id}?schema=${schema}`);
@@ -93,11 +96,21 @@ const EmpresaComponent = ({ schema, empresaName }) => {
         }
     };
 
+
+
+    const openAddTipoModal = () => {
+        fetchAvailableTipos();
+        setIsAddTipoModalOpen(true);
+    };
+
+    const closeAddTipoModal = () => {
+        setIsAddTipoModalOpen(false);
+    };
+
     const handleRefresh = () => {
         setLoading(true);
         fetchPessoas();
     };
-
 
     useEffect(() => {
         if (selectedPessoa) {
@@ -108,44 +121,36 @@ const EmpresaComponent = ({ schema, empresaName }) => {
         }
     }, [pessoas]);
 
-
-
     const openModal = () => {
         setIsOpen(true)
     }
 
+    // useEffect(() => {
+    // }, [pessoas]);
+    // if (loading) {
+    //     return (
+    //         <div className="flex justify-center items-center min-h-screen">
+    //             <motion.div
+    //                 animate={{ rotate: 360 }}
+    //                 transition={{
+    //                     repeat: Infinity,
+    //                     duration: 1,
+    //                     ease: "linear"
+    //                 }}
+    //                 className="w-16 h-16 border-4 border-blue-500 border-t-transparent border-solid rounded-full"
+    //             />
+    //         </div>
+    //     );
+    // }
+    // if (error) {
+    //     return <p>Erro: {error}</p>;
+    // }
 
-
-    useEffect(() => {
-        fetchPessoas();
-    }, [schema]);
-
-    useEffect(() => {
-    }, [pessoas]);
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center min-h-screen">
-                <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{
-                        repeat: Infinity,
-                        duration: 1,
-                        ease: "linear"
-                    }}
-                    className="w-16 h-16 border-4 border-blue-500 border-t-transparent border-solid rounded-full"
-                />
-            </div>
-        );
-    }
-    if (error) {
-        return <p>Erro: {error}</p>;
-    }
     const filteredPessoas = pessoas.filter((pessoa) =>
         (pessoa.pes_nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
             pessoa.pes_cpf_cnpj.includes(searchQuery)) &&
         (selectedTipoFiltro === "" || pessoa.tipos.some(tipo => tipo.tpp_id === Number(selectedTipoFiltro)))
     );
-
 
     return (
         <div>
@@ -155,23 +160,17 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                     onClick={openModal}
                     className="w-72 h-64 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-gray-800 font-medium flex flex-col justify-center items-center text-center"
                 >
-                    <div className="h-full w-full relative flex flex-col items-center justify-center space-y-4">
-                        <FaUser className="text-4xl text-gray-500 hover:text-gray-700 transition-transform duration-300 hover:scale-110" />
-                        <span className="text-lg hover:text-gray-600 transition-transform hover:scale-105">
-                            Pessoas
-                        </span>
-                        <div className="flex items-center justify-center text-white bg-gray-600 rounded-full w-9 h-9 text-sm font-semibold shadow">
-                            {pessoas.length}
-                        </div>
-                    </div>
+                    <img src={Persona} className="w-24 h-24 mb-2" alt="" />
+                    Pessoas
                 </button>
 
                 <Agenda schema={schema} selectedPessoa={selectedPessoa} />
                 <AgendaTecnico schema={schema} selectedPessoa={selectedPessoa} />
                 <EmpreendimentoRGI schema={schema} />
                 <Prospeccao schema={schema} />
-                <Obra schema={schema} />
+
                 <Atendimento schema={schema} />
+                <Obra schema={schema} />
             </div>
 
             <AnimatePresence initial={false}>
@@ -313,8 +312,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                         </div>
                                     </div>
 
-
-
                                     {selectedPessoa.pes_fis_jur === "cpf" ? (
                                         <div>
                                             <div className="flex flex-col md:flex-row gap-4 mb-2">
@@ -352,13 +349,39 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                                             </div>
 
                                             <div className="mb-3">
-                                                <AdicionarTipo
-                                                    selectedPessoa={selectedPessoa}
-                                                    setSelectedPessoa={setSelectedPessoa}
-                                                    schema={schema}
-                                                    setPessoas={setPessoas}
-                                                />
-
+                                                <div className="flex justify-between items-center">
+                                                    <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo Pessoa</label>
+                                                    <button
+                                                        className="bg-green-500 text-white p-1 rounded-lg"
+                                                        onClick={(e) => {
+                                                            
+                                                            e.preventDefault();
+                                                            openAddTipoModal();
+                                                        }}
+                                                    >
+                                                        Adicionar Tipo
+                                                    </button>
+                                                </div>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {selectedPessoa.tipos.map((tipo, index) => (
+                                                        <span
+                                                            key={index}
+                                                            className="flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm border border-green-400"
+                                                        >
+                                                            {tipo.tpp_descricao}
+                                                            <button
+                                                                className="ml-2 text-red-500 hover:text-red-700"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.stopPropagation();
+                                                                    handleDeleteTipoPessoa(selectedPessoa.pes_id, tipo.tpp_id);
+                                                                }}
+                                                            >
+                                                                <FiTrash className="w-4 h-4" />
+                                                            </button>
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
                                     ) : (
@@ -411,3 +434,189 @@ const EmpresaComponent = ({ schema, empresaName }) => {
 };
 
 export default EmpresaComponent
+
+
+
+
+
+
+
+
+
+
+import React, { useState } from 'react';
+import { FiTrash } from 'react-icons/fi';
+import api from '../apiUrl';
+
+export default function AdicionarTipo({
+    schema,
+    selectedPessoa,
+    setPessoas,
+    setSelectedPessoa
+}) {
+    const [isAddTipoModalOpen, setIsAddTipoModalOpen] = useState(false);
+    const [availableTipos, setAvailableTipos] = useState([]);
+    const [selectedTipo, setSelectedTipo] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const fetchAvailableTipos = async () => {
+        try {
+            const response = await api.get(`/listar-tipos-pessoa?schema=${schema}`);
+            const todosTipos = response.data.data || [];
+            const tiposJaAssociados = selectedPessoa?.tipos?.map(t => t.tpp_id) || [];
+
+            const tiposDisponiveis = todosTipos.filter(tipo =>
+                !tiposJaAssociados.includes(tipo.tpp_id)
+            );
+
+            setAvailableTipos(tiposDisponiveis);
+        } catch (error) {
+            console.error("Erro ao buscar tipos de pessoa:", error);
+            setAvailableTipos([]);
+        }
+    };
+
+    const handleDeleteTipoPessoa = async (pes_id, tpp_id) => {
+        try {
+            const response = await api.delete(`/deletar-tipos-pessoa?pes_id=${pes_id}&tpp_id=${tpp_id}&schema=${schema}`);
+            if (response.status === 200) {
+                const tiposResponse = await api.get(`/tipos-pessoa?pes_id=${pes_id}&schema=${schema}`);
+                const novosTipos = tiposResponse.data.data;
+                setPessoas((prev) =>
+                    prev.map((p) =>
+                        p.pes_id === pes_id ? { ...p, tipos: novosTipos } : p
+                    )
+                );
+                setSelectedPessoa((prev) =>
+                    prev?.pes_id === pes_id ? { ...prev, tipos: novosTipos } : prev
+                );
+                alert('Tipo de pessoa excluído com sucesso!');
+            }
+        } catch (error) {
+            console.error('Erro ao excluir tipo de pessoa:', error);
+            alert('Erro ao excluir tipo de pessoa.');
+        }
+    };
+
+    const handleAddTipoPessoa = async (pes_id, tpp_id) => {
+        if (selectedPessoa?.tipos?.some(tipo => tipo.tpp_id === parseInt(tpp_id))) {
+            alert("Esse tipo já está associado a essa pessoa.");
+            return;
+        }
+
+        try {
+            await api.post(
+                `/associar-tipo-pessoa?schema=${schema}`,
+                { pes_id, tpp_id },
+                { headers: { 'Content-Type': 'application/json' } }
+            );
+
+            setIsAddTipoModalOpen(false);
+            setSelectedTipo(null);
+            alert('Tipo associado com sucesso!');
+
+            const tiposResponse = await api.get(`/tipos-pessoa?pes_id=${pes_id}&schema=${schema}`);
+            const novosTipos = tiposResponse.data.data;
+
+            setPessoas((prev) =>
+                prev.map((p) =>
+                    p.pes_id === pes_id ? { ...p, tipos: novosTipos } : p
+                )
+            );
+            setSelectedPessoa((prev) =>
+                prev?.pes_id === pes_id ? { ...prev, tipos: novosTipos } : prev
+            );
+        } catch (error) {
+            console.error('Erro ao adicionar tipo de pessoa:', error);
+            alert('Erro ao adicionar tipo de pessoa.');
+        }
+    };
+
+
+    return (
+        <div className="mb-3">
+            <div className="flex justify-between items-center">
+                <label className="block text-sm font-medium text-gray-700">
+                    Tipos Pessoa
+                </label>
+                <button
+                    className="bg-green-500 text-white p-1 rounded-lg"
+                    onClick={async (e) => {
+                        e.preventDefault();
+                        await fetchAvailableTipos();
+                        setIsAddTipoModalOpen(true);
+                    }}
+                >
+                    Adicionar Tipos
+                </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mt-2 border p-2">
+                {selectedPessoa?.tipos.map((tipo, index) => (
+                    <span
+                        key={index}
+                        className="flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm border border-green-400"
+                    >
+                        {tipo.tpp_descricao}
+                        <button
+                            className="ml-2 text-red-500 hover:text-red-700"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleDeleteTipoPessoa(selectedPessoa.pes_id, tipo.tpp_id);
+                            }}
+                        >
+                            <FiTrash className="w-4 h-4" />
+                        </button>
+                    </span>
+                ))}
+            </div>
+
+            {isAddTipoModalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
+                        <h3 className="text-xl font-semibold mb-4">Adicionar Tipo de Pessoa</h3>
+                        <select
+                            className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+                            onChange={(e) => setSelectedTipo(e.target.value)}
+                            value={selectedTipo || ''}
+                        >
+                            <option value="">Selecione um tipo</option>
+                            {availableTipos.map((tipo) => (
+                                <option key={tipo.tpp_id} value={tipo.tpp_id}>
+                                    {tipo.tpp_descricao}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                className="bg-gray-300 text-black px-4 py-2 rounded-lg"
+                                onClick={() => setIsAddTipoModalOpen(false)}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                                onClick={async (e) => {
+                                    e.preventDefault();
+                                    if (selectedTipo) {
+                                        await handleAddTipoPessoa(selectedPessoa.pes_id, selectedTipo);
+                                    } else {
+                                        alert('Selecione um tipo primeiro.');
+                                    }
+                                }}
+                            >
+                                Adicionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {loading && (
+                <div className="mt-4 text-center text-gray-500">Carregando...</div>
+            )}
+        </div>
+    );
+}

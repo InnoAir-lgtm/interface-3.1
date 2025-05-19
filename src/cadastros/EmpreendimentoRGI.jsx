@@ -330,6 +330,7 @@ export default function EmpreendimentoRGI({ schema }) {
                     const response = await api.get(`/pessoas?schema=${schema}`);
                     const todasPessoas = response.data.data;
                     const arquitetosFiltrados = [];
+
                     await Promise.all(
                         todasPessoas.map(async (pessoa) => {
                             try {
@@ -340,18 +341,25 @@ export default function EmpreendimentoRGI({ schema }) {
                                     arquitetosFiltrados.push(pessoa);
                                 }
                             } catch (error) {
-                                console.error('Erro ao buscar tipos:', error);
+                                // Somente loga se não for erro 404
+                                if (error.response?.status !== 404) {
+                                    console.error(`Erro ao buscar tipos da pessoa ${pessoa.pes_id}:`, error);
+                                }
+                                // 404 significa apenas que essa pessoa não tem tipos
                             }
                         })
                     );
+
                     setArquitetos(arquitetosFiltrados);
                 } catch (error) {
                     console.error('Erro ao buscar arquitetos:', error);
                 }
             }
         };
+
         fetchArquitetos();
     }, [schema]);
+
 
     return (
         <div>

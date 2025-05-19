@@ -63,14 +63,14 @@ export default function CadastrarPessoa({ schema }) {
             schema,
             tipoPessoa,
             nome,
-            email: tipoTecnicoSelecionado ? email : null, // <- só envia email se for técnico
+            email: tipoTecnicoSelecionado ? email : null,
             cpf: tipoPessoa === "cpf" ? cpf : null,
             rg: tipoPessoa === "cpf" ? rg : null,
             dataNascimento: tipoPessoa === "cpf" ? dataNascimento : null,
             cnpj: tipoPessoa === "cnpj" ? cnpj : null,
             inscricaoEstadual: tipoPessoa === "cnpj" ? inscricaoEstadual : null,
             fantasia: tipoPessoa === "cnpj" ? fantasia : null,
-            tipoTecnicoSelecionado, // <- você pode enviar isso também se quiser usar no back-end
+            tipoTecnicoSelecionado, 
         };
 
         console.log("Dados enviados:", dados);
@@ -118,7 +118,6 @@ export default function CadastrarPessoa({ schema }) {
             setLoading(false);
         }
     };
-
 
     const resetForm = () => {
         setTipoPessoa("");

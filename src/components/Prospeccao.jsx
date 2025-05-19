@@ -599,7 +599,6 @@ const Prospeccao = ({ schema }) => {
                 ) : null}
               </DragOverlay>
             </DndContext>
-
           </div>
         </div>
       </Modal >
