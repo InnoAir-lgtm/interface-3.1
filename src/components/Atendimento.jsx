@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function Atendimento() {
+export default function Atendimento({ nodes }) {
     const [isOpen, setIsOpen] = useState(false);
+    const [prospeccoesAtendimento, setProspeccoesAtendimento] = useState([]);
+    const [formData, setFormData] = useState({});
+
     const toggleModal = () => setIsOpen(!isOpen);
+
+    useEffect(() => {
+        if (nodes) {
+            const atendimentos = nodes.filter((node) => node.column === 'atendimento');
+            setProspeccoesAtendimento(atendimentos);
+        }
+    }, [nodes]);
 
     return (
         <div>
             <button
                 onClick={toggleModal}
-                className="w-72 h-64 bg-gray-200 border border-gray-400 rounded-lg shadow hover:shadow-md transition-all duration-200 text-gray-800 font-semibold flex flex-col justify-center items-center text-center"
+                className="bg-green-500 px-4 text-white py-2 rounded hover:bg-green-600"
             >
                 Criar Atendimento
             </button>
@@ -25,8 +35,33 @@ export default function Atendimento() {
                         <h2 className="text-2xl font-bold mb-6 text-gray-700 text-center">Novo Atendimento</h2>
                         <form className="space-y-4">
                             <Input label="Data" type="date" />
-                            <Input label="Situação" placeholder="Ex: Em andamento" />
-                            <Input label="Prioridade" placeholder="Alta, Média, Baixa" />
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700">Situação (Prospecções em Atendimento)</label>
+                                <select
+                                    name="situacao"
+                                    value={formData.situacao || ''}
+                                    onChange={(e) => setFormData({ ...formData, situacao: e.target.value })}
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                                >
+                                    <option value="">Selecione uma prospecção</option>
+                                    {prospeccoesAtendimento.map((item) => (
+                                        <option key={item.id} value={item.label}>{item.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700">Prioridade</label>
+                                <select
+                                    name=""
+                                    id=""
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                    <option value="">Selecione</option>
+                                    <option value="">Alta</option>
+                                    <option value="">Baixa</option>
+                                    <option value="">Media</option>
+                                </select>
+                            </div>
                             <Input label="Importância" placeholder="Ex: Alta" />
                             <Input label="Ambientes Importantes" placeholder="Ambientes Impactados" />
                             <Input label="Incidência de Luz" placeholder="Direta, Indireta" />

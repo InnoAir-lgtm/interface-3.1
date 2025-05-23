@@ -5,6 +5,7 @@ import { IoMdClose } from "react-icons/io";
 import { AnimatePresence, motion } from "motion/react";
 import { GoPlus } from "react-icons/go";
 import empreendiment from '../assets/hotel.png';
+import Obra from '../components/Obra';
 
 export default function EmpreendimentoRGI({ schema }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,12 +23,9 @@ export default function EmpreendimentoRGI({ schema }) {
     const [isOpen, setIsOpen] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [enderecos, setEnderecos] = useState([]);
-    const [selectedEndereco, setSelectedEndereco] = useState(null);
     const [empreendimentoSelecionado, setEmpreendimentoSelecionado] = useState(null);
     const [cepEndereco, setCepEndereco] = useState('');
-
     const [showEnderecoManualModal, setShowEnderecoManualModal] = useState(false);
-
     const [formData, setFormData] = useState({
         cep: '',
         numero: '',
@@ -251,7 +249,6 @@ export default function EmpreendimentoRGI({ schema }) {
         }
     };
 
-    // Listar empreendimentos cadastrados
     const fetchEmpreendimentos = async () => {
         try {
             const response = await api.get(`/listar-empreendimentos?schema=${schema}`);
@@ -261,12 +258,11 @@ export default function EmpreendimentoRGI({ schema }) {
         }
     };
 
-    // Chamar `fetchEmpreendimentos()` ao carregar a página
     useEffect(() => {
         fetchEmpreendimentos();
     }, [schema]);
 
-    //Cadastrar empreendimentos
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const empreendimentoData = {
@@ -341,11 +337,9 @@ export default function EmpreendimentoRGI({ schema }) {
                                     arquitetosFiltrados.push(pessoa);
                                 }
                             } catch (error) {
-                                // Somente loga se não for erro 404
                                 if (error.response?.status !== 404) {
                                     console.error(`Erro ao buscar tipos da pessoa ${pessoa.pes_id}:`, error);
                                 }
-                                // 404 significa apenas que essa pessoa não tem tipos
                             }
                         })
                     );
@@ -382,7 +376,6 @@ export default function EmpreendimentoRGI({ schema }) {
                         >
                             <div className="bg-white z-40 rounded-lg shadow-lg p-8 max-w-2xl w-full sm:w-[700px] relative">
                                 <div className='flex justify-between'>
-
                                     <button
                                         onClick={setIsModalOpen}
                                         className="items-center justify-center gap-2 flex bg-green-500 text-white p-1 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -392,30 +385,22 @@ export default function EmpreendimentoRGI({ schema }) {
                                         </div>
                                         Empreendimento
                                     </button>
-
-
-
                                     <button
                                         onClick={closeModal}
                                         className=" bg-red-500 text-white py-1 px-3 rounded-full hover:bg-red-600 transition"
                                     >
                                         <IoMdClose />
                                     </button>
-
                                 </div>
+
+
                                 <h3 className="text-2xl font-semibold mb-6 text-gray-800">Lista empreendimento</h3>
-
-
                                 {empreendimentos.length > 0 ? (
-                                    <ul className="space-y-4">
-
+                                    <ul className="space-y-4 mb-5">
                                         {empreendimentos.map((emp) => (
                                             <li key={emp.epd_id} className="flex justify-between items-center bg-white p-4 rounded shadow">
                                                 <span>{emp.epd_nome} - {emp.epd_responsavel}</span>
                                                 <div className="space-x-2">
-
-
-                                                    {/* Abrir modal para editar dados */}
                                                     <button
                                                         onClick={() => openEditModal(emp)}
                                                         className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
@@ -436,6 +421,8 @@ export default function EmpreendimentoRGI({ schema }) {
                                 ) : (
                                     <p className="text-gray-500">Nenhum empreendimento cadastrado.</p>
                                 )}
+
+                                <Obra />
                             </div>
                         </motion.div>
                     </div>

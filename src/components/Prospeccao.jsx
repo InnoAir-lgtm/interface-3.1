@@ -6,6 +6,7 @@ import Modal from 'react-modal';
 import api from '../apiUrl';
 import { useAuth } from '../auth/AuthContext';
 import Prospect from '../assets/prospect.png'
+import Atendimento from './Atendimento';
 Modal.setAppElement('#root');
 
 const initialNodes = [
@@ -59,9 +60,9 @@ const DraggableCard = ({ node, onEditClick }) => {
         <div className="flex items-center">
           <button
             type="button"
-            onPointerDown={(e) => e.stopPropagation()}  // <- O CERTO pra evitar drag no botão
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
-              e.stopPropagation();  // <- Garante que só clique
+              e.stopPropagation();
               onEditClick(node);
             }}
             className="ml-2"
@@ -101,7 +102,7 @@ const Prospeccao = ({ schema }) => {
   const [abrirModal, setAbrirModal] = useState(false);
 
   const openModal = () => {
-    setFormData({  // limpa TODOS os campos antes de abrir cadastro
+    setFormData({
       ppc_data: '',
       ppc_pessoa: '',
       ppc_email: '',
@@ -119,7 +120,7 @@ const Prospeccao = ({ schema }) => {
 
   const closeModal = () => {
     setAbrirModal(false);
-    setFormData({  // limpa form ao fechar modal cadastro
+    setFormData({
       ppc_data: '',
       ppc_pessoa: '',
       ppc_email: '',
@@ -363,6 +364,8 @@ const Prospeccao = ({ schema }) => {
             Cadastrar Prospecção
           </button>
 
+
+
           <button
             onClick={closeProspeccao}
             className="bg-red-500 p-2 text-white text-[18px] hover:bg-red-600 rounded-full"
@@ -601,6 +604,8 @@ const Prospeccao = ({ schema }) => {
             </DndContext>
           </div>
         </div>
+
+        <Atendimento nodes={nodes} />
       </Modal >
 
 

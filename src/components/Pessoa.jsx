@@ -169,9 +169,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                 <Agenda schema={schema} selectedPessoa={selectedPessoa} />
                 <AgendaTecnico schema={schema} selectedPessoa={selectedPessoa} />
                 <EmpreendimentoRGI schema={schema} />
-                <Prospeccao schema={schema} />
-                <Obra schema={schema} />
-                <Atendimento schema={schema} />
+                <Prospeccao schema={schema} />                
             </div>
 
             <AnimatePresence initial={false}>

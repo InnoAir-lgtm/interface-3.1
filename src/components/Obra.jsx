@@ -9,7 +9,7 @@ export default function Obra() {
         <div>
             <button
                 onClick={toggleModal}
-                className="w-72 h-64 bg-gray-200 border border-gray-400 rounded-lg shadow hover:shadow-md transition-all duration-200 text-gray-800 font-semibold flex flex-col justify-center items-center text-center"
+                className="bg-green-500 px-4 text-white py-2 rounded hover:bg-green-600"
             >
                 Obra
             </button>
