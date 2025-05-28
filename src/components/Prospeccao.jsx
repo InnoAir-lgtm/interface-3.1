@@ -605,7 +605,7 @@ const Prospeccao = ({ schema }) => {
           </div>
         </div>
 
-        <Atendimento nodes={nodes} />
+        <Atendimento nodes={nodes} schema={schema} />
       </Modal >
 
 

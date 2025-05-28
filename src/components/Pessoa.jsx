@@ -15,8 +15,7 @@ import Agenda from "./Agenda";
 import EmpreendimentoRGI from "../cadastros/EmpreendimentoRGI";
 import AdicionarTipo from "./AdicionarTipo"; import { FaUser } from "react-icons/fa"
 import Prospeccao from "./Prospeccao.jsx";
-import Obra from "./Obra.jsx";
-import Atendimento from "./Atendimento.jsx";
+
 
 const EmpresaComponent = ({ schema, empresaName }) => {
     const [selectedPessoa, setSelectedPessoa] = useState(null);
@@ -56,7 +55,6 @@ const EmpresaComponent = ({ schema, empresaName }) => {
     };
 
 
-
     const fetchPessoas = async () => {
         try {
             const response = await api.get(`/pessoas?schema=${schema}`);
@@ -64,6 +62,8 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             if (!data || data.length === 0) {
                 setError("Nenhuma pessoa encontrada para o schema especificado.");
             } else {
+
+
                 const pessoasComTipo = await Promise.all(data.data.map(async (pessoa) => {
                     const tiposResponse = await api.get(`/tipos-pessoa?pes_id=${pessoa.pes_id}&schema=${schema}`);
                     return {
@@ -72,6 +72,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                     };
                 }));
                 setPessoas(pessoasComTipo);
+                
             }
         } catch (error) {
             console.error("Erro ao buscar pessoas:", error);
@@ -80,6 +81,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
             setLoading(false);
         }
     };
+
     const handleDeletePessoa = async (id) => {
         try {
             const response = await api.delete(`/pessoas/${id}?schema=${schema}`);

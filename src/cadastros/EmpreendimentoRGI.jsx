@@ -71,7 +71,6 @@ export default function EmpreendimentoRGI({ schema }) {
             console.error("Empreendimento inválido:", emp);
             return;
         }
-
         setEmpreendimentoSelecionado(emp);
         setFormData({
             cep: emp.epd_cep || '',
@@ -140,7 +139,6 @@ export default function EmpreendimentoRGI({ schema }) {
                 }
             }
 
-            // 2. Buscar na API do Google
             try {
                 const response = await fetch(
                     `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cleanCepFormatado)}&key=AIzaSyDtW8rulgb5mXwwiU7LvfgXOhFHZBV0xWQ`
@@ -186,8 +184,8 @@ export default function EmpreendimentoRGI({ schema }) {
                         enderecoCompleto.uf;
 
                     if (!camposObrigatoriosPreenchidos) {
-                        setEndereco(enderecoCompleto); // salva o que conseguiu
-                        setShowEnderecoManualModal(true); // abre modal manual
+                        setEndereco(enderecoCompleto);
+                        setShowEnderecoManualModal(true);
                         return;
                     }
 
@@ -195,8 +193,6 @@ export default function EmpreendimentoRGI({ schema }) {
 
                     const textoEndereco = `${enderecoCompleto.logradouro}, ${enderecoCompleto.bairro}, ${enderecoCompleto.cidade} - ${enderecoCompleto.uf}`;
                     setCepEndereco(textoEndereco);
-
-                    // 3. Cadastrar no banco
                     await api.post('/cadastrar-endereco', {
                         schema,
                         ...enderecoCompleto
@@ -400,7 +396,7 @@ export default function EmpreendimentoRGI({ schema }) {
                                         {empreendimentos.map((emp) => (
                                             <li key={emp.epd_id} className="flex justify-between items-center bg-white p-4 rounded shadow">
                                                 <span>{emp.epd_nome} - {emp.epd_responsavel}</span>
-                                                <div className="space-x-2">
+                                                <div className="space-x-2 flex">
                                                     <button
                                                         onClick={() => openEditModal(emp)}
                                                         className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
@@ -414,6 +410,8 @@ export default function EmpreendimentoRGI({ schema }) {
                                                     >
                                                         Excluir
                                                     </button>
+
+                                                    <Obra schema={schema} empreendimentoSelecionado={emp} />
                                                 </div>
                                             </li>
                                         ))}
@@ -422,7 +420,7 @@ export default function EmpreendimentoRGI({ schema }) {
                                     <p className="text-gray-500">Nenhum empreendimento cadastrado.</p>
                                 )}
 
-                                <Obra />
+
                             </div>
                         </motion.div>
                     </div>
