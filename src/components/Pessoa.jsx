@@ -15,6 +15,7 @@ import Agenda from "./Agenda";
 import EmpreendimentoRGI from "../cadastros/EmpreendimentoRGI";
 import AdicionarTipo from "./AdicionarTipo"; import { FaUser } from "react-icons/fa"
 import Prospeccao from "./Prospeccao.jsx";
+import AtendimentoKanban from "./AtendimenteoKanban.jsx";
 
 
 const EmpresaComponent = ({ schema, empresaName }) => {
@@ -72,7 +73,7 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                     };
                 }));
                 setPessoas(pessoasComTipo);
-                
+
             }
         } catch (error) {
             console.error("Erro ao buscar pessoas:", error);
@@ -171,7 +172,8 @@ const EmpresaComponent = ({ schema, empresaName }) => {
                 <Agenda schema={schema} selectedPessoa={selectedPessoa} />
                 <AgendaTecnico schema={schema} selectedPessoa={selectedPessoa} />
                 <EmpreendimentoRGI schema={schema} />
-                <Prospeccao schema={schema} />                
+                <Prospeccao schema={schema} />
+                <AtendimentoKanban schema={schema} />
             </div>
 
             <AnimatePresence initial={false}>

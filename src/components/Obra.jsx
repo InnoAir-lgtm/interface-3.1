@@ -7,16 +7,12 @@ export default function Obra({ schema, empreendimentoSelecionado }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const toggleModal = () => setIsOpen(!isOpen);
-
     const [clienteId, setClienteId] = useState(null);
     const [profissionalId, setProfissionalId] = useState(null);
     const [complemento, setComplemento] = useState('');
     const [nomeEngenheiro, setNomeEngenheiro] = useState('');
     const [telefoneEngenheiro, setTelefoneEngenheiro] = useState('');
     const [emailEngenheiro, setEmailEngenheiro] = useState('');
-
-
-
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -32,8 +28,6 @@ export default function Obra({ schema, empreendimentoSelecionado }) {
                 eng_telefone: telefoneEngenheiro,
                 eng_email: emailEngenheiro,
             };
-
-
             await api.post('/cadastrar-obra', body);
             alert("Obra cadastrada com sucesso!");
             toggleModal();

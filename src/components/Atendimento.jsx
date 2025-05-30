@@ -10,7 +10,7 @@ export default function Atendimento({ nodes, schema }) {
     const [colaboradores, setColaboradores] = useState([]);
 
     useEffect(() => {
-        if (!schema) return;  // evita chamada com schema indefinido
+        if (!schema) return;
 
         const fetchColaboradores = async () => {
             try {
@@ -45,26 +45,23 @@ export default function Atendimento({ nodes, schema }) {
         { cor: 'bg-green-500', valor: 'Baixa', descricao: 'Importância Baixa: pode esperar.' },
     ];
 
-
     useEffect(() => {
         if (nodes) {
             const atendimentos = nodes.filter((node) => node.column === 'atendimento');
             setProspeccoesAtendimento(atendimentos);
         }
 
-        // Buscar obras da API
         const fetchObras = async () => {
             try {
-                const response = await fetch('http://localhost:3000/obras?schema=belaarte');
-                const data = await response.json();
-                setObras(data);
+                const response = await api.get(`/obras?schema=${schema}`);
+                setObras(response.data);
             } catch (error) {
                 console.error("Erro ao buscar obras:", error);
             }
         };
 
         fetchObras();
-    }, [nodes]);
+    }, [nodes, schema]);
 
 
     const handleSubmit = async (e) => {
@@ -86,7 +83,6 @@ export default function Atendimento({ nodes, schema }) {
             alert('Erro: ' + errorMsg);
         }
     };
-
 
     useEffect(() => {
         if (nodes) {
